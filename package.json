@@ -1,0 +1,25 @@
+{
+  "author": "Alexey Grishin <alexey.grishin@gmail.com>",
+  "name": "smart-dog",
+  "description": "turn-based 2d engine for bot challenges",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/AlexeyGrishin/smart-dog.git"
+  },
+  "dependencies": {
+      "ejs": "0.8.x",
+      "express": "3.0.x",
+      "express-ejs-layouts": "0.1.x",
+      "socket.io": "0.9.x",
+      "socket.io-client": "0.9.x",
+      "nodeunit": "0.7.x",
+      "nodemock": "0.2.x"
+
+  },
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}
