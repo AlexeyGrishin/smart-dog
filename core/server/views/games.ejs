@@ -1,0 +1,18 @@
+<% if (games.length > 0) { %>
+<table class="table table-striped table-bordered">
+<tr>
+<th>ID</th><th>Map</th><th>Turn</th><th>Players</th><th>Link</th>
+</tr>
+<% for (var i = 0; i < games.length; i++) { %>
+<tr>
+<td><%= games[i].id %></td>
+<td><%= games[i].brief.map %></td>
+<td><%= games[i].brief.turn %></td>
+<td><%= games[i].players.join(",") %></td>
+<td><a href="/<%= games[i].id %>">See online</a></td>
+</tr>
+<% } %>
+</table>
+<% } else {%>
+<p class="alert alert-warning">There is no active game</p>
+<% } %>

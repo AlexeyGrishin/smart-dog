@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <script src="jquery-1.8.0.min.js"></script>
+    <script src="bootstrap.js"></script>
+    <script src="socket.io.min.js"></script>
+    <script src="renderer.js"></script>
+    <script src="webclient.js"></script>
+    <link href="bootstrap.css" rel="stylesheet"/>
+    <link href="games.css" rel="stylesheet"/>
+</head>
+<body data-id="<%= game.id %>">
+<h1>Game <%= game.id %></h1>
+<p>Turn # <span id="turn">0</span> </p>
+<canvas id="game">
+    Loading...
+</canvas>
+<pre id="log">
+
+</pre>
+</body>
+</html>

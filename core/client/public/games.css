@@ -1,0 +1,35 @@
+.player1 {
+    color: red;
+    background-color: #ffd4cd;
+}
+
+.player2 {
+    color: green;
+    background-color: #c8ecbf;
+}
+
+.player3 {
+    color: blue;
+    background-color: #cfccff;
+}
+
+.player4 {
+    color: purple;
+    background-color: #f6c3f9;
+}
+
+.grass {
+    background-color: #94d723;
+}
+
+.wall {
+    background-color: #915d12;
+}
+
+.tree {
+
+}
+
+.sheep {
+    background-color: #ffffff;
+}
