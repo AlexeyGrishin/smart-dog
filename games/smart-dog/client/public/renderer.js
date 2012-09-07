@@ -22,7 +22,7 @@ function Renderer(canvas) {
 Renderer.prototype = {
 
   BLOCK: 15,
-  DRAW_EACH: 1,
+  DRAW_EACH: 0.1,
 
   stop: function() {
     clearInterval(this.updator);
