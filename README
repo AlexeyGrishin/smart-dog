@@ -1,3 +1,7 @@
+This project is a platform for bot challenges.
+Currently it is under construction, there is only some prototype that shall be improved.
+
+How to see it at work:
 
 1. Run server
 nodejs ./games/smart-dog/server/smart_dog_server.js &
@@ -8,3 +12,25 @@ nodejs ./games/smart-dog/server/smart_dog_server.js &
 nodejs ./games/smart-dog/client/cmdclient.js &
 
 4. Observe game on site
+
+
+TODO:
+1. Game logic (see GameFactory, Player, Dog, etc.)
+2. Persistance (save to DB, see MemoryStorage class)
+3. Entry point for bots (command-line client, etc)
+4. Development tools (turns replays, etc)
+5. Offline replay (ReplayDataStorer shall put html page near json)
+6. Rendering ('barking' and other sounds, animated moval, probably sprites)
+7. Website
+   - player page - list of games, winning count, replay/realtime view of latest/current game
+     shall be updated in runtime!
+   - game page - improve design
+   - list of players
+   - list of games - active/finished filter, paging, design
+   - tournament creation/results review (see below)
+8. Players balancer
+   - now it just waits for players to join and starts a game with first 2-4 of them.
+     It shall make sure that all players play same amount of games
+   - tournament: user specifies players, maps, and then server schedules games to be played and awaits required players 
+9. Improve data format to minimize size of turns/replays/data transferred (base64 or something other binary)?
+
