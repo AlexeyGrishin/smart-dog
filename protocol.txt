@@ -1,0 +1,80 @@
+Player/Server
+---> join <username>
+<--- wait
+<--- start <initial state>      - some initial state. May absent
+<--- turn <game state> - objects seen by player with their states
+---> turn <actions>
+...
+<--- warning <warning>
+<--- finished <result>
+
+<username> = String
+<initial state> = {
+    you: <playerId>
+    width: <width>,
+    height: <height>,
+    landscape: [
+        "#.12",
+        "...."
+    ]
+}
+
+landscape elements:
+ # - wall, non-traversable
+ . - grass, traversable
+ 1 - site of player 1
+ 2 - site of player 2, etc.
+
+<game state> = {
+    turn: <turnNr>,
+    objects: [
+        {id: <id>, type: <type>, x: <x>, y: <y>, movedFromX: <x>, movedFromY: <y>, state: <stateString>},
+        ...
+    ]
+}
+
+<stateString> = "[barking][scary][silent][baa]"
+<type> = String or undefined (for cases when player do not see this object, just hear)
+
+<actions> = [
+    {id: <id>, action: <action>}
+]
+<action> = "[move up|down|left|right][bark]"
+<warning> = String
+<result> = {
+    winner: <playerName>,
+    you: <isYouWinner>,
+    stopReason: <stopReason>
+}
+
+
+Viewer/Server
+<--- list [<game>, <game>, ...]
+---> list
+<--- list [<game>, <game>, ...]
+---> listen <gameId>
+<--- view <gameId> <gameState>
+<--- end <gameId> {...last map state..., winner: , stopReason}
+<--- error <gameId> <error>
+
+<game> = {
+    id: <id>, map: <map>, players: [<name1>,...], finished: <tf>, stopReason: <reason>}
+}
+<error> = string
+
+<gameId> = integer
+<gameState> = {
+    turn: <turn>,
+    landscape: [
+        "#.12",
+        "...."
+    ],
+    objects: [
+         {id: <id>, type: <type>, x: <x>, y: <y>, movedFromX: <x>, movedFromY: <y>, state: <stateString>, owner: <playerId>},
+         ...
+    ],
+    players: [
+        {id: <playerId>, name: <playerName>, score: <score>},
+        ...
+    ]
+}

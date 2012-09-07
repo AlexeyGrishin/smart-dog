@@ -1,0 +1,10 @@
+{
+    "mapsDir": "./maps",
+    "replaysDir": "./replays",
+    "httpResources": "./games/smart-dog/client/public",
+    "storage": "MemoryStorage",
+    "controllerPort": 3002,
+    "viewPort": 3003,
+    "httpPort": 3000,
+    "waitForPlayer": 4000
+}

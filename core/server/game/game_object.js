@@ -5,7 +5,8 @@ function GameObject(game, properties) {
   var p = {
     game: game,
     map: game.getMap(),
-    id: id++
+    id: id++,
+    oldPosition: undefined
   };
 
   Object.keys(properties).forEach(function(key) {
@@ -46,10 +47,18 @@ function GameObject(game, properties) {
     p.x = p.map.x(p.x + dx);
     p.y = p.map.y(p.y + dy);
     game.emit("gameobject.move", this, oldX, oldY);
+    p.oldPosition = {
+      x: oldX,
+      y: oldY
+    };
     cb();
   };
   this.__defineGetter__('type', function() { return this.constructor.name})
 }
+
+GameObject.Event = {
+  Move: "gameobject.move"
+};
 
 GameObject.prototype = {
   finalize: function() {
@@ -57,13 +66,19 @@ GameObject.prototype = {
   },
 
   genState: function(p) {
-    return {
-      owner:p.owner ? p.owner.id : undefined,
+    var state = {
+      owner:p.owner ? p.owner.getId() : undefined,
       type: this.type,
       x:p.x,
       y:p.y,
       layer:p.layer
+    };
+    if (p.oldPosition) {
+      state.movedFromX = p.oldPosition.x;
+      state.movedFromY = p.oldPosition.y;
     }
+    p.oldPosition = undefined;
+    return state;
   }
 };
 

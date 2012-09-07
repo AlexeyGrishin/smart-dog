@@ -1,16 +1,25 @@
 var GameObject = require("./game_object.js")
   , events = require("events")
-  , util = require("util")
-  , Dog = require('./dog');
+  , util = require("util");
+
 
 var Game = function(logic, playerFactory, options) {
   this.o = options;
   this.logic = logic;
   this.playerFactory = playerFactory;
-  this.on("gameobject.move", function(object, oldX, oldY) {
+  this.on(GameObject.Event.Move, function(object, oldX, oldY) {
     this.map.objectMoved(object, oldX, oldY);
   });
   this.players = [];
+};
+
+Game.Event = {
+  Turn: 'game.turn',
+  BeforeTurn: 'game.beforeTurn',
+  Stop: 'game.stop',
+  PlayerGone: 'player.gone',
+  PlayerTurn: 'player.turn',
+  PlayerMissedTurn: 'player.missed'
 };
 
 Game.prototype.__proto__ = events.EventEmitter.prototype;
@@ -19,11 +28,13 @@ Game.prototype.__proto__ = events.EventEmitter.prototype;
 var GameMethods = {
   start: function() {
     this.turn = 0;
+    //TODO: send events instead of 'logic' calls
+    //TODO: order is important. logic.init initializes cached landscape, getState puts it into savedState, and player.init uses it
+    this.logic.init(this);
     this.savedState = this.genState();
     this.brief = this.genBrief();
-    this.logic.init(this);
     this.players.forEach(function(p) {p.init();});
-    this.on('player.turn', this.catchError(this.onPlayerTurn.bind(this)));
+    this.on(Game.Event.PlayerTurn, this.catchError(this.onPlayerTurn.bind(this)));
     setTimeout(this.catchError(this.doTurn.bind(this)), 0);
   },
 
@@ -57,12 +68,13 @@ var GameMethods = {
       }
     }
     else {
-      this.endTurn(true, error || "player.missed", p);
+      this.endTurn(true, error || Game.Event.PlayerMissedTurn, p);
     }
   },
 
   doTurn: function() {
     this.turnMade = 0;
+    this.emit(Game.Event.BeforeTurn, this.savedState);
     this.logic.beforeTurn(this.turn);
     this.players.forEach(function(p) {
       p.makeTurn(this.turn);
@@ -75,7 +87,7 @@ var GameMethods = {
           break;
         }
       }
-      this.endTurn(true, 'player.gone', player);
+      this.endTurn(true, Game.Event.PlayerGone, player);
     }.bind(this)
     ), this.o.waitForTurn);
   },
@@ -86,7 +98,7 @@ var GameMethods = {
     this.turn++;
     this.savedState = this.genState();
     this.brief = this.genBrief();
-    this.emit("game.turn", this.savedState);
+    this.emit(Game.Event.Turn, this.savedState);
     if (!stop) setTimeout(this.catchError(this.doTurn.bind(this)), 0);
     if (this.logic.getGameResult().finished || stop) {
       this.logic.stopGame(stopReason, playerCausedStop);
@@ -103,7 +115,8 @@ var GameMethods = {
         p.finished(gameResult);
       });
       this.brief = this.genBrief();
-      this.emit('game.stop', gameResult);
+      this.savedState = this.genState();
+      this.emit(Game.Event.Stop, gameResult);
     }
   },
 
@@ -135,6 +148,10 @@ var GameMethods = {
     return this.map;
   },
 
+  getMapName: function() {
+    return this.mapName;
+  },
+
   setId: function(id) {
     this.id = id;
   },
@@ -155,7 +172,7 @@ var GameMethods = {
     var brief = {map: this.mapName, width: this.map.cols, height: this.map.rows, turn: this.turn};
     if (this.isFinished()) {
       brief.finished = true;
-      brief.winner = this.gameResult.winner.name;
+      brief.winner = this.gameResult.winner ? {id: this.gameResult.winner.id, name: this.gameResult.winner.name} : undefined;
       brief.reason = this.gameResult.reason;
     }
     return this.logic.getBriefStatus(brief);
@@ -163,7 +180,7 @@ var GameMethods = {
 
   genState: function() {
     var state = this.genBrief();
-    state.players = this.players.map(function(p) {return p.name});
+    state.players = this.players.map(function(p) {return {id:p.getId(), name:p.getName()}});
     //TODO: optimize - cache landscape
     state.objects = this.map.allObjects.map(function(o) {
       return o.toState();

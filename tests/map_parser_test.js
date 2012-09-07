@@ -1,5 +1,5 @@
-var Factory = require('../core/server/game_object_factory.js')
-  , Map2d = require('../core/server/map2d.js');
+var Factory = require('../games/smart-dog/server/game_object_factory.js')
+  , Map2d = require('../core/server/game/map2d.js');
 var t = Factory.types;
 module.exports = {
   testEmptyMap: function(test) {

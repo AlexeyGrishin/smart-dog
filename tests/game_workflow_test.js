@@ -1,7 +1,8 @@
-var GameServer = require('../core/server/game_server.js')
-  , Factory = require('../core/server/game_object_factory.js')
-  , Map2D = require('../core/server/map2d.js')
-  , SocketController = require('../core/server/socket_controller.js');
+var GameServer = require('../core/server/game/game_server.js')
+  , Factory = require('../games/smart-dog/server/game_object_factory.js')
+  , Map2D = require('../core/server/game/map2d.js')
+  , SocketController = require('../core/server/socket_server/socket_controller.js')
+  , MemoryStorage = require('../core/server/storage/mem_storage.js');
 
 var MapsMock = {
   minPlayersCount: function() { return 1},
@@ -15,7 +16,7 @@ var MapsMock = {
 };
 
 var MockIo = function() {
-  this.wait = function() {
+  this.sendWait = function() {
     this.waitCalled = true;
   };
   this.setPlayerInterface = function(pi) {
@@ -50,7 +51,7 @@ var MockSocket = function() {
 
 module.exports = {
   setUp: function(cb) {
-    this.server = new GameServer(MapsMock, Factory, {waitForPlayer: 0});
+    this.server = new GameServer(new MemoryStorage(), MapsMock, Factory, {waitForPlayer: 0});
     this.mockSocket1 = new MockSocket();
     this.playerSocket1 = new SocketController(this.mockSocket1, this.server);
     cb();
@@ -76,7 +77,7 @@ module.exports = {
           barking: false
         }]);
       test.equals(this.mockSocket1.disconnected, false);
-      this.playerSocket1.receive('turn [{"cmd": "move", "args": ["1", "0", "1"]}]');
+      this.playerSocket1.receive('turn [{"id": 1, "action": "move up"}]');
       test.done();
     }.bind(this), 1);
   }

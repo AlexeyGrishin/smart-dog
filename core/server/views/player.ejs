@@ -9,16 +9,8 @@
     <link href="bootstrap.css" rel="stylesheet"/>
     <link href="games.css" rel="stylesheet"/>
 </head>
-<body data-id="<%= game.id %>">
-<h1>Game <%= game.id %></h1>
-<p class="players"></p>
-<p>Turn # <span id="turn">0</span> </p>
-<p class="alert alert-error hidden"></p>
-<canvas id="game">
-    Loading...
-</canvas>
-<br/>
-<button class="btn btn-primary disabled replay">Replay</button>
-
+<body data-id="<%= player.name %>">
+<h1>Player <%= player.name %></h1>
+<!-- TODO -->
 </body>
 </html>

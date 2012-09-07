@@ -1,4 +1,4 @@
-var GameObject = require('./game_object')
+var GameObject = require('../../../core/server/game/game_object.js')
   , util = require('util');
 
 function Dog(game, properties) {

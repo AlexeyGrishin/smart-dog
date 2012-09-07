@@ -1,10 +1,10 @@
 var fs = require('fs')
   , Map2D = require('./map2d.js');
 
-var Maps = function(mapFactory) {
+var Maps = function(mapDir, mapFactory) {
   this.maps = [];
   this.mapFactory = mapFactory;
-  fs.readdirSync('./maps').forEach(function(name) {
+  fs.readdirSync(mapDir).forEach(function(name) {
     var mapFile = fs.readFileSync('./maps/' + name);
     var mapCtor = mapFactory.parseMapPart(mapFile.toString().replace(/\r/g, '').split("\n"));
     this.maps.push({

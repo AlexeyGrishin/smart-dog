@@ -1,5 +1,6 @@
 var SocketJson = {
   receive: function(cmd) {
+    console.log(cmd);
     try {
       cmd = cmd + " ";
       var spaceIdx = cmd.indexOf(" ");

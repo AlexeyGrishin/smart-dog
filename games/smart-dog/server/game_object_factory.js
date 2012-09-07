@@ -1,12 +1,11 @@
-var GameObject = require('./game_object.js')
+var GameObject = require('../../../core/server/game/game_object.js')
   , Dog = require('./dog.js')
   , util = require('util')
-  , Game = require('./game')
+  , Game = require('../../../core/server/game/game.js')
   , PlayerInterface = require('./player');
 
 function Sheep() {
   GameObject.apply(this, arguments);
-
 }
 
 function Wall() {
@@ -26,6 +25,7 @@ function Site() {
   GameObject.apply(this, arguments);
   this.traversable = true;
 }
+
 util.inherits(Sheep, GameObject);
 util.inherits(Site, GameObject);
 util.inherits(Grass, GameObject);
@@ -160,6 +160,30 @@ var Factory = {
     }
   },
 
+  encodeMap: function(width, height, gameObjects) {
+    var map = [];
+    for (var i = 0; i < height; i++) {
+      var line = [];
+      for (var j = 0; j < width; j++) {
+        line.push(".");
+      }
+      map.push(line);
+    }
+    gameObjects.forEach(function(g) {
+      var chr;
+      switch (g.type) {
+        case 'Wall': chr = '#'; break;
+        case 'Site': chr = "" + g.owner.id; break;
+        default: chr = '.';
+      }
+      map[g.y][g.x] = chr;
+    });
+    for (var i = 0; i < height; i++) {
+      map[i] = map[i].join("");
+    }
+    return map;
+  },
+
   createGame: function() {
     return new Game(new Logic(), this, this.options);
   },
@@ -170,12 +194,12 @@ var Factory = {
 };
 
 var Logic = function() {
-
 };
 
 Logic.prototype = {
   init: function(game) {
     this.map = game.getMap();
+    this.landscape = Factory.encodeMap(game.getMap().cols, game.getMap().rows, game.getMap().getAll("landscape"));
     this.players = game.getPlayers();
     this.result = {
       finished: false
@@ -188,7 +212,7 @@ Logic.prototype = {
 
   afterTurn: function(turn) {
     this.turn = turn;
-    if (turn >= 500) {
+    if (turn >= 50) {
       this.stopGame('turnsLimit');
     }
   },
@@ -198,6 +222,7 @@ Logic.prototype = {
   },
 
   genState: function(state) {
+    state.landscape = this.landscape;
     return state;
   },
 

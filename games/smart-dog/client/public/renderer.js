@@ -3,7 +3,6 @@ function Renderer(canvas) {
   this.ctx = canvas.getContext("2d");
   this.doInit = this.init;
   this.toDraw = [];
-  this.updator = setInterval($.proxy(this.doDraw, this), this.DRAW_EACH * 1000);
   var div = $("<div></div>").appendTo($("body"));
   this.colors = {};
   var colors = this.colors;
@@ -23,10 +22,12 @@ function Renderer(canvas) {
 Renderer.prototype = {
 
   BLOCK: 15,
-  DRAW_EACH: 1/25,
+  DRAW_EACH: 1,
 
   stop: function() {
     clearInterval(this.updator);
+    this.updator = null;
+    this.toDraw = [];
   },
 
   init: function(state) {
@@ -40,14 +41,22 @@ Renderer.prototype = {
   update: function(state) {
     this.doInit(state);
     this.toDraw.push(state);
-
+    if (!this.updator) {
+      this.updator = setInterval($.proxy(this.doDraw, this), this.DRAW_EACH * 1000);
+      this.doDraw();
+    }
   },
 
   doDraw: function() {
-    if (this.toDraw.length > 0) {
-      var state = this.toDraw.shift();
-      this.draw(state);
-      this.canvas.trigger("render", state);
+    try {
+      if (this.toDraw.length > 0) {
+        var state = this.toDraw.shift();
+        this.draw(state);
+        this.canvas.trigger("render", state);
+      }
+    }
+    catch (e) {
+      console.log(e);
     }
     //else - show 'waiting
   },
@@ -55,14 +64,8 @@ Renderer.prototype = {
   draw: function(state) {
     this.ctx.fillStyle = "white";
     this.ctx.clearRect(0, 0, this.width * this.BLOCK, this.height * this.BLOCK);
-    var landscape = [];
-    var objects = [];
-    $.each(state.objects, function() {
-      var o = this;
-      if (o.layer == "landscape") landscape.push(o); else objects.push(o);
-    });
-    $.each(landscape, $.proxy(this.render, this));
-    $.each(objects, $.proxy(this.render, this));
+    $.each(state.landscape, $.proxy(this.render, this));
+    $.each(state.objects, $.proxy(this.render, this));
   },
 
   render: function(i, el) {

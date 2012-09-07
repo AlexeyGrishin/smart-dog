@@ -1,24 +1,5 @@
-/**
- * Protocol description
- * --> join <username>    # first command, want to join the game
- * <-- wait 1             # please wait, there is only 1 player, wait more
- * <-- start              # game is started
- * <-- turn <state>    # please make turn
- *  <state> = json
- *  {
- *    turn: <turnNr>,
- *    dogs: [{type: "Dog", x:<x>, y:<y>, barking:<tf>, id:<id>}, ..],
- *    visibleArea: [{type: "Grass|Tree|Wall|Sheep|Site|Dog", x:<x>, y:<y>, owner:<owner>}, ..]
- *  }
- *  -->turn [<command>,<command>]
- *    where <command> = {cmd: <name>, args: <args>}
- *  <-- warning <warning>     #if turn was generated some errors
- * <-- finished <state>
- *    where <state> = {youWin: <tf>, winner: <name>, stopReason: <reason>}
- *
- */
-
 var SocketJson = require('./socket_json.js');
+
 
 var SocketController = function(socket, gameServer) {
   this.socket = socket;
@@ -39,22 +20,26 @@ SocketController.prototype = {
     }
   },
 
+  /* protocol commands */
   join: function(name) {
     this.gameServer.connect(this.socket.id.toString(), name, this);
   },
 
   turn: function(commands) {
     for (var i = 0; i < commands.length; i++) {
-      var cmd = commands[i].cmd;
-      var args = commands[i].args;
-      this.player.command(cmd, args, this.warning.bind(this));
+      var action = commands[i].action;
+      var parts = action.split(" ");
+      var cmd = parts.splice(0, 1)[0].trim();
+      var args = parts.slice();
+      args.unshift(commands[i].id);
+      this.player.command(cmd, args, this.sendWarning.bind(this));
     }
     this.player.endTurn();
   },
 
-  warning: function(warning) {
+  sendWarning: function(warning) {
     if (warning) {
-      this.send("warn", warning);
+      this.send("warning", warning);
     }
   },
 
@@ -62,13 +47,14 @@ SocketController.prototype = {
     this.socket.send(cmd + (arg ? " " + arg : ""));
   },
 
-  wait: function(players) {
+  sendWait: function(players) {
     this.send("wait", players);
   },
 
-  makeTurn: function() {
+  sendTurn: function(turn) {
     var state = this.player.toState();
-    this.send("turn", JSON.stringify(state));
+    state.landscape = undefined;
+    this.send("turn ", JSON.stringify(state));
   },
 
   setPlayerInterface: function(player) {
@@ -78,7 +64,12 @@ SocketController.prototype = {
   },
 
   init: function(player) {
-    this.send("start");
+    var state = this.player.toState();
+    var initState = {
+      you: player.getId(),
+      landscape: state.landscape
+    };
+    this.send("start", JSON.stringify(initState));
   },
 
   returnErrorIfAny: function(error) {

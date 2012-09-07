@@ -18,6 +18,9 @@ var Map2D = function(layers) {
     this["add" + layoutName] = function(object, x, y) {
       return this.add(l, object, x, y);
     };
+    this["get" + layoutName + "sAround"] = function(x, y, radius) {
+      return this.getAround(l, x, y, radius);
+    }
   }.bind(this))
 
 };
@@ -73,6 +76,11 @@ Map2D.prototype = {
     return this.map[this.y(y)][this.x(x)][layer];
   },
 
+  getAll: function(layer) {
+    if (!layer) layer = ALL;
+    return this.objects[layer];
+  },
+
 
   moveObject: function(object, newX, newY) {
     this.remove(object.layer, object.x, object.y);
@@ -110,15 +118,15 @@ Map2D.prototype = {
     return dx*dx + dy*dy;
   },
 
-  getObjectsAround: function(x, y, radius) {
+  getAround: function(layer, x, y, radius) {
     var radius2 = radius*radius;
     var objects = [];
     for (var dx = -radius; dx <= radius; dx++) {
       for (var dy = -radius; dy <= radius; dy++) {
         if (this.distance2(x, y, this.x(x+dx), this.y(y+dy)) <= radius2) {
           var layers = this.map[this.y(y+dy)][this.x(x+dx)];
-          if (layers.object) objects.push(layers.object);
-          if (layers.landscape) objects.push(layers.landscape);
+          if (layers.layer)
+            objects.push(layers[layer]);
         }
       }
     }
@@ -128,7 +136,7 @@ Map2D.prototype = {
   getObjectsBy: function(layer, filter) {
     if (filter === undefined) {
       filter = layer;
-      layer = "all";
+      layer = ALL;
     }
     return this.objects[layer].filter(filter);
   }

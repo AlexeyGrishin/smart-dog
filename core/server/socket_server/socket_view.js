@@ -1,15 +1,5 @@
-/**
- * protocol
- *
- * <-- list [{id: <id>, map: <map>, players: [<name1>,...], finished: <tf>, stopReason: <reason>}, ..]
- * --> listen <gameId>
- *  -- each update --
- * <-- view <gameId> {landscape: ["...", "..."], players: [{name, score}, {name, score}], dogs: [{x, y, owner, moveFromX, moveFromY},...], sheeps: []};
- * <-- end <gameId> {...last map state..., winner: , stopReason}
- * <-- error <gameId> {error}
- */
-
-var SocketJson = require('./socket_json.js');
+var SocketJson = require('./socket_json.js')
+  , ReplayFormat = require('../storage/replay_format.js');
 
 function SocketView(socket, gameServer) {
   this.socket = socket;
@@ -18,6 +8,7 @@ function SocketView(socket, gameServer) {
   socket.on('disconnect', this.disconnect.bind(this));
   this.sendList(true);
   this.ids = [];
+  this.first = true;
 }
 
 SocketView.prototype = {
@@ -46,20 +37,24 @@ SocketView.prototype = {
   } ,
 
   sendList: function(active) {
-    this.send("list", JSON.stringify(this.gameServer.listGames(active)));
+    this.gameServer.listGames(active, function(err, games) {
+      this.send("list", JSON.stringify(games));
+    }.bind(this));
   },
 
   sendUpdate: function(error, id, state) {
+    if (state) var stateToSend = this.first ? ReplayFormat.getFirstState(state) : ReplayFormat.getNextState(state);
     if (error) {
       if (error == "game.stop") {
-        this.sendFinished(id, state);
+        this.sendFinished(id, JSON.stringify(stateToSend));
       }
       else {
         this.sendError(id, error);
       }
     }
     else {
-      this.send("view " + id, JSON.stringify(state));
+      this.send("view " + id, JSON.stringify(stateToSend));
+      this.first = false;
     }
 
   },
@@ -69,7 +64,7 @@ SocketView.prototype = {
   },
 
   sendFinished: function(id, state) {
-    this.send("end " + id, JSON.stringify(state));
+    this.send("end " + id, state);
   }
 };
 

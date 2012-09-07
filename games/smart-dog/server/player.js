@@ -6,12 +6,11 @@ var PlayerInterface = function(game, ownerId, info, options) {
   this.id = ownerId;
   this.info = info;
   this.name = info.name;
-
 };
 
 var PlayerController = {
   init: function(playerInterface) {},
-  makeTurn: function() {},
+  sendTurn: function() {},
   finished: function(winner, gameResult) {}
 };
 
@@ -24,8 +23,16 @@ PlayerInterface.prototype = {
     for (var i = 0; i < this.dogs.length; i++) {
       this.dogById[this.dogs[i].id] = this.dogs[i];
     }
-    //TODO: send landscape once
+    this.savedState = this.genState();
     this.controller.init(this);
+  },
+
+  getName: function() {
+    return this.name;
+  },
+
+  getId: function() {
+    return this.id;
   },
 
   genState: function() {
@@ -42,10 +49,12 @@ PlayerInterface.prototype = {
         }
       });
     }.bind(this));
+    //TODO: also add barking dogs - all hear them
     return {
       turn: this.game.turn,
       dogs: this.dogs.map(toState),
-      visibleArea: visibleArea.map(toState)
+      visibleArea: visibleArea.map(toState),
+      landscape: this.game.toState().landscape
     }
   },
 
@@ -64,22 +73,29 @@ PlayerInterface.prototype = {
     }
   },
 
-  move: function(id, dx, dy, cb) {
-    var movement = Math.abs(dx) + Math.abs(dy);
-    if (movement <= 0 && movement >= 2) {
-      return cb("Cannot move by " + dx + "," + dy)
+  DIRECTIONS: {
+    up: {dx: 0, dy: -1},
+    down: {dx: 0, dy: 1},
+    left: {dx: -1, dy: 0},
+    right: {dx: 1, dy: 0}
+  },
+
+  move: function(id, direction, cb) {
+
+    var movement = this.DIRECTIONS[direction];
+    if (!movement) {
+      return cb("Unexpected direction '" + direction + "', one of the following expected: " + Object.keys(this.DIRECTIONS).join(','));
     }
     var dog = this.dogById[id];
     if (!dog) return cb("Unknown id - " + id);
     if (dog.moved) return cb("Dog with id " + id + " already moved this turn");
-    dog.move(dx, dy, function(err) {
+    dog.move(movement.dx, movement.dy, function(err) {
       if (err) {
-       cb(err);
-       cb = function() {};
+       return cb(err);
       }
+      dog.moved = true;
+      cb();
     });
-    dog.moved = true;
-    cb();
   },
 
   endTurn: function(error) {
@@ -98,7 +114,7 @@ PlayerInterface.prototype = {
     this.dogs.forEach(function(d) {
       d.moved = false;
     });
-    this.controller.makeTurn();
+    this.controller.sendTurn();
   },
 
   finished: function(gameResult) {

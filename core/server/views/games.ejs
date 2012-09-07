@@ -4,12 +4,12 @@
 <th>ID</th><th>Map</th><th>Turn</th><th>Players</th><th>Link</th>
 </tr>
 <% for (var i = 0; i < games.length; i++) { %>
-<tr>
+<tr class="<%= games[i].finished ? 'finished' : 'active' %>">
 <td><%= games[i].id %></td>
 <td><%= games[i].brief.map %></td>
 <td><%= games[i].brief.turn %></td>
 <td><%= games[i].players.join(",") %></td>
-<td><a href="/<%= games[i].id %>">See online</a></td>
+<td><a href="/<%= games[i].id %>">See <%= games[i].finished ? 'Replay' : 'Online' %></a></td>
 </tr>
 <% } %>
 </table>

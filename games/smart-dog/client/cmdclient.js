@@ -26,8 +26,8 @@ function doNext() {
     }
     else {
       var splitted = data.split(' ');
-      var cmd = splitted.splice(0, 1)[0];
-      commands.push({cmd: cmd, args: splitted});
+      var id = splitted.splice(0, 1)[0];
+      commands.push({id: id, action: splitted.join(' ')});
     }
   });
   socket.on('message', function(data) {
@@ -57,7 +57,7 @@ function doAutoNext() {
       var state = JSON.parse(args);
       var did = state.dogs[0].id;
       setTimeout(function() {
-        socket.send('turn [{"cmd": "move", "args": [' + did + ', -1, 0]}]');
+        socket.send('turn [{"id": ' + did + ', "action": "move left"}]');
       }, 50);
     }
   });

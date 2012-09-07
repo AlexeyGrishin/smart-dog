@@ -1,1 +1,10 @@
-This file was created by JetBrains WebStorm 4.0.3 for binding GitHub repository
+
+1. Run server
+nodejs ./games/smart-dog/server/smart_dog_server.js &
+
+2. Open site http://localhost:3000
+
+3. Run 2 or more clients:
+nodejs ./games/smart-dog/client/cmdclient.js &
+
+4. Observe game on site

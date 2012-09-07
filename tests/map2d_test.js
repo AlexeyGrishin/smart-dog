@@ -1,4 +1,4 @@
-var Map2D = require('../core/server/map2d.js');
+var Map2D = require('../core/server/game/map2d.js');
 
 var mockObj = function() {
   this.locate = function(x, y) {
@@ -83,8 +83,8 @@ module.exports = {
 
   testGetObjectsAround: function(test) {
     this.map.setSize(10, 10);
-    this.map.add("landscape", mockObj, 5, 5);
-    this.map.add("landscape", mockObj, 5, 5);
+    this.map.add("landscape", new mockObj, 5, 5);
+    this.map.add("landscape", new mockObj, 5, 4);
     test.done();
 
   },
