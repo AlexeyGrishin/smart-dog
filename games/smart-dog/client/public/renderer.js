@@ -22,6 +22,7 @@ function Renderer(canvas) {
 Renderer.prototype = {
 
   BLOCK: 15,
+  OBJ_PAD: 3,
   DRAW_EACH: 0.1,
 
   stop: function() {
@@ -31,6 +32,11 @@ Renderer.prototype = {
   },
 
   init: function(state) {
+    var calcWidth = state.width * this.BLOCK;
+    if (calcWidth > screen.width - 200) {
+      this.BLOCK = (screen.width - 200) / state.width;
+      this.OBJ_PAD = this.BLOCK / 5;
+    }
     this.canvas.attr("width", state.width * this.BLOCK).attr("height", state.height * this.BLOCK);
     this.width = state.width*this.BLOCK;
     this.height = state.height*this.BLOCK;
@@ -61,6 +67,7 @@ Renderer.prototype = {
     //else - show 'waiting
   },
 
+  //TODO: performance: draw landscape once, then re-draw only cells where objects were
   draw: function(state) {
     this.ctx.fillStyle = "white";
     this.ctx.clearRect(0, 0, this.width * this.BLOCK, this.height * this.BLOCK);
@@ -76,10 +83,10 @@ Renderer.prototype = {
       height: this.BLOCK
     };
     if (el.layer == "object") {
-      bounds.x+=3;
-      bounds.y+=3;
-      bounds.width-=6;
-      bounds.height-=6;
+      bounds.x+=this.OBJ_PAD;
+      bounds.y+=this.OBJ_PAD;
+      bounds.width-=this.OBJ_PAD*2;
+      bounds.height-=this.OBJ_PAD*2;
     }
     var ctx = this.ctx;
     var player = parseInt(el.owner);

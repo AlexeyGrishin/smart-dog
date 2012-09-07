@@ -139,9 +139,15 @@ var Factory = {
           object: Dog
         };
         break;
-      case '*':
+      case 'o':
         return {
           landscape: Site,
+          object: Sheep
+        };
+        break;
+      case '*':
+        return {
+          landscape: Grass,
           object: Sheep
         };
         break;
