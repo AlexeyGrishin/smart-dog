@@ -109,7 +109,7 @@ var GameView = {
 
 $(function() {
   var gameId = $("body").attr("data-id");
-  var socket = io.connect('http://localhost:3003');
+  var socket = io.connect("http://" + window.location.hostname + ':3003');
   var viewCmd = 'view';
   var errorCmd = 'error';
   var endCmd = 'end';
