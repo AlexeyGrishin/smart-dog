@@ -111,8 +111,8 @@ Renderer.prototype = {
     ctx.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
     if (el.voice == "barking") {
       //do bark
-      ctx.stroke = "#ffffff";
-      ctx.font = "10";
+      ctx.strokeStyle = "#ffffff";
+      ctx.font = "9";
       ctx.strokeText("!", bounds.x+5, bounds.y + bounds.height);
     }
 

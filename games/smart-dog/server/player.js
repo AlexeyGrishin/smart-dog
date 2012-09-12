@@ -1,5 +1,6 @@
 var Dog = require('./dog')
   , constants = require('./consts.js')
+  , Sheep = require('./sheep.js')
   , Game = require('../../../core/server/game/game.js');
 
 var PlayerInterface = function(game, ownerId, info, options) {
@@ -22,6 +23,7 @@ PlayerInterface.prototype = {
     this.map = this.game.getMap();  //TODO: use setters/getters instead
     //TODO: constants for layers
     this.dogs = this.map.getObjectsBy("object", function(o) {return o instanceof Dog && o.owner.id == this.id}.bind(this));
+    this.site = this.map.getObjectsBy("landscape", function(o) {return o.type == "Site" && o.owner.id == this.id}.bind(this));
     this.dogById = {};
     for (var i = 0; i < this.dogs.length; i++) {
       this.dogById[this.dogs[i].id] = this.dogs[i];
@@ -36,6 +38,18 @@ PlayerInterface.prototype = {
 
   getId: function() {
     return this.id;
+  },
+
+  calculateScore: function() {
+    var score = 0;
+    if (!this.site) return score;
+    this.site.forEach(function(s) {
+      var objOnSite = this.map.getObject(s.x, s.y);
+      if (objOnSite && objOnSite instanceof Sheep) {
+        score++;
+      }
+    }.bind(this));
+    return score;
   },
 
   genState: function() {
@@ -67,7 +81,6 @@ PlayerInterface.prototype = {
         visibleArea.push(o);
       }
     });
-    //TODO: also add barking dogs - all hear them
     return {
       turn: this.game.turn,
       dogs: this.dogs.map(toState),
@@ -102,7 +115,7 @@ PlayerInterface.prototype = {
     if (dog.moved) return cb("Dog with id " + id + " already moved this turn");
     dog.move(movement.dx, movement.dy, function(err) {
       if (err) {
-       return cb(err);
+        return cb(err);
       }
       dog.moved = true;
       cb();

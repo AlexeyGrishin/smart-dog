@@ -61,9 +61,19 @@ Sheep.prototype.afterTurn = function(p) {
       }
     });
     if (doMove) {
+      //TODO: add more selectors to map
+      //make it look like:
+      //  $ = map;
+      //  $.objects.all
+      //  $.all
+      //  $.object.at(x,y)
+      //  $.at(x,y).object
+      //  $.objects.around(x,y,radius)
+      //  $.landscape.forward(x,y,dx,dy,distance)
+      //  $.objects.around(x,y,radius).find("Dog.isBarking")
       console.log("Sheep " + p.id + "  decided to go " + doMove.dx + "," + doMove.dy);
       this.move(doMove.dx, doMove.dy, function(err){
-        console.error("Shall never happen - " + err);
+        if (err) console.error("Shall never happen - " + err);
       });
       p.standBy = 4;
     }

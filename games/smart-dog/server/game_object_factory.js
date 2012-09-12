@@ -236,10 +236,12 @@ Logic.prototype = {
     this.result.reason = reason;
     this.result.finished = true;
     this.result.playerCausedStop = playerCausedStop;
+    var maxScore = -1;
     for (var i = 0; i < this.players.length; i++) {
-      if (this.players[i] != playerCausedStop) {
+      var score = this.players[i].calculateScore(); //TODO: cache score inside player
+      if (this.players[i] != playerCausedStop && score > maxScore) {
         this.result.winner = this.players[i];
-        break;
+        maxScore = score;
       }
     }
   }

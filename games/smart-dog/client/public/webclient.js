@@ -58,7 +58,7 @@ var GameView = {
     }
     if (!this.playersShown) {
       $(".players").html(
-        update.players.map(function(p) {return "<span class='player" + p.id + "'>" + p.name + "</span>"}).join("<br>")
+        update.players.map(function(p) {return "<span class='player" + p.id + "'>" + p.name + "</span> - " + p.score}).join("<br>")
       );
       this.playersShown = true;
     }

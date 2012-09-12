@@ -76,6 +76,16 @@ var GameMethods = {
 
   doTurn: function() {
     this.turnMade = 0;
+    //TODO: probably we need more events, the valid sequence shall be the following:
+    //1. generate player state (now is BeforeTurn)
+    // 1.2 - reset state of game-object? i.e. clear 'barking' flag, etc. - before the next move
+    // 1.3 send to players (now in makeTurn)
+    //2. receive turns (change GameObjects state)
+    //3. do internal logic (change GameObjects state)
+    //4. generate game-object states
+    //5. calculate score, generate player state?
+    //6. generate game state
+    //7. render
     this.emit(Game.Event.BeforeTurn, this.savedState);
     this.logic.beforeTurn(this.turn);
     this.players.forEach(function(p) {
@@ -183,7 +193,7 @@ var GameMethods = {
 
   genState: function() {
     var state = this.genBrief();
-    state.players = this.players.map(function(p) {return {id:p.getId(), name:p.getName()}});
+    state.players = this.players.map(function(p) {return {id:p.getId(), name:p.getName(), score:p.calculateScore()}});
     //TODO: optimize - cache landscape
     state.objects = this.map.allObjects.map(function(o) {
       return o.toState();

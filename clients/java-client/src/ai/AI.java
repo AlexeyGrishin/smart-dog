@@ -35,13 +35,10 @@ public class AI implements CommandReactor {
                 System.out.println("Someone barking at " + go.x + "," + go.y);
             }
         }
-        /*for (GameObject go: info) {
-            if (go.type == GameObject.Type.DOG && go.owner == me) {
-                turn.move(go.id, Direction.RIGHT);
-            }
-        }       */
         this.turn++;
+        Direction moveTo = Direction.values()[(int)(Math.random()*Direction.values().length)];
         if (this.turn % 10 == 0) {
+            turn.move(getMyDog(info), moveTo);
             turn.bark(getMyDog(info));
         }
         turn.endTurn();
