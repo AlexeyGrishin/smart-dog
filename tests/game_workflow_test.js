@@ -30,11 +30,15 @@ var MockSocket = function() {
   this.id = 1;
   this.on = function() {};
   var sent = [];
-  this.send = function(data) {
+  this.write = function(data) {
+    if (data == '\n') return;
     sent.push(data);
   };
   this.sent = function() {
     return sent;
+  };
+  this.resume = function() {
+
   };
 
   this.next = function() {
@@ -61,11 +65,15 @@ module.exports = {
     this.playerSocket1.receive('join Alex');
     setTimeout(function() {
       test.ok(this.mockSocket1.hasNext());
-      test.equals(this.mockSocket1.next(), "start");
+      test.ok(this.mockSocket1.next().indexOf('start') == 0);
+      test.ok(this.mockSocket1.next().indexOf('landscape') == 0);
+      test.ok(this.mockSocket1.next().indexOf('state') == 0);
+      var obj = this.mockSocket1.next();
+      test.ok(obj.indexOf('obj') == 0);
       var turn = this.mockSocket1.next();
       console.log(turn);
-      test.ok(turn.indexOf('turn ') == 0);
-      var state = JSON.parse(turn.substring(5));
+      test.ok(turn.indexOf('turn') == 0);
+      var state = JSON.parse("{" + obj.substring(4) + "}");
       test.deepEqual(state.dogs, [
         {
           id: 1,
@@ -73,11 +81,11 @@ module.exports = {
           y: 0,
           layer: "object",
           owner: 1,
-          type: "Dog",
-          barking: false
+          type: "Dog"
         }]);
       test.equals(this.mockSocket1.disconnected, false);
-      this.playerSocket1.receive('turn [{"id": 1, "action": "move up"}]');
+      this.playerSocket1.receive('do 1 move up\n');
+      this.playerSocket1.receive('end\n');
       test.done();
     }.bind(this), 1);
   }

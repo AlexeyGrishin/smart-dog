@@ -1,4 +1,9 @@
 
+function sign(num) {
+  if (num > 0) return 1;
+  if (num < 1) return -1;
+  return 0;
+}
 
 var Map2D = function(layers) {
   this.objects = {};
@@ -109,14 +114,37 @@ Map2D.prototype = {
 
   //here selectors
   distance2: function(x1, y1, x2, y2) {
-    var dx = Math.abs(x2 - x1);
-    var dx2 = Math.abs(x2 > x1 ? x1 + this.cols - x2 : x2 + this.cols - x1);
-    var dy = Math.abs(y2 - y1);
-    var dy2 = Math.abs(y2 > y1 ? y1 + this.cols - y2 : y2 + this.cols - y1);
-    dx = dx < dx2 ? dx : dx2;
-    dy = dy < dy2 ? dy : dy2;
-    return dx*dx + dy*dy;
+    var delta = this.getDelta(x1,y1,x2,y2);
+    return delta.dx*delta.dx + delta.dy*delta.dy;
   },
+
+  //returns step as object {dx,dy} the object at x1,y1 shall perform to get x2,y2.
+  //|dx| <=1 && |dy| <=1 && |dx|+|dy| <=1
+  getDirection: function(x1, y1, x2, y2) {
+    var delta = this.getDelta(x1, y1, x2, y2);
+    var dir = {dx: sign(delta.dx), dy: sign(delta.dy)};
+    if (dir.dx != 0 && dir.dy != 0) {
+      if (Math.abs(delta.dx) > Math.abs(delta.dy)) {
+        dir.dy = 0;
+      }
+      else {
+        dir.dx = 0;
+      }
+    }
+    return dir;
+  },
+
+  //returns {dx,dy} the object at x1,y1 shall perform to get x2,y2
+  getDelta: function(x1, y1, x2, y2) {
+    var dx = x2 - x1;
+    var dx2 = x2 > x1 ? -(x1 + this.cols - x2) : x2 + this.cols - x1;
+    var dy = y2 - y1;
+    var dy2 = y2 > y1 ? -(y1 + this.cols - y2) : y2 + this.cols - y1;
+    dx = Math.abs(dx) < Math.abs(dx2) ? dx : dx2;
+    dy = Math.abs(dy) < Math.abs(dy2) ? dy : dy2;
+    return {dx: dx, dy: dy};
+  },
+
 
   getAround: function(layer, x, y, radius) {
     var radius2 = radius*radius;
@@ -125,7 +153,7 @@ Map2D.prototype = {
       for (var dy = -radius; dy <= radius; dy++) {
         if (this.distance2(x, y, this.x(x+dx), this.y(y+dy)) <= radius2) {
           var layers = this.map[this.y(y+dy)][this.x(x+dx)];
-          if (layers.layer)
+          if (layers[layer])
             objects.push(layers[layer]);
         }
       }
@@ -135,10 +163,14 @@ Map2D.prototype = {
 
   getObjectsBy: function(layer, filter) {
     if (filter === undefined) {
-      filter = layer;
-      layer = ALL;
+      if (typeof layer == 'function') {
+        filter = layer;
+        layer = ALL;
+      }
     }
-    return this.objects[layer].filter(filter);
+    var os = this.objects[layer];
+    if (filter) os = os.filter(filter);
+    return os;
   }
 };
 

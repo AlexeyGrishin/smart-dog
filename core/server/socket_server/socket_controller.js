@@ -1,18 +1,24 @@
-var SocketJson = require('./socket_json.js');
+var SocketJson = require('./socket_json.js')
+  , readline = require('readline');
 
 
 var SocketController = function(socket, gameServer) {
   this.socket = socket;
+  this.rl = readline.createInterface({
+    input: socket,
+    output: socket
+  });
   this.gameServer = gameServer;
 
-  socket.on('message', this.receive.bind(this));
-  socket.on('disconnect', this.disconnect.bind(this));
+  this.rl.on('line', this.receive.bind(this));
+  this.socket.on('close', this.disconnect.bind(this));
+  this.socket.on('error', this.disconnect.bind(this));
 };
 
 SocketController.prototype = {
   receive: function(cmd) {
     try {
-      SocketJson.receive.call(this, cmd);
+      SocketJson.receive.call(this, cmd.toString());
     }
     catch (e){
       this.returnErrorIfAny(e);
@@ -22,18 +28,23 @@ SocketController.prototype = {
 
   /* protocol commands */
   join: function(name) {
-    this.gameServer.connect(this.socket.id.toString(), name, this);
+    this.gameServer.connect(/*todo*/-1, name, this);
   },
 
-  turn: function(commands) {
-    for (var i = 0; i < commands.length; i++) {
-      var action = commands[i].action;
-      var parts = action.split(" ");
-      var cmd = parts.splice(0, 1)[0].trim();
-      var args = parts.slice();
-      args.unshift(commands[i].id);
-      this.player.command(cmd, args, this.sendWarning.bind(this));
-    }
+  unknown: function(cmd, arg) {
+    console.error("Unknown command: " + cmd + "(" + arg + ")");
+  },
+
+  "do": function(action) {
+    var parts = action.split(" ");
+    var id = parts[0];
+    var cmd = parts[1];
+    var args = parts.slice(2);
+    args.unshift(id);
+    this.player.command(cmd, args, this.sendWarning.bind(this));
+  },
+
+  "end": function() {
     this.player.endTurn();
   },
 
@@ -44,7 +55,8 @@ SocketController.prototype = {
   },
 
   send: function(cmd, arg) {
-    this.socket.send(cmd + (arg ? " " + arg : ""));
+    SocketJson.send.call(this, cmd, arg);
+    //this.socket.send(cmd + (arg ? " " + arg : ""));
   },
 
   sendWait: function(players) {
@@ -54,7 +66,11 @@ SocketController.prototype = {
   sendTurn: function(turn) {
     var state = this.player.toState();
     state.landscape = undefined;
-    this.send("turn ", JSON.stringify(state));
+    this.send("state ", {turn: state.turn});
+    for (var i = 0; i < state.visibleArea.length; i++) {
+      this.send("obj ", state.visibleArea[i]);
+    }
+    this.send("turn");
   },
 
   setPlayerInterface: function(player) {
@@ -64,12 +80,17 @@ SocketController.prototype = {
   },
 
   init: function(player) {
-    var state = this.player.toState();
+    var state = player.toState();
+    var landscape = state.landscape;
     var initState = {
       you: player.getId(),
-      landscape: state.landscape
+      rows: landscape.length,
+      cols: landscape[0].length,
+      players: player.TODO || 0
+
     };
-    this.send("start", JSON.stringify(initState));
+    this.send("start", initState);
+    this.send("landscape", landscape);
   },
 
   returnErrorIfAny: function(error) {
@@ -83,16 +104,17 @@ SocketController.prototype = {
   },
 
   finished: function(myWin, state) {
-    this.send("finished", JSON.stringify({
+    this.send("finished", {
       youWin: myWin,
-      winner: state.winner.name,
+      winner: state.winner ? state.winner.id : undefined,
       stopReason: state.stopReason
-    }));
+    });
     this.stopped = true;
-    this.socket.disconnect();
+    this.socket.end();
   },
 
   disconnect: function() {
+    console.log("Disconnected " + (this.player ? this.player.getId() : "<unknown>"));
     if (this.stopped) return;
     this.stopped = true;
     this.returnErrorIfAny('player.gone');

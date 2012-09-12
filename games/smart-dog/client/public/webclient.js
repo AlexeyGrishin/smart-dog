@@ -9,6 +9,7 @@ var characters = {
 
 function parseMap(charMap) {
   var objects = [];
+  objects.xy = {};
   for (var y = 0; y < charMap.length; y++) {
     for (var x = 0; x < charMap[y].length; x++) {
       var ctor = characters[charMap[y][x]];
@@ -17,6 +18,7 @@ function parseMap(charMap) {
       obj.x = x;
       obj.y = y;
       objects.push(obj);
+      objects.xy[x + '_' + y] = obj;
     }
   }
   return objects;
@@ -30,9 +32,29 @@ var GameView = {
     $("#game").on("render", $.proxy(this.postRender, this));
   },
 
+
+  reduceLandscape: function(landscape, objects) {
+    var newLandscape = [];
+    newLandscape.xy = {};
+    for (var i = 0; i < objects.length; i++) {
+      if (objects[i].movedFromX != undefined) {
+        var x = objects[i].movedFromX;
+        var y = objects[i].movedFromY;
+        var le = landscape.xy[x + '_' + y];
+        newLandscape.push(le);
+        newLandscape.xy[x + '_' + y] = le;
+      }
+    }
+    return newLandscape;
+  },
+
   update: function(update) {
     if (update.landscape && update.landscape.length > 0 && !this.landscape) {
       this.landscape = parseMap(update.landscape);
+      update.landscape = this.landscape;
+    }
+    else {
+      this.assignLandscape(update, this.landscape, true);
     }
     if (!this.playersShown) {
       $(".players").html(
@@ -40,7 +62,6 @@ var GameView = {
       );
       this.playersShown = true;
     }
-    update.landscape = this.landscape;
     this.renderer.update(update);
     if (update.winner) {
       this.onFinished(update);
@@ -63,13 +84,24 @@ var GameView = {
     $(".alert").removeClass("alert-error").addClass("alert-success").html(stats.join("<br>")).show().removeClass("hidden");
   },
 
-  replay: function(data) {
+  replay: function(data, from) {
     this.renderer.stop();
     var replay = data.replay;
     this.landscape = parseMap(replay[0].landscape);
-    for (var i = 0; i < replay.length; i++) {
-      replay[i].landscape = this.landscape;
+    var from = from || 0;
+    for (var i = from; i < replay.length; i++) {
+      this.assignLandscape(replay[i], this.landscape, i != from);
       this.renderer.update(replay[i]);
+    }
+  },
+
+  assignLandscape: function(state, landscape, partial) {
+    if (!partial) {
+      state.landscape = landscape;
+    }
+    else {
+      state.landscape = this.reduceLandscape(landscape, state.objects);
+      state.partial = true;
     }
   }
 

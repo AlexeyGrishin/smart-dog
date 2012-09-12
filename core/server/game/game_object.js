@@ -1,4 +1,3 @@
-
 var id = 1;
 
 function GameObject(game, properties) {
@@ -53,7 +52,11 @@ function GameObject(game, properties) {
     };
     cb();
   };
-  this.__defineGetter__('type', function() { return this.constructor.name})
+  this.__defineGetter__('type', function() { return this.constructor.name});
+  this.extend(p);
+  var Game = require('./game.js');
+  game.on(Game.Event.BeforeTurn, this.beforeTurn.bind(this, p));
+  game.on(Game.Event.AfterTurn, this.afterTurn.bind(this, p));
 }
 
 GameObject.Event = {
@@ -77,8 +80,19 @@ GameObject.prototype = {
       state.movedFromX = p.oldPosition.x;
       state.movedFromY = p.oldPosition.y;
     }
-    p.oldPosition = undefined;
     return state;
+  },
+
+  extend: function(p) {
+    //do nothing, extend it in subclasses
+  },
+
+  beforeTurn: function(p) {
+    p.oldPosition = undefined;
+  },
+
+  afterTurn: function(p) {
+
   }
 };
 

@@ -1,12 +1,9 @@
 var GameObject = require('../../../core/server/game/game_object.js')
   , Dog = require('./dog.js')
+  , Sheep = require('./sheep.js')
   , util = require('util')
   , Game = require('../../../core/server/game/game.js')
   , PlayerInterface = require('./player');
-
-function Sheep() {
-  GameObject.apply(this, arguments);
-}
 
 function Wall() {
   GameObject.apply(this, arguments);
@@ -26,7 +23,6 @@ function Site() {
   this.traversable = true;
 }
 
-util.inherits(Sheep, GameObject);
 util.inherits(Site, GameObject);
 util.inherits(Grass, GameObject);
 util.inherits(Tree, GameObject);

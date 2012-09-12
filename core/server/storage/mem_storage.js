@@ -73,7 +73,7 @@ MemoryStorage.prototype = {
     if (path.dirname(fullPath) == this.replaysDir) {
       fs.readFile(fullPath, function(err, data) {
         if (err) return cb(err);
-        return(null, JSON.parse(data));
+        return cb(null, JSON.parse(data));
       });
     }
     else {

@@ -11,11 +11,13 @@ var Game = function(logic, playerFactory, options) {
     this.map.objectMoved(object, oldX, oldY);
   });
   this.players = [];
+  this.setMaxListeners(9999);
 };
 
 Game.Event = {
   Turn: 'game.turn',
   BeforeTurn: 'game.beforeTurn',
+  AfterTurn: 'game.afterTurn',
   Stop: 'game.stop',
   PlayerGone: 'player.gone',
   PlayerTurn: 'player.turn',
@@ -95,6 +97,7 @@ var GameMethods = {
   endTurn: function(stop, stopReason, playerCausedStop) {
     clearTimeout(this.turnTimeout);
     this.logic.afterTurn(this.turn);
+    this.emit(Game.Event.AfterTurn);
     this.turn++;
     this.savedState = this.genState();
     this.brief = this.genBrief();

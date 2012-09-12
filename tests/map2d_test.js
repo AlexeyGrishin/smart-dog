@@ -81,6 +81,42 @@ module.exports = {
     test.done();
   },
 
+  testDirection_dx_oneStep: function(test) {
+    this.map.setSize(10,10);
+    test.deepEqual({dx:1, dy:0}, this.map.getDirection(0,0,1,0));
+    test.done();
+  },
+
+  testDirection_dy_oneStep: function(test) {
+    this.map.setSize(10,10);
+    test.deepEqual({dx:0, dy:-1}, this.map.getDirection(1,1,1,0));
+    test.done();
+  },
+
+  testDirection_dx_crossEdge: function(test) {
+    this.map.setSize(10,10);
+    test.deepEqual({dx:-1, dy:0}, this.map.getDirection(0,0,7,0));
+    test.done();
+  },
+
+  testDirection_dy_crossEdge: function(test) {
+    this.map.setSize(10,10);
+    test.deepEqual({dx:0, dy:1}, this.map.getDirection(0,8,0,1));
+    test.done();
+  },
+
+  testDirection_dy_diagonal: function(test) {
+    this.map.setSize(10,10);
+    test.deepEqual({dx:0, dy:1}, this.map.getDirection(0, 0, 3, 4));
+    test.done();
+  },
+
+  testDirection_dx_diagonal: function(test) {
+    this.map.setSize(10,10);
+    test.deepEqual({dx:-1, dy:0}, this.map.getDirection(6, 6, 2, 5));
+    test.done();
+  },
+
   testGetObjectsAround: function(test) {
     this.map.setSize(10, 10);
     this.map.add("landscape", new mockObj, 5, 5);

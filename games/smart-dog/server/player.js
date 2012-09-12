@@ -1,4 +1,6 @@
-var Dog = require('./dog');
+var Dog = require('./dog')
+  , constants = require('./consts.js')
+  , Game = require('../../../core/server/game/game.js');
 
 var PlayerInterface = function(game, ownerId, info, options) {
   this.game = game;
@@ -6,6 +8,7 @@ var PlayerInterface = function(game, ownerId, info, options) {
   this.id = ownerId;
   this.info = info;
   this.name = info.name;
+  this.game.on(Game.Event.BeforeTurn, this.beforeTurn.bind(this));
 };
 
 var PlayerController = {
@@ -36,19 +39,34 @@ PlayerInterface.prototype = {
   },
 
   genState: function() {
-    function toState(d) {
-      return d.toState();
-    }
     var visibleArea = [];
-    var visited = {};
+    var see = {};
+    function toState(d) {
+      var st = d.toState();
+      //anonimize :)
+      if (!see[d.x + '_' + d.y]) {
+        var ost = st;
+        st = {};
+        Object.keys(ost).forEach(function(k) {
+          if (['id', 'type', 'owner'].indexOf(k) > -1) return;
+          st[k] = ost[k];
+        })
+      }
+      return st;
+    }
     this.dogs.forEach(function(d) {
       this.map.getObjectsAround(d.x, d.y, this.o.visibilityRadius).forEach(function(o) {
-        if (!visited[o.x + "_" + o.y]) {
-          visited[o.x + "_" + o.y] = true;
+        if (!see[o.x + "_" + o.y]) {
+          see[o.x + "_" + o.y] = true;
           visibleArea.push(o);
         }
       });
     }.bind(this));
+    this.map.getObjectsBy('object').forEach(function(o) {
+      if (o.type == "Dog" && o.isBarking && !see[o.x + '_' + o.y]) {
+        visibleArea.push(o);
+      }
+    });
     //TODO: also add barking dogs - all hear them
     return {
       turn: this.game.turn,
@@ -62,7 +80,7 @@ PlayerInterface.prototype = {
     return this.savedState;
   },
 
-  COMMANDS: ["move"],
+  COMMANDS: ["move", "bark"],
 
   command: function(cmd, args, cb) {
     if (this.COMMANDS.indexOf(cmd) > -1) {
@@ -73,18 +91,11 @@ PlayerInterface.prototype = {
     }
   },
 
-  DIRECTIONS: {
-    up: {dx: 0, dy: -1},
-    down: {dx: 0, dy: 1},
-    left: {dx: -1, dy: 0},
-    right: {dx: 1, dy: 0}
-  },
-
   move: function(id, direction, cb) {
 
-    var movement = this.DIRECTIONS[direction];
+    var movement = constants.DIRECTIONS[direction];
     if (!movement) {
-      return cb("Unexpected direction '" + direction + "', one of the following expected: " + Object.keys(this.DIRECTIONS).join(','));
+      return cb("Unexpected direction '" + direction + "', one of the following expected: " + Object.keys(constants.DIRECTIONS).join(','));
     }
     var dog = this.dogById[id];
     if (!dog) return cb("Unknown id - " + id);
@@ -98,6 +109,14 @@ PlayerInterface.prototype = {
     });
   },
 
+  bark: function(id, cb) {
+    var dog = this.dogById[id];
+    if (!dog) return cb("Unknown id - " + id);
+    if (dog.isBarking) return cb("Dog with id " + id + " already barked this turn");
+    dog.bark();
+    cb();
+  },
+
   endTurn: function(error) {
     this.moved = !error;
     this.game.emit('player.turn', this, this.turn, error);
@@ -107,8 +126,11 @@ PlayerInterface.prototype = {
     this.controller = controller;
   },
 
-  makeTurn: function() {
+  beforeTurn: function() {
     this.savedState = this.genState();
+  },
+
+  makeTurn: function() {
     this.turn = this.game.turn;
     this.moved = false;
     this.dogs.forEach(function(d) {

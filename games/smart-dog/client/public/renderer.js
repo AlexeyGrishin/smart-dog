@@ -23,7 +23,7 @@ Renderer.prototype = {
 
   BLOCK: 15,
   OBJ_PAD: 3,
-  DRAW_EACH: 0.1,
+  DRAW_EACH: 0.5,
 
   stop: function() {
     clearInterval(this.updator);
@@ -69,11 +69,14 @@ Renderer.prototype = {
 
   //TODO: performance: draw landscape once, then re-draw only cells where objects were
   draw: function(state) {
-    this.ctx.fillStyle = "white";
-    this.ctx.clearRect(0, 0, this.width * this.BLOCK, this.height * this.BLOCK);
+    if (!state.partial) {
+      this.ctx.fillStyle = "white";
+      this.ctx.clearRect(0, 0, this.width * this.BLOCK, this.height * this.BLOCK);
+    }
     $.each(state.landscape, $.proxy(this.render, this));
     $.each(state.objects, $.proxy(this.render, this));
   },
+
 
   render: function(i, el) {
     var bounds = {
@@ -106,6 +109,12 @@ Renderer.prototype = {
         throw "Unknown type - " + el.type;
     }
     ctx.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+    if (el.voice == "barking") {
+      //do bark
+      ctx.stroke = "#ffffff";
+      ctx.font = "10";
+      ctx.strokeText("!", bounds.x+5, bounds.y + bounds.height);
+    }
 
   }
 

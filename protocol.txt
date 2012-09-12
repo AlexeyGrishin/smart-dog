@@ -1,54 +1,31 @@
-Player/Server
----> join <username>
-<--- wait
-<--- start <initial state>      - some initial state. May absent
-<--- turn <game state> - objects seen by player with their states
----> turn <actions>
+Player / Server
+----------------------------------------
+Uses stdin(>)/stdout(<) or sockets. Commands are separated with \n, \r or \n\r
+In pattern: <command> <arg> where <arg> is a json-like string, for example:
+    <prop1>:<value1>, <prop2>:<value2>
+        where propX/valueX are wrapped with quotes (")
+    <val1>,<val2>,<val3>
+        where vals are wrapped with quotes (")
+Out pattern: the same, but <arg> is a string
+
+> ready
+< wait
+< start "players":"<playersCount>","map":"<mapName>","rows":"<rows>","cols":"<cols>","you":"<yourId>"
+< landscape "#1.2","#12.",...
+< state turn:1
+< obj id:1,x:2,y:3,owner:1,type:Dog
+< obj x:2,y:4,type:Sheep,voice:Baa
+< obj x:10,y:15,type:Unknown,voice:Barking
+< turn
+> do 1 move up
+> do 2 move down
+> end
 ...
-<--- warning <warning>
-<--- finished <result>
-
-<username> = String
-<initial state> = {
-    you: <playerId>
-    width: <width>,
-    height: <height>,
-    landscape: [
-        "#.12",
-        "...."
-    ]
-}
-
-landscape elements:
- # - wall, non-traversable
- . - grass, traversable
- 1 - site of player 1
- 2 - site of player 2, etc.
-
-<game state> = {
-    turn: <turnNr>,
-    objects: [
-        {id: <id>, type: <type>, x: <x>, y: <y>, movedFromX: <x>, movedFromY: <y>, state: <stateString>},
-        ...
-    ]
-}
-
-<stateString> = "[barking][scary][silent][baa]"
-<type> = String or undefined (for cases when player do not see this object, just hear)
-
-<actions> = [
-    {id: <id>, action: <action>}
-]
-<action> = "[move up|down|left|right][bark]"
-<warning> = String
-<result> = {
-    winner: <playerName>,
-    you: <isYouWinner>,
-    stopReason: <stopReason>
-}
+< finished winner:<id>
 
 
 Viewer/Server
+--------------------------
 <--- list [<game>, <game>, ...]
 ---> list
 <--- list [<game>, <game>, ...]
@@ -78,3 +55,5 @@ Viewer/Server
         ...
     ]
 }
+
+
