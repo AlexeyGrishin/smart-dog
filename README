@@ -87,6 +87,14 @@ Game:
 
 Player:
 
+  No specific comments
+
+Game,GameObject,Player:
+
+  Have method 'toState' which returns the object's snapshot. This snapshot is generated once after each turn (still not true for GameObject)
+  and it is what is returned to clients classes (like SocketController and SocketView). Client classes may reduce state or somehow reformat it before
+  passing further, but they shall not call to the real object methods because they may have inconsistent state.
+  Summary: toState shall return latest stable state which corresponds to the beginning of current Turn, and shall do it as quick as possible
 
 GameObjectsFactory:
 
