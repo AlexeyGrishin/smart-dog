@@ -1,3 +1,7 @@
+/**
+ * Helper class which is used for both views and replays
+ * @type {Object}
+ */
 var ReplayFormat = {
 
   getFirstState: function(state) {

@@ -15,6 +15,10 @@ HttpServer.prototype.init = function(resources) {
     app.set('view engine', 'ejs');
     //app.use(expressLayouts);
     app.use(express.static(resources));
+    app.use(function(err, req, res, next) {
+      console.error(err);
+      next(err, req, res, next);
+    });
 
   });
   app.get('/', function(req, res){

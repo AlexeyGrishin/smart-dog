@@ -1,25 +1,78 @@
 .player1 {
     color: red;
     background-color: #ffd4cd;
+    background-image: url(20px-Husky-icon.png);
+    background-repeat: no-repeat;
+}
+
+.info .player1 {
+    background-image: url(100px-Husky-icon.png)
+}
+
+.info div {
+    display: inline-block;
+    height: 100px;
+    width: 100px;
+    position: relative;
+    margin: 10px;
+    box-shadow: #003580 0px 0px 2px;
+    margin-bottom: 0;
+}
+
+.info span {
+    position: absolute;
+    left: 0;
+    bottom: 0px;
+    right: 0;
+    height: 20px;
+    background-color: white;
+    opacity: 0.9;
+}
+
+.info em {
+    position: absolute;
+    right: 4px;
+    bottom: 0;
+    height: 20px;
+    font-weight: bold;
+
+}
+
+.info {
+    display: inline-block;
+    padding-bottom: 0;
+}
+
+.alert {
+    display: inline-block;
 }
 
 .player2 {
     color: green;
     background-color: #c8ecbf;
+    background-image: url(20px-Dutch_Shepherd-icon.png);
+    background-repeat: no-repeat;
+}
+
+.info .player2 {
+    background-image: url(100px-Dutch_Shepherd-icon.png)
 }
 
 .player3 {
     color: blue;
     background-color: #cfccff;
+    background-image: url(20px-Golden_Retriever-icon.png)
 }
 
 .player4 {
     color: purple;
     background-color: #f6c3f9;
+    background-image: url(20px-Welsh_Terrier-icon.png)
 }
 
 .grass {
     background-color: #94d723;
+    background-image: url(./grass.png);
 }
 
 .wall {
@@ -32,4 +85,9 @@
 
 .sheep {
     background-color: #ffffff;
+    background-image: url(./20px-Sheep-icon.png);
+}
+
+.sheep.scary {
+    background-image: url(./20px-Brown_Sheep-icon.png)
 }

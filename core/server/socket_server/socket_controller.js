@@ -2,6 +2,13 @@ var SocketJson = require('./socket_json.js')
   , readline = require('readline');
 
 
+/**
+ * Controller for smart dog player interface which works via sockets.
+ * WARNING: this class uses 'plain' sockets, not the socket.io sockets. The client shall work with plain sockets, not the WebSockets
+ * @param socket plain socket
+ * @param gameServer game server
+ * @constructor
+ */
 var SocketController = function(socket, gameServer) {
   this.socket = socket;
   this.rl = readline.createInterface({
@@ -27,8 +34,8 @@ SocketController.prototype = {
   },
 
   /* protocol commands */
-  join: function(name) {
-    this.gameServer.connect(/*todo*/-1, name, this);
+  "join": function(name) {
+    this.gameServer.connect(name, this);
   },
 
   unknown: function(cmd, arg) {

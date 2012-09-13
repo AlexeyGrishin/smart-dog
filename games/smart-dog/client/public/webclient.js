@@ -32,22 +32,6 @@ var GameView = {
     $("#game").on("render", $.proxy(this.postRender, this));
   },
 
-
-  reduceLandscape: function(landscape, objects) {
-    var newLandscape = [];
-    newLandscape.xy = {};
-    for (var i = 0; i < objects.length; i++) {
-      if (objects[i].movedFromX != undefined) {
-        var x = objects[i].movedFromX;
-        var y = objects[i].movedFromY;
-        var le = landscape.xy[x + '_' + y];
-        newLandscape.push(le);
-        newLandscape.xy[x + '_' + y] = le;
-      }
-    }
-    return newLandscape;
-  },
-
   update: function(update) {
     if (update.landscape && update.landscape.length > 0 && !this.landscape) {
       this.landscape = parseMap(update.landscape);
@@ -58,7 +42,7 @@ var GameView = {
     }
     if (!this.playersShown) {
       $(".players").html(
-        update.players.map(function(p) {return "<span class='player" + p.id + "'>" + p.name + "</span> - " + p.score}).join("<br>")
+        update.players.map(function(p) {return "<div class='player" + p.id + "'><span>" + p.name + "</span><em>" + p.score + "</em></div>"}).join("")
       );
       this.playersShown = true;
     }
@@ -100,7 +84,6 @@ var GameView = {
       state.landscape = landscape;
     }
     else {
-      state.landscape = this.reduceLandscape(landscape, state.objects);
       state.partial = true;
     }
   }

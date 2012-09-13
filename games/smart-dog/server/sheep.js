@@ -9,13 +9,13 @@ function Sheep(game, properties) {
 
 util.inherits(Sheep, GameObject);
 
-Sheep.prototype.genState = function(p) {
-  var state = GameObject.prototype.genState.call(this, p);
+Sheep.prototype._genState = function(p) {
+  var state = GameObject.prototype._genState.call(this, p);
   state.scary = p.fearSources.length > 0;
   return state;
 };
 
-Sheep.prototype.extend = function(p) {
+Sheep.prototype._extend = function(p) {
   p.fearSources = [];
   p.standBy = Math.ceil(Math.random()*4);
   p.game.on(Dog.Event.Barked, function(dog) {
@@ -26,14 +26,14 @@ Sheep.prototype.extend = function(p) {
   })
 };
 
-Sheep.prototype.beforeTurn = function(p) {
+Sheep.prototype._beforeTurn = function(p) {
   p.fearSources = p.fearSources.filter(function(fs) {
     return --fs.turns>0;
   });
   if (p.standBy > 0) p.standBy--;
 };
 
-Sheep.prototype.afterTurn = function(p) {
+Sheep.prototype._afterTurn = function(p) {
   //detect where to go next
   if (p.standBy > 0) return;  //just stay on the grass
   if (p.fearSources.length > 0) {

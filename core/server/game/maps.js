@@ -1,6 +1,13 @@
 var fs = require('fs')
   , Map2D = require('./map2d.js');
 
+/**
+ * Maps collection
+ * TODO: make configurable - players counts, map directory, map files - shall be able to say 'use only map4.txt with 4 players' via config - that would be useful for debug
+ * @param mapDir
+ * @param mapFactory
+ * @constructor
+ */
 var Maps = function(mapDir, mapFactory) {
   this.maps = [];
   this.mapFactory = mapFactory;

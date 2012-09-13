@@ -37,7 +37,7 @@ public class AI implements CommandReactor {
         }
         this.turn++;
         Direction moveTo = Direction.values()[(int)(Math.random()*Direction.values().length)];
-        if (this.turn % 10 == 0) {
+        if ((this.turn % this.me) == 0) {
             turn.move(getMyDog(info), moveTo);
             turn.bark(getMyDog(info));
         }

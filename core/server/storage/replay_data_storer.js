@@ -3,6 +3,11 @@ var Game = require('../game/game.js')
   , util = require('util')
   , ReplayFormat = require('./replay_format.js');
 
+/**
+ * Automatically stores the game turns into the file
+ * @param game
+ * @constructor
+ */
 var ReplayData = function(game) {
   EventEmitter.call(this);
   this.game = ReplayFormat.getGameInfo(game);

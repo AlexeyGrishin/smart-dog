@@ -5,14 +5,23 @@ function sign(num) {
   return 0;
 }
 
+/**
+ * Represents 2d rectangle map with 1 or several layers where game objects may be contained.
+ * Provides helpers for finding objects and calculating reltions between them.
+ *
+ * TODO: I'd like to introduce jQuery-like api: Map(game).at(4,3).around(4).list("landscape").emit("boo);
+ * @param layers
+ * @constructor
+ */
 var Map2D = function(layers) {
-  this.objects = {};
-  this.map = [];
-  this.layers = layers || ["landscape", "object"];
-  this.__defineGetter__('cols', function() {return this.width});
-  this.__defineGetter__('rows', function() {return this.height});
-  this.__defineGetter__('allObjects', function() {return this.objects["all"]});
-  this.layers.forEach(function(l) {
+  this._ = {}
+  this._.objects = {};
+  this._.map = [];
+  this._.layers = layers || ["landscape", "object"];
+  this.__defineGetter__('cols', function() {return this._.width});
+  this.__defineGetter__('rows', function() {return this._.height});
+  this.__defineGetter__('allObjects', function() {return this._.objects["all"]});
+  this._.layers.forEach(function(l) {
     var layoutName = l.substring(0,1).toUpperCase() + l.substring(1);
     this["get" + layoutName] = function(x, y) {
       return this.get(l, x, y);
@@ -34,25 +43,26 @@ const ALL = "all";
 
 Map2D.prototype = {
   setSize: function(height, width) {
-    this.map = new Array(height);
+    this._.map = new Array(height);
     for (var i = 0; i < height; i++) {
-      this.map[i] = new Array(width);
+      this._.map[i] = new Array(width);
     }
-    this.width = width;
-    this.height = height;
+    this._.width = width;
+    this._.height = height;
   },
 
   add: function(layer, object, x, y) {
-    var obj = this.map[y][x] || {};
+    var _ = this._;
+    var obj = _.map[y][x] || {};
     if (obj[layer] !== undefined) throw new Error('There is already object on layer "' + layer + '" x=' + x + ', y=' + y);
     obj[layer] = object;
-    this.map[y][x] = obj;
-    if (!this.objects[layer])
-      this.objects[layer] = [];
-    if (!this.objects[ALL])
-      this.objects[ALL] = [];
-    this.objects[layer].push(object);
-    this.objects[ALL].push(object);
+    _.map[y][x] = obj;
+    if (!_.objects[layer])
+      _.objects[layer] = [];
+    if (!_.objects[ALL])
+      _.objects[ALL] = [];
+    _.objects[layer].push(object);
+    _.objects[ALL].push(object);
     object.locate(x, y);
     //TODO: special landscape map - for quick access
   },
@@ -66,24 +76,24 @@ Map2D.prototype = {
       y = obj.y;
     }
     else {
-      obj = this.map[y][x][layer];
+      obj = this._.map[y][x][layer];
     }
     if (obj != undefined) {
-      delete this.map[y][x][layer];
-      this.objects[layer].splice(this.objects[layer].indexOf(obj), 1);
-      this.objects[ALL].splice(this.objects[ALL].indexOf(obj), 1);
+      delete this._.map[y][x][layer];
+      this._.objects[layer].splice(this._.objects[layer].indexOf(obj), 1);
+      this._.objects[ALL].splice(this._.objects[ALL].indexOf(obj), 1);
       return obj;
     }
     return undefined;
   },
 
   get: function(layer, x, y) {
-    return this.map[this.y(y)][this.x(x)][layer];
+    return this._.map[this.y(y)][this.x(x)][layer];
   },
 
   getAll: function(layer) {
     if (!layer) layer = ALL;
-    return this.objects[layer];
+    return this._.objects[layer];
   },
 
 
@@ -139,7 +149,7 @@ Map2D.prototype = {
     var dx = x2 - x1;
     var dx2 = x2 > x1 ? -(x1 + this.cols - x2) : x2 + this.cols - x1;
     var dy = y2 - y1;
-    var dy2 = y2 > y1 ? -(y1 + this.cols - y2) : y2 + this.cols - y1;
+    var dy2 = y2 > y1 ? -(y1 + this.rows - y2) : y2 + this.rows - y1;
     dx = Math.abs(dx) < Math.abs(dx2) ? dx : dx2;
     dy = Math.abs(dy) < Math.abs(dy2) ? dy : dy2;
     return {dx: dx, dy: dy};
@@ -152,7 +162,7 @@ Map2D.prototype = {
     for (var dx = -radius; dx <= radius; dx++) {
       for (var dy = -radius; dy <= radius; dy++) {
         if (this.distance2(x, y, this.x(x+dx), this.y(y+dy)) <= radius2) {
-          var layers = this.map[this.y(y+dy)][this.x(x+dx)];
+          var layers = this._.map[this.y(y+dy)][this.x(x+dx)];
           if (layers[layer])
             objects.push(layers[layer]);
         }
@@ -168,7 +178,7 @@ Map2D.prototype = {
         layer = ALL;
       }
     }
-    var os = this.objects[layer];
+    var os = this._.objects[layer];
     if (filter) os = os.filter(filter);
     return os;
   }

@@ -11,14 +11,14 @@ Dog.Event = {
 
 util.inherits(Dog, GameObject);
 
-Dog.prototype.genState = function(p) {
-  var state = GameObject.prototype.genState.call(this, p);
+Dog.prototype._genState = function(p) {
+  var state = GameObject.prototype._genState.call(this, p);
   state.id = p.id;
   if (p.barking) state.voice = "barking";
   return state;
 };
 
-Dog.prototype.extend = function(p) {
+Dog.prototype._extend = function(p) {
   p.barking = false;
   p.justBarked = false;
   this.__defineGetter__('isBarking', function() {return p.barking;});
@@ -29,7 +29,7 @@ Dog.prototype.extend = function(p) {
   }
 };
 
-Dog.prototype.afterTurn = function(p) {
+Dog.prototype._afterTurn = function(p) {
   p.barking = p.justBarked;
   p.justBarked = false;
 };

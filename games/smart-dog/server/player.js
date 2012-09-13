@@ -9,7 +9,7 @@ var PlayerInterface = function(game, ownerId, info, options) {
   this.id = ownerId;
   this.info = info;
   this.name = info.name;
-  this.game.on(Game.Event.BeforeTurn, this.beforeTurn.bind(this));
+  this.game.on(Game.Event.AfterTurn, this.generateState.bind(this));
 };
 
 var PlayerController = {
@@ -20,7 +20,7 @@ var PlayerController = {
 
 PlayerInterface.prototype = {
   init: function() {
-    this.map = this.game.getMap();  //TODO: use setters/getters instead
+    this.map = this.game.getMap();
     //TODO: constants for layers
     this.dogs = this.map.getObjectsBy("object", function(o) {return o instanceof Dog && o.owner.id == this.id}.bind(this));
     this.site = this.map.getObjectsBy("landscape", function(o) {return o.type == "Site" && o.owner.id == this.id}.bind(this));
@@ -28,7 +28,7 @@ PlayerInterface.prototype = {
     for (var i = 0; i < this.dogs.length; i++) {
       this.dogById[this.dogs[i].id] = this.dogs[i];
     }
-    this.savedState = this.genState();
+    this.savedState = this._genState();
     this.controller.init(this);
   },
 
@@ -52,7 +52,7 @@ PlayerInterface.prototype = {
     return score;
   },
 
-  genState: function() {
+  _genState: function() {
     var visibleArea = [];
     var see = {};
     function toState(d) {
@@ -139,12 +139,12 @@ PlayerInterface.prototype = {
     this.controller = controller;
   },
 
-  beforeTurn: function() {
-    this.savedState = this.genState();
+  generateState: function() {
+    this.savedState = this._genState();
   },
 
   makeTurn: function() {
-    this.turn = this.game.turn;
+    this.turn = this.game.getTurn();
     this.moved = false;
     this.dogs.forEach(function(d) {
       d.moved = false;

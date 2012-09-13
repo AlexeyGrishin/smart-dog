@@ -1,5 +1,21 @@
 var id = 1;
 
+/**
+ * Represents game object with base properties/functionality - coordinates, type, etc.
+ * Note that it has private object which cannot be accessed outside
+ *
+ * TODO: in the future it seems to be useful to have modules that may be attached to GameObject, i.e.
+ *
+ * function Bullet() {
+ * }
+ * util.extend(Bullet, GameObject);
+ * Bullet.make(Moveable); //adds 'move' method
+ * Bullet.make(Solid);    //adds size and collisions
+ *
+ * @param game
+ * @param properties
+ * @constructor
+ */
 function GameObject(game, properties) {
   var p = {
     game: game,
@@ -31,7 +47,7 @@ function GameObject(game, properties) {
     p.y = y;
   };
   this.toState = function() {
-    return this.genState(p);
+    return this._genState(p);
   };
   this.move = function(dx, dy, cb) {
     dx = parseInt(dx);
@@ -53,10 +69,8 @@ function GameObject(game, properties) {
     cb();
   };
   this.__defineGetter__('type', function() { return this.constructor.name});
-  this.extend(p);
-  var Game = require('./game.js');
-  game.on(Game.Event.BeforeTurn, this.beforeTurn.bind(this, p));
-  game.on(Game.Event.AfterTurn, this.afterTurn.bind(this, p));
+  this._extend(p);
+  this._subscribe(p);
 }
 
 GameObject.Event = {
@@ -68,7 +82,16 @@ GameObject.prototype = {
     //do nothing
   },
 
-  genState: function(p) {
+  _subscribe: function(p) {
+    var Game = require('./game.js');
+    p.game.on(Game.Event.BeforeTurn, function() {
+      p.oldPosition = undefined;
+      this._beforeTurn(p);
+    }.bind(this));
+    p.game.on(Game.Event.AfterTurn, this._afterTurn.bind(this, p));
+  },
+
+  _genState: function(p) {
     var state = {
       owner:p.owner ? p.owner.getId() : undefined,
       type: this.type,
@@ -83,15 +106,15 @@ GameObject.prototype = {
     return state;
   },
 
-  extend: function(p) {
+  _extend: function(p) {
     //do nothing, extend it in subclasses
   },
 
-  beforeTurn: function(p) {
-    p.oldPosition = undefined;
+  _beforeTurn: function(p) {
+
   },
 
-  afterTurn: function(p) {
+  _afterTurn: function(p) {
 
   }
 };

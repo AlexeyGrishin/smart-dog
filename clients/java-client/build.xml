@@ -1,0 +1,20 @@
+<project name="AIBot" default="jar">
+    
+    <target name="compile">
+        <delete dir="out"/>
+        <mkdir dir="out"/>
+        <javac srcdir="src" destdir="out"/>
+    </target>
+    
+    <target name="jar" depends="compile">
+        <manifest file="out/MANIFEST.MF">
+            <attribute name="Main-Class"
+                       value="Main" />
+        </manifest>
+
+        <jar destfile="client.jar" manifest="out/MANIFEST.MF">
+            <fileset dir="out"/>
+        </jar>
+    </target>
+    
+</project>

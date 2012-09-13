@@ -3,28 +3,26 @@ Currently it is under construction, there is only some prototype that shall be i
 
 How to see it at work:
 
-1. Run server
-nodejs ./games/smart-dog/server/smart_dog_server.js &
+1. Run server (require NodeJS >= 0.8.9)
+node ./games/smart-dog/server/smart_dog_server.js &
 
 2. Open site http://localhost:3000
 
-3. Run 2 or more clients:
-nodejs ./games/smart-dog/client/cmdclient.js &
+3. Run 2 or more clients (require JRE7):
+./clients/java-client/player1.bat &
+./clients/java-client/player2.bat &
 
 4. Observe game on site
 
 
 TODO:
-0. Define the code style, i.e.:
-    - how to distinguish private/public
-    - get/set methods vs getters/setters
-    - public fields (i'd like to do not access fields directly outside the class)
++0. Guidelines
 1. Game logic (see GameFactory, Player, Dog, etc.)
-2. Persistance (save to DB, see MemoryStorage class)
-3. Entry point for bots (command-line client, etc)
+2. Persistence (save to DB, see MemoryStorage class)
++3. Entry point for bots (command-line client, etc)
 4. Development tools (turns replays, etc)
 5. Offline replay (ReplayDataStorer shall put html page near json)
-6. Rendering ('barking' and other sounds, animated moval, probably sprites)
+*6. Rendering ('barking' and other sounds, animated moval, probably sprites)
 7. Website
    - player page - list of games, winning count, replay/realtime view of latest/current game
      shall be updated in runtime!
@@ -38,3 +36,71 @@ TODO:
    - tournament: user specifies players, maps, and then server schedules games to be played and awaits required players 
 9. Improve data format to minimize size of turns/replays/data transferred (base64 or something other binary)?
 10. Unit tests!
+11. TODOs, comments, make code clean
+12. Memory leaks - currently server allocates a lot of memory. Probably listeners, or non-closed connections
+
+------------------------------------------------
+Code guidelines
+
+Common:
+ - indent is 2 spaces
+ - brace on the same line with if, function, while, etc.
+ - start private methods with _
+ - do NOT access private directly members (i.e. something like { return object.id })
+    exception: struct-like objects
+ - introduce getters/setters for accessing (__defineGetter__/__defineSetter__) or get/set methods
+    - when to use get/set methods? when they may be overriden (virtual)
+    - when to use getters/setters? when they shall not be overriden (final)
+
+ ? probably store private members in a separate field? like this:
+    function Object() {
+        this._ = {};
+        this._.name = "";
+        this.__defineGetter('name', function() {return this._.name});
+    }
+    will try for some cases
+
+ ! so search '._' shall show only 'this._' strings
+
+ - use .bind instead of 'that' variables
+
+ - introduce Event sub-object to store event constants, like this:
+
+    function Object() {}
+
+    Object.Event = {
+        CHANGED: "object.changed",
+        DELETED: "object.deleted"
+    }
+
+
+
+GameObject:
+  Some special case. Has "private" object p which is not a field of GameObject, so it shall be transfered
+  to any method if it requires some private fields.
+
+  Override 'extends' method in subclasses to add new properties/methods.
+
+Game:
+
+  All events between players or game objects are go through the Game object.
+
+Player:
+
+
+GameObjectsFactory:
+
+  A heart of the specific game. Contains references to all game-specific objects and logic.
+  Any game-specific logic shall be implemented here or in the corresopnding game objects
+
+SocketController:
+
+  Has single entry-point for client (#receive), parses the command and calls its own method with command name.
+  Shall use plain sockets for simplification
+
+SocketView:
+
+  Has single entry-point for client (#receive), parses the command and calls its own method with command name.
+  Shall use socket.io sockets for HTML client which uses websockets.
+  Shall use ReplayFormat helper to prepare view, so the same renderer may be used for online and replay
+

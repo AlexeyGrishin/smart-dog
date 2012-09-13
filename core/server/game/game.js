@@ -2,15 +2,33 @@ var GameObject = require("./game_object.js")
   , events = require("events")
   , util = require("util");
 
-
+/**
+ * Represents single game session. Holds anything related - players, map, etc.
+ * Also controls the game events - when to start turn, when to finish, etc.
+ *
+ * Currently implements turn-based game.
+ *
+ * Also all game events go though this object. Other obejcts (like game objects) shall subscribe on events for game
+ * and shall trigger events for the game.
+ *
+ * All game-specific logic shall be encapsulated in logic, players and specific game objects.
+ * TODO: I'd like to delete logic at all and subscribe on events.
+ *
+ * @param logic
+ * @param playerFactory
+ * @param options
+ * @constructor
+ */
 var Game = function(logic, playerFactory, options) {
-  this.o = options;
-  this.logic = logic;
-  this.playerFactory = playerFactory;
+  events.EventEmitter.call(this);
+  this._ = {};
+  this._.o = options;
+  this._.logic = logic;
+  this._.playerFactory = playerFactory;
   this.on(GameObject.Event.Move, function(object, oldX, oldY) {
-    this.map.objectMoved(object, oldX, oldY);
-  });
-  this.players = [];
+    this._.map.objectMoved(object, oldX, oldY);
+  }.bind(this));
+  this._.players = [];
   this.setMaxListeners(9999);
 };
 
@@ -24,23 +42,24 @@ Game.Event = {
   PlayerMissedTurn: 'player.missed'
 };
 
-Game.prototype.__proto__ = events.EventEmitter.prototype;
+util.inherits(Game, events.EventEmitter);
 
 
 var GameMethods = {
   start: function() {
-    this.turn = 0;
+    var _ = this._;
+    _.turn = 0;
     //TODO: send events instead of 'logic' calls
     //TODO: order is important. logic.init initializes cached landscape, getState puts it into savedState, and player.init uses it
-    this.logic.init(this);
-    this.savedState = this.genState();
-    this.brief = this.genBrief();
-    this.players.forEach(function(p) {p.init();});
-    this.on(Game.Event.PlayerTurn, this.catchError(this.onPlayerTurn.bind(this)));
-    setTimeout(this.catchError(this.doTurn.bind(this)), 0);
+    _.logic.init(this);
+    _.savedState = this._genState();
+    _.brief = this._genBrief();
+    _.players.forEach(function(p) {p.init();});
+    this.on(Game.Event.PlayerTurn, this._catchError(this._onPlayerTurn.bind(this)));
+    setTimeout(this._catchError(this._doTurn.bind(this)), 0);
   },
 
-  catchError: function(f) {
+  _catchError: function(f) {
     return function() {
       try {
         f.apply(this, arguments);
@@ -49,9 +68,9 @@ var GameMethods = {
         console.trace();
         console.error("Unexpected error: " + e);
         console.error(e.stack);
-        this.logic.stopGame("Unexpected error: " + e);
+        this._.logic.stopGame("Unexpected error: " + e);
         try {
-          this.checkGameFinished();
+          this._checkGameFinished();
         }
         catch (e) {
           console.error("Cannot execute checkGameFinished " - e);
@@ -62,147 +81,144 @@ var GameMethods = {
     }.bind(this);
   },
 
-  onPlayerTurn: function(p, turnMade, error) {
-    if (!error && turnMade == this.turn) {
-      this.turnMade++;
-      if (this.turnMade == this.players.length) {
-        this.endTurn();
+  _onPlayerTurn: function(p, turnMade, error) {
+    if (!error && turnMade == this._.turn) {
+      this._.turnMade++;
+      if (this._.turnMade == this._.players.length) {
+        this._endTurn();
       }
     }
     else {
-      this.endTurn(true, error || Game.Event.PlayerMissedTurn, p);
+      this._endTurn(true, error || Game.Event.PlayerMissedTurn, p);
     }
   },
 
-  doTurn: function() {
-    this.turnMade = 0;
-    //TODO: probably we need more events, the valid sequence shall be the following:
-    //1. generate player state (now is BeforeTurn)
-    // 1.2 - reset state of game-object? i.e. clear 'barking' flag, etc. - before the next move
-    // 1.3 send to players (now in makeTurn)
-    //2. receive turns (change GameObjects state)
-    //3. do internal logic (change GameObjects state)
-    //4. generate game-object states
-    //5. calculate score, generate player state?
-    //6. generate game state
-    //7. render
-    this.emit(Game.Event.BeforeTurn, this.savedState);
-    this.logic.beforeTurn(this.turn);
-    this.players.forEach(function(p) {
-      p.makeTurn(this.turn);
+  _doTurn: function() {
+    var _ = this._;
+    _.turnMade = 0;
+    this.emit(Game.Event.BeforeTurn, _.savedState);
+    _.logic.beforeTurn(_.turn);
+    _.players.forEach(function(p) {
+      p.makeTurn(_.turn);
     }.bind(this));
-    this.turnTimeout = setTimeout(this.catchError(function() {
+    this._.turnTimeout = setTimeout(this._catchError(function() {
       var player = undefined;
-      for (var i = 0; i < this.players.length; i++) {
-        if (!this.players[i].moved) {
-          player = this.players[i];
+      for (var i = 0; i < _.players.length; i++) {
+        if (!_.players[i].isMoved()) {
+          player = _.players[i];
           break;
         }
       }
-      this.endTurn(true, Game.Event.PlayerGone, player);
+      this._endTurn(true, Game.Event.PlayerGone, player);
     }.bind(this)
-    ), this.o.waitForTurn);
+    ), _.o.waitForTurn);
   },
 
-  endTurn: function(stop, stopReason, playerCausedStop) {
-    clearTimeout(this.turnTimeout);
-    this.logic.afterTurn(this.turn);
+  _endTurn: function(stop, stopReason, playerCausedStop) {
+    var _ = this._;
+    clearTimeout(this._.turnTimeout);
+    _.logic.afterTurn(_.turn);
     this.emit(Game.Event.AfterTurn);
-    this.turn++;
-    this.savedState = this.genState();
-    this.brief = this.genBrief();
-    this.emit(Game.Event.Turn, this.savedState);
-    if (!stop) setTimeout(this.catchError(this.doTurn.bind(this)), 0);
-    if (this.logic.getGameResult().finished || stop) {
-      this.logic.stopGame(stopReason, playerCausedStop);
+    _.turn++;
+    _.savedState = this._genState();
+    _.brief = this._genBrief();
+    this.emit(Game.Event.Turn, _.savedState);
+    if (!stop) setTimeout(this._catchError(this._doTurn.bind(this)), 0);
+    if (_.logic.getGameResult().finished || stop) {
+      _.logic.stopGame(stopReason, playerCausedStop);
     }
-    this.checkGameFinished();
+    this._checkGameFinished();
 
   },
 
-  checkGameFinished: function() {
-    var gameResult = this.logic.getGameResult();
+  _checkGameFinished: function() {
+    var _ = this._;
+    var gameResult = _.logic.getGameResult();
     if (gameResult.finished) {
-      this.gameResult = gameResult;
-      this.players.forEach(function(p) {
+      _.gameResult = gameResult;
+      _.players.forEach(function(p) {
         p.finished(gameResult);
       });
-      this.brief = this.genBrief();
-      this.savedState = this.genState();
+      _.brief = this._genBrief();
+      _.savedState = this._genState();
       this.emit(Game.Event.Stop, gameResult);
     }
   },
 
   isFinished: function() {
-    return this.gameResult !== undefined;
+    return this._.gameResult !== undefined;
   },
 
   getGameResult: function() {
-    return this.gameResult;
+    return this._.gameResult;
   },
 
   setPlayers: function(players) {
-    this.players = [];
+    this._.players = [];
     var index = 1;
     players.forEach(function(p) {
-      var pi = this.playerFactory.createPlayer(this, {name:p.name}, index++);
+      var pi = this._.playerFactory.createPlayer(this, {name:p.name}, index++);
       p.pi = pi;
       p.io.setPlayerInterface(pi);
-      this.players.push(pi);
+      this._.players.push(pi);
     }.bind(this))
   },
 
   setMap: function(name, map) {
-    this.map = map;
-    this.mapName = name;
+    this._.map = map;
+    this._.mapName = name;
   },
 
   getMap: function() {
-    return this.map;
+    return this._.map;
   },
 
   getMapName: function() {
-    return this.mapName;
+    return this._.mapName;
   },
 
   setId: function(id) {
-    this.id = id;
+    this._.id = id;
   },
 
   getId: function() {
-    return this.id
+    return this._.id
   },
 
   getPlayers: function() {
-    return this.players;
+    return this._.players;
   },
 
   getBriefStatus: function() {
-    return this.brief;
+    return this._.brief;
   },
 
-  genBrief: function() {
-    var brief = {map: this.mapName, width: this.map.cols, height: this.map.rows, turn: this.turn};
+  _genBrief: function() {
+    var brief = {map: this._.mapName, width: this._.map.cols, height: this._.map.rows, turn: this._.turn};
     if (this.isFinished()) {
       brief.finished = true;
-      brief.winner = this.gameResult.winner ? {id: this.gameResult.winner.id, name: this.gameResult.winner.name} : undefined;
-      brief.reason = this.gameResult.reason;
+      brief.winner = this._.gameResult.winner ? {id: this._.gameResult.winner.id, name: this._.gameResult.winner.name} : undefined;
+      brief.reason = this._.gameResult.reason;
     }
-    return this.logic.getBriefStatus(brief);
+    return this._.logic.getBriefStatus(brief);
   },
 
-  genState: function() {
-    var state = this.genBrief();
-    state.players = this.players.map(function(p) {return {id:p.getId(), name:p.getName(), score:p.calculateScore()}});
+  _genState: function() {
+    var state = this._genBrief();
+    state.players = this._.players.map(function(p) {return {id:p.getId(), name:p.getName(), score:p.calculateScore()}});
     //TODO: optimize - cache landscape
-    state.objects = this.map.allObjects.map(function(o) {
+    state.objects = this._.map.allObjects.map(function(o) {
       return o.toState();
     });
-    return this.logic.genState(state);
+    return this._.logic._genState(state);
   },
 
   toState: function() {
-    return this.savedState;
+    return this._.savedState;
+  },
+
+  getTurn: function() {
+    return this._.turn;
   }
 
 };

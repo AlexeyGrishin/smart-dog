@@ -1,5 +1,14 @@
 var ReplayDataStorer = require('../storage/replay_data_storer.js');
 
+
+/**
+ * Represents server which manages games - accepts players, starts games, provides information about them
+ * @param storage game storage
+ * @param maps available maps collection
+ * @param gameFactory factory which produces all game-specific stuff
+ * @param options options
+ * @constructor
+ */
 var GameServer = function(storage, maps, gameFactory, options) {
   this.storage = storage;
   this.waiting = [];
@@ -18,30 +27,35 @@ var IoInterface = {
   finished: function(winner, result) {}
 };
 
+
 GameServer.prototype = {
 
-
-  connect: function(playerId, playerName, ioInterface) {
+  /**
+   * Adds player to the waiting list. The game will be started as soon as possible - usually waits for other players.
+   *
+   * @param playerName
+   * @param ioInterface
+   */
+  connect: function(playerName, ioInterface) {
     var playerInfo = {
-      id: playerId,
       name: playerName,
       io: ioInterface
     };
     this.waiting.push(playerInfo);
     if (this.waiting.length == this.maps.maxPlayersCount()) {
-      this.startGame();
+      this._startGame();
     }
     else {
       if (this.waiting.length >= this.maps.minPlayersCount()) {
         this.waitForAnotherPlayer = setTimeout(function() {
-          this.startGame();
+          this._startGame();
         }.bind(this), this.options.waitForPlayer);
       }
       playerInfo.io.sendWait(this.waiting.length);
     }
   },
 
-  startGame: function() {
+  _startGame: function() {
     //guard
     if (this.waiting.length < this.maps.minPlayersCount()) return;
     clearTimeout(this.waitForAnotherPlayer);
@@ -60,6 +74,13 @@ GameServer.prototype = {
 
   },
 
+  /**
+   * adds listener for the game
+   * @param id game id
+   * @param callback callback that will be called on each game update. Will be guarantely called at least once even the game is finished
+   *  Note: usually first call will contain the whole info and the further calls will contain only 'delta'
+   * @return {Object}
+   */
   listen: function(id, callback) {
     var callbacks = {
     };
@@ -84,6 +105,11 @@ GameServer.prototype = {
     return callbacks;
   },
 
+  /**
+   * Removes listener of the game
+   * @param id game id
+   * @param callbacks an object returned by #listen method
+   */
   unlisten: function(id, callbacks) {
     if (!callbacks || !callbacks.onTurn) return;
     this.storage.getGameInfo(id, function(error, game) {
@@ -94,6 +120,11 @@ GameServer.prototype = {
     });
   },
 
+  /**
+   * Gets the list of the games asynchronously
+   * @param onlyActive
+   * @param cb will be called with brief info array (id, players[], brief{}, finished}
+   */
   listGames: function(onlyActive, cb) {
     this.storage[onlyActive ? 'listActiveGames' : 'listGames'](function(error, games) {
       if (error) return cb(error);

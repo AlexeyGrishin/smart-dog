@@ -7,27 +7,30 @@ var GameObject = require('../../../core/server/game/game_object.js')
 
 function Wall() {
   GameObject.apply(this, arguments);
-  this.traversable = false;
+  this.__defineGetter__('traversable', function() {return false});
 }
 
 function Tree() {
   GameObject.apply(this, arguments);
-  this.traversable = false;
+  this.__defineGetter__('traversable', function() {return false});
 }
 function Grass() {
   GameObject.apply(this, arguments);
-  this.traversable = true;
+  this.__defineGetter__('traversable', function() {return true});
 }
 function Site() {
   GameObject.apply(this, arguments);
-  this.traversable = true;
+  this.__defineGetter__('traversable', function() {return true});
 }
 
-util.inherits(Site, GameObject);
-util.inherits(Grass, GameObject);
-util.inherits(Tree, GameObject);
-util.inherits(Wall, GameObject);
+function makeLandscape(clss) {
+  clss.forEach(function(cls) {
+    util.inherits(cls, GameObject);
+    cls.prototype._subscribe = function() {}
+  });
+}
 
+makeLandscape([Site, Wall, Tree, Grass]);
 
 var Fillers = {
   1: [
@@ -223,7 +226,7 @@ Logic.prototype = {
     return brief;
   },
 
-  genState: function(state) {
+  _genState: function(state) {
     state.landscape = this.landscape;
     return state;
   },

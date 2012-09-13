@@ -4,16 +4,18 @@
     <script src="jquery-1.8.0.min.js"></script>
     <script src="bootstrap.js"></script>
     <script src="socket.io.min.js"></script>
+    <script src="raphael-min.js"></script>
     <script src="renderer.js"></script>
     <script src="webclient.js"></script>
     <link href="bootstrap.css" rel="stylesheet"/>
     <link href="games.css" rel="stylesheet"/>
 </head>
-<body data-id="<%= game.id %>">
-<h1>Game <%= game.id %></h1>
-<p class="players"></p>
+<body data-id="<%= game.getId() %>">
+<h1>Game <%= game.getId() %></h1>
 <p>Turn # <span id="turn">0</span> </p>
+<p class="players info"></p>
 <p class="alert alert-error hidden"></p>
+<br>
 <canvas id="game">
     Loading...
 </canvas>

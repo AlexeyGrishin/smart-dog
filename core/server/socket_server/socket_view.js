@@ -1,6 +1,13 @@
 var SocketJson = require('./socket_json.js')
   , ReplayFormat = require('../storage/replay_format.js');
 
+/**
+ * Represents remote view which uses socket for getting update.
+ * Warning: this class uses socket.io socket, not the plain sockets. The client shall implement WebSocket client
+ * @param socket
+ * @param gameServer
+ * @constructor
+ */
 function SocketView(socket, gameServer) {
   this.socket = socket;
   this.gameServer = gameServer;
