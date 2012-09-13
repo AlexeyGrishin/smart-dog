@@ -3,17 +3,23 @@ Currently it is under construction, there is only some prototype that shall be i
 
 How to see it at work:
 
-1. Run server (require NodeJS >= 0.8.9)
+1. Clone it
+
+2. Install nodejs >= 0.8.9
+
+3. In the local repository run
+     npm install
+
+4. Run server (require NodeJS >= 0.8.9)
 node ./games/smart-dog/server/smart_dog_server.js &
 
-2. Open site http://localhost:3000
+5. Open site http://localhost:3000
 
-3. Run 2 or more clients (require JRE7):
+6. Run 2 or more clients (require JRE7):
 ./clients/java-client/player1.bat &
 ./clients/java-client/player2.bat &
 
-4. Observe game on site
-
+7. Observe game on site
 
 TODO:
 +0. Guidelines
