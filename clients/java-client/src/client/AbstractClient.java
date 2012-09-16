@@ -17,8 +17,8 @@ public abstract class AbstractClient implements CommandReactor {
     }
 
     @Override
-    public void onInit(int players, int yourId, int cols, int rows, Landscape[][] map) {
-        reactor.onInit(players, yourId, cols, rows, map);
+    public void onInit(GameOptions options, Landscape[][] map) {
+        reactor.onInit(options, map);
     }
 
     @Override

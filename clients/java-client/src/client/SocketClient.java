@@ -43,6 +43,7 @@ public class SocketClient extends AbstractClient {
                     new StreamClient(inputStream, outputStream, SocketClient.this, name).run();
                 }
                 catch (Throwable e) {
+                    if (socket.isClosed()) return;
                     e.printStackTrace();
                     try {
                         socket.close();

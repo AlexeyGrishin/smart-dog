@@ -1,7 +1,5 @@
 package client;
 
-import java.util.Map;
-
 public interface CommandReactor {
 
     void onWarning(String warning);
@@ -16,7 +14,7 @@ public interface CommandReactor {
         LEFT, RIGHT, UP, DOWN
     }
     
-    void onInit(int players, int yourId, int cols, int rows, Landscape[][] map);
+    void onInit(GameOptions options, Landscape[][] map);
     
     void onTurn(GameObject[] info, Turn turn);
     

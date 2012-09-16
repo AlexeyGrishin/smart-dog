@@ -42,29 +42,34 @@ GameServer.prototype = {
       io: ioInterface
     };
     this.waiting.push(playerInfo);
-    if (this.waiting.length == this.maps.maxPlayersCount()) {
-      this._startGame();
+    var gameToStart = this.maps.getGameToStart(this.waiting);
+    if (gameToStart.exists && !gameToStart.waitMore) {
+      this._startGame(gameToStart);
     }
     else {
-      if (this.waiting.length >= this.maps.minPlayersCount()) {
+      if (gameToStart.exists) {
+        clearTimeout(this.waitForAnotherPlayer);
         this.waitForAnotherPlayer = setTimeout(function() {
-          this._startGame();
+          this._startGame(gameToStart);
         }.bind(this), this.options.waitForPlayer);
       }
       playerInfo.io.sendWait(this.waiting.length);
     }
   },
 
-  _startGame: function() {
+  _startGame: function(gameToStart) {
     //guard
-    if (this.waiting.length < this.maps.minPlayersCount()) return;
+    //if (this.waiting.length < this.maps.minPlayersCount()) return;
     clearTimeout(this.waitForAnotherPlayer);
-    var players = this.waiting.splice(0, this.waiting.length);
-    var game = this.gameFactory.createGame();
+    gameToStart.players.forEach(function(p) {
+      this.waiting.splice(this.waiting.indexOf(p), 1);
+    }.bind(this));
     var id = this.nextGameId++;
-    game.setId(id);
-    game.setPlayers(players);
-    this.maps.initGameMap(game, game.getPlayers());
+    var game = this.gameFactory.createGame(id, gameToStart);
+    this.maps.gameStarted(gameToStart);
+    //game.setId(id);
+    //game.setPlayers(players);
+    //this.maps.initGameMap(game, game.getPlayers());
     this.storage.saveGame(id, game);
     game.start();
     var replay = new ReplayDataStorer(game);
@@ -131,7 +136,6 @@ GameServer.prototype = {
       cb(null, games.map(function(g) {
         return {
           id: g.getId(),
-          players: g.getPlayers().map(function(p) {return p.name}),
           brief: g.getBriefStatus(),
           finished:g.isFinished()
         }

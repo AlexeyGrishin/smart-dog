@@ -3,7 +3,8 @@ var GameObject = require('../../../core/server/game/game_object.js')
   , Sheep = require('./sheep.js')
   , util = require('util')
   , Game = require('../../../core/server/game/game.js')
-  , PlayerInterface = require('./player');
+  , PlayerInterface = require('./player')
+  , _ = require('cloneextend');
 
 function Wall() {
   GameObject.apply(this, arguments);
@@ -54,12 +55,21 @@ var Fillers = {
   ]
 };
 
-var Factory = {
-  //TODO: read from config
-  options: {
-    waitForTurn: 300000,
-    visibilityRadius: 4
-  },
+var Factory = function(options) {
+  this.options = _.extend({
+    "games": {
+      "default": {
+        waitForTurn: 300000,
+        dogVisibilityR: 4,
+        sheepVisibilityR: 2,
+        sheepScaryDistance: 4,
+        dogScaryDistance: 4,
+        sheepStandBy: 4,
+        sheepScaryTurns: 4,
+        turnsLimit: 3
+      }}}, options || {})
+};
+Factory.prototype = {
   types: {
     Grass: Grass,
     Wall: Wall,
@@ -69,7 +79,7 @@ var Factory = {
     Sheep: Sheep
   },
 
-  fillMap: function(mapCtor, players, map2d, game) {
+  fillMap: function(mapCtor, players, map2d, game, options) {
     var playersCount = players.length;
     var filler = Fillers[playersCount];
     var y = 0, x = 0;
@@ -91,7 +101,7 @@ var Factory = {
               owner = undefined;
             }
             if (mObj.object) {
-              var obj = new mObj.object(game, {x:x+dx, y:y+dy, owner: owner, layer: "object"});
+              var obj = new mObj.object(game, _.replace({x:x+dx, y:y+dy, owner: owner, layer: "object"}, options));
               map2d.add("object", obj, x+dx, y+dy);
             }
             if (mObj.landscape) {
@@ -101,6 +111,11 @@ var Factory = {
         }
       }
     }
+  },
+
+  _getOptions: function(gameType) {
+    //by default - default
+    return _.clone(this.options.games["default"]);
   },
 
   empty: function() {
@@ -189,66 +204,87 @@ var Factory = {
     return map;
   },
 
-  createGame: function() {
-    return new Game(new Logic(), this, this.options);
-  },
-
-  createPlayer: function(game, info, id) {
-    return new PlayerInterface(game, id, info, this.options);
+  /**
+   *
+   * @param id game id
+   * @param gameToStart object returned by game balancer:
+   *  {
+   *    map: map object instance,
+   *    mapCtor: map creator (returned by this factory),
+   *    mapName: map name,
+   *    players: array[] of {
+   *      name: player name,
+   *      io: controller
+   *    }
+   *  }
+   * @return {*}
+   */
+  createGame: function(id, gameToStart) {
+    var options = _.extend(this._getOptions(), _.clone(gameToStart.options));
+    var game = new SmartDogGame(options);
+    game.setId(id);
+    var pid = 1;
+    game.setPlayers(gameToStart.players.map(function(p) {
+      var pi = new PlayerInterface(game, pid++, {name: p.name}, options);
+      p.io.setPlayerInterface(pi);
+      return pi;
+    }.bind(this)));
+    game.setMap(gameToStart.mapName, gameToStart.map);
+    this.fillMap(gameToStart.mapCtor, game.getPlayers(), gameToStart.map, game, options);
+    game._.landscape = this.encodeMap(game._.map.cols, game._.map.rows, game._.map.getAll("landscape"));
+    return game;
   }
 };
 
-var Logic = function() {
+var SmartDogGame = function(options) {
+  Game.call(this, options);
+  this.on(Game.Event.Init, this.init.bind(this));
+  //this.on(Game.Event.BeforeTurn, this.beforeTurn.bind(this));
+  this.on(Game.Event.AfterTurn, this.afterTurn.bind(this));
 };
 
-Logic.prototype = {
-  init: function(game) {
-    this.map = game.getMap();
-    this.landscape = Factory.encodeMap(game.getMap().cols, game.getMap().rows, game.getMap().getAll("landscape"));
-    this.players = game.getPlayers();
-    this.result = {
-      finished: false
-    }
-  },
+util.inherits(SmartDogGame, Game);
 
-  beforeTurn: function(turn) {
+SmartDogGame.prototype.init = function() {
+  var _ = this._;
+  this._.result = {
+    finished: false
+  }
+};
 
-  },
 
-  afterTurn: function(turn) {
-    this.turn = turn;
-    if (turn >= 50) {
-      this.stopGame('turnsLimit');
-    }
-  },
+SmartDogGame.prototype.afterTurn = function() {
+  if (this._.turn >= this._.o.turnsLimit) {
+    this._stopGame('turnsLimit');
+  }
+};
 
-  getBriefStatus: function(brief) {
-    return brief;
-  },
 
-  _genState: function(state) {
-    state.landscape = this.landscape;
-    return state;
-  },
+SmartDogGame.prototype._genState = function() {
+  var state = Game.prototype._genState.call(this);
+  state.landscape = this._.landscape;
+  return state;
+};
 
-  getGameResult: function() {
-    return this.result;
-  },
+SmartDogGame.prototype._getGameResult = function() {
+  return this._.result;
+};
 
-  stopGame: function(reason, playerCausedStop) {
-    this.result.reason = reason;
-    this.result.finished = true;
-    this.result.playerCausedStop = playerCausedStop;
-    var maxScore = -1;
-    for (var i = 0; i < this.players.length; i++) {
-      var score = this.players[i].calculateScore(); //TODO: cache score inside player
-      if (this.players[i] != playerCausedStop && score > maxScore) {
-        this.result.winner = this.players[i];
-        maxScore = score;
-      }
+SmartDogGame.prototype._stopGame = function(reason, playerCausedStop) {
+  var _ = this._;
+  _.result.reason = reason;
+  _.result.finished = true;
+  _.result.playerCausedStop = playerCausedStop;
+  var maxScore = -1;
+  for (var i = 0; i < _.players.length; i++) {
+    var score = _.players[i].calculateScore(); //TODO: cache score inside player
+    if (_.players[i] != playerCausedStop && score > maxScore) {
+      _.result.winner = _.players[i];
+      maxScore = score;
     }
   }
-
 };
 
-module.exports = Factory;
+module.exports = function(config) {
+  return new Factory(config);
+};

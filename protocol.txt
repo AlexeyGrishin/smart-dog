@@ -3,19 +3,24 @@ Player / Server
 Uses stdin(>)/stdout(<) or sockets. Commands are separated with \n, \r or \n\r
 In pattern: <command> <arg> where <arg> is a json-like string, for example:
     <prop1>:<value1>, <prop2>:<value2>
-        where propX/valueX are wrapped with quotes (")
+        where propX/valueX may be wrapped with quotes (")
     <val1>,<val2>,<val3>
         where vals are wrapped with quotes (")
 Out pattern: the same, but <arg> is a string
 
 > ready
 < wait
-< start "players":"<playersCount>","map":"<mapName>","rows":"<rows>","cols":"<cols>","you":"<yourId>"
+< start "players":"<playersCount>","map":"<mapName>","rows":"<rows>","cols":"<cols>","you":"<yourId>" \
+            "dogVisibilityR":"<radius>","sheepVisibilityR":"<radius>","sheepScaryDistance":"<distance>","dogScaryDistance":"<distance>"\
+            "sheepStandBy": "<num-of-turns>", "sheepScaryTurns":"<num-of-turns>"
 < landscape "#1.2","#12.",...
 < state turn:1
-< obj id:1,x:2,y:3,owner:1,type:Dog
-< obj x:2,y:4,type:Sheep,voice:Baa
-< obj x:10,y:15,type:Unknown,voice:Barking
+#For dog
+< obj id:1,x:2,y:3,owner:1,type:Dog[,voice:barking]
+#For sheep
+< obj x:2,y:4,type:Sheep[,voice:baa][,direction:left|down|right|up][,scary=true|false]
+#For unknown voice
+< obj x:10,y:15,voice:Barking
 < turn
 > do 1 move up
 > do 2 move down

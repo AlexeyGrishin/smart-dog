@@ -12,7 +12,7 @@ class StreamClient implements Runnable {
     private CommandReactor reactor;
     private String name;
     private Decoder decoder = new Decoder();
-    private Map<String, Integer> initMap = null;
+    private GameOptions gameOptions = null;
     private List<GameObject> objects = new ArrayList<GameObject>();
     private CommandReactor.Turn turn;
     private boolean debug = true;
@@ -87,15 +87,15 @@ class StreamClient implements Runnable {
     }
 
     private void doStart(String args) {
-        initMap = decoder.decodeIntMap(args);
+        gameOptions = new GameOptions(decoder.decodeIntMap(args));
     }
 
     void doWait() {
     }
     
     void doLandscape(String args) {
-        Landscape[][] lanscape = parseLandscape(initMap.get("you"), decoder.decodeList(args));
-        reactor.onInit(initMap.get("players"), initMap.get("you"), initMap.get("rows"), initMap.get("cols"), lanscape);
+        Landscape[][] lanscape = parseLandscape(gameOptions.yourId, decoder.decodeList(args));
+        reactor.onInit(gameOptions, lanscape);
         
     }
     
@@ -121,6 +121,11 @@ class StreamClient implements Runnable {
     }
     
     void doFinished(String args) {
+        try {
+            inputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
         reactor.onFinish(-1);
     }
 

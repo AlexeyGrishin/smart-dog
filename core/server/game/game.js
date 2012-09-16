@@ -11,20 +11,15 @@ var GameObject = require("./game_object.js")
  * Also all game events go though this object. Other obejcts (like game objects) shall subscribe on events for game
  * and shall trigger events for the game.
  *
- * All game-specific logic shall be encapsulated in logic, players and specific game objects.
- * TODO: I'd like to delete logic at all and subscribe on events.
+ * All game-specific logic shall be encapsulated in subclasses, players and specific game objects.
  *
- * @param logic
- * @param playerFactory
  * @param options
  * @constructor
  */
-var Game = function(logic, playerFactory, options) {
+var Game = function(options) {
   events.EventEmitter.call(this);
   this._ = {};
   this._.o = options;
-  this._.logic = logic;
-  this._.playerFactory = playerFactory;
   this.on(GameObject.Event.Move, function(object, oldX, oldY) {
     this._.map.objectMoved(object, oldX, oldY);
   }.bind(this));
@@ -33,6 +28,7 @@ var Game = function(logic, playerFactory, options) {
 };
 
 Game.Event = {
+  Init: 'game.init',
   Turn: 'game.turn',
   BeforeTurn: 'game.beforeTurn',
   AfterTurn: 'game.afterTurn',
@@ -49,9 +45,8 @@ var GameMethods = {
   start: function() {
     var _ = this._;
     _.turn = 0;
-    //TODO: send events instead of 'logic' calls
     //TODO: order is important. logic.init initializes cached landscape, getState puts it into savedState, and player.init uses it
-    _.logic.init(this);
+    this.emit(Game.Event.Init);
     _.savedState = this._genState();
     _.brief = this._genBrief();
     _.players.forEach(function(p) {p.init();});
@@ -68,7 +63,7 @@ var GameMethods = {
         console.trace();
         console.error("Unexpected error: " + e);
         console.error(e.stack);
-        this._.logic.stopGame("Unexpected error: " + e);
+        this._stopGame("Unexpected error: " + e);
         try {
           this._checkGameFinished();
         }
@@ -97,7 +92,6 @@ var GameMethods = {
     var _ = this._;
     _.turnMade = 0;
     this.emit(Game.Event.BeforeTurn, _.savedState);
-    _.logic.beforeTurn(_.turn);
     _.players.forEach(function(p) {
       p.makeTurn(_.turn);
     }.bind(this));
@@ -117,15 +111,14 @@ var GameMethods = {
   _endTurn: function(stop, stopReason, playerCausedStop) {
     var _ = this._;
     clearTimeout(this._.turnTimeout);
-    _.logic.afterTurn(_.turn);
     this.emit(Game.Event.AfterTurn);
     _.turn++;
     _.savedState = this._genState();
     _.brief = this._genBrief();
     this.emit(Game.Event.Turn, _.savedState);
     if (!stop) setTimeout(this._catchError(this._doTurn.bind(this)), 0);
-    if (_.logic.getGameResult().finished || stop) {
-      _.logic.stopGame(stopReason, playerCausedStop);
+    if (this._getGameResult().finished || stop) {
+      this._stopGame(stopReason, playerCausedStop);
     }
     this._checkGameFinished();
 
@@ -133,7 +126,7 @@ var GameMethods = {
 
   _checkGameFinished: function() {
     var _ = this._;
-    var gameResult = _.logic.getGameResult();
+    var gameResult = this._getGameResult();
     if (gameResult.finished) {
       _.gameResult = gameResult;
       _.players.forEach(function(p) {
@@ -154,14 +147,16 @@ var GameMethods = {
   },
 
   setPlayers: function(players) {
-    this._.players = [];
+    this._.players = players.slice();
+    /* TODO: delete
     var index = 1;
     players.forEach(function(p) {
       var pi = this._.playerFactory.createPlayer(this, {name:p.name}, index++);
       p.pi = pi;
       p.io.setPlayerInterface(pi);
       this._.players.push(pi);
-    }.bind(this))
+    }.bind(this))*/
+
   },
 
   setMap: function(name, map) {
@@ -195,22 +190,22 @@ var GameMethods = {
 
   _genBrief: function() {
     var brief = {map: this._.mapName, width: this._.map.cols, height: this._.map.rows, turn: this._.turn};
+    brief.players = this._.players.map(function(p) {return {id:p.getId(), name:p.getName(), score:p.calculateScore()}});
     if (this.isFinished()) {
       brief.finished = true;
       brief.winner = this._.gameResult.winner ? {id: this._.gameResult.winner.id, name: this._.gameResult.winner.name} : undefined;
       brief.reason = this._.gameResult.reason;
     }
-    return this._.logic.getBriefStatus(brief);
+    return brief;
   },
 
   _genState: function() {
     var state = this._genBrief();
-    state.players = this._.players.map(function(p) {return {id:p.getId(), name:p.getName(), score:p.calculateScore()}});
     //TODO: optimize - cache landscape
     state.objects = this._.map.allObjects.map(function(o) {
       return o.toState();
     });
-    return this._.logic._genState(state);
+    return state;
   },
 
   toState: function() {
@@ -219,7 +214,19 @@ var GameMethods = {
 
   getTurn: function() {
     return this._.turn;
+  },
+
+  //protected
+  _stopGame: function(stopReason, playerCausedStop) {
+
+  },
+
+  //protected
+  _getGameResult: function() {
+    return {finished: false};
   }
+
+
 
 };
 

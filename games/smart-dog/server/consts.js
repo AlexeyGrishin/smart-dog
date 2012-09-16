@@ -7,5 +7,9 @@ var DIRECTIONS = {
 };
 
 module.exports = {
-  DIRECTIONS: DIRECTIONS
+  DIRECTIONS: DIRECTIONS,
+  UP: "up",
+  DOWN: "down",
+  LEFT: "left",
+  RIGHT: "right"
 };

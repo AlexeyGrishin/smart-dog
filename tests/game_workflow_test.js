@@ -1,5 +1,5 @@
 var GameServer = require('../core/server/game/game_server.js')
-  , Factory = require('../games/smart-dog/server/game_object_factory.js')
+  , Factory = require('../games/smart-dog/server/game_object_factory.js')()
   , Map2D = require('../core/server/game/map2d.js')
   , SocketController = require('../core/server/socket_server/socket_controller.js')
   , MemoryStorage = require('../core/server/storage/mem_storage.js');
@@ -12,6 +12,16 @@ var MapsMock = {
     var map = Factory.parseMapPart(["@..", "...", "..."]);
     game.setMap("", map2d);
     Factory.fillMap(map, players, map2d, game);
+  },
+  getGameToStart: function(players) {
+    return {
+      exists: true,
+      map: new Map2D(),
+      mapName: "test",
+      mapCtor: Factory.parseMapPart(["@..", "...", "..."]),
+      players: players.slice(),
+      waitMore: false
+    }
   }
 };
 

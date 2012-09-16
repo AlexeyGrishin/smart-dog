@@ -69,7 +69,7 @@ PlayerInterface.prototype = {
       return st;
     }
     this.dogs.forEach(function(d) {
-      this.map.getObjectsAround(d.x, d.y, this.o.visibilityRadius).forEach(function(o) {
+      this.map.getObjectsAround(d.x, d.y, this.o.dogVisibilityR).forEach(function(o) {
         if (!see[o.x + "_" + o.y]) {
           see[o.x + "_" + o.y] = true;
           visibleArea.push(o);
@@ -125,14 +125,14 @@ PlayerInterface.prototype = {
   bark: function(id, cb) {
     var dog = this.dogById[id];
     if (!dog) return cb("Unknown id - " + id);
-    if (dog.isBarking) return cb("Dog with id " + id + " already barked this turn");
+    if (dog.justBarked) return cb("Dog with id " + id + " already barked this turn");
     dog.bark();
     cb();
   },
 
   endTurn: function(error) {
     this.moved = !error;
-    this.game.emit('player.turn', this, this.turn, error);
+    this.game.emit(Game.Event.PlayerTurn, this, this.turn, error);
   },
 
   setController: function(controller) {
@@ -158,6 +158,10 @@ PlayerInterface.prototype = {
 
   isMoved: function() {
     return this.moved;
+  },
+
+  getGameOptions: function() {
+    return this.o;
   }
 
 

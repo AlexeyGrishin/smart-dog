@@ -1,3 +1,4 @@
+{"min":2,"max":4,"dogVisibilityR":"4","sheepVisibilityR":2,"sheepScaryDistance":"4"}
 ........
 .#####..
 .#oo-#..

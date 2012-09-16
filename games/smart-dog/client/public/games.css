@@ -1,14 +1,3 @@
-.player1 {
-    color: red;
-    background-color: #ffd4cd;
-    background-image: url(20px-Husky-icon.png);
-    background-repeat: no-repeat;
-}
-
-.info .player1 {
-    background-image: url(100px-Husky-icon.png)
-}
-
 .info div {
     display: inline-block;
     height: 100px;
@@ -43,6 +32,19 @@
     padding-bottom: 0;
 }
 
+
+
+.player1 {
+    color: red;
+    background-color: #ffd4cd;
+    background-image: url(20px-Husky-icon.png);
+    background-repeat: no-repeat;
+}
+
+.info .player1 {
+    background-image: url(100px-Husky-icon.png)
+}
+
 .alert {
     display: inline-block;
 }
@@ -63,11 +65,17 @@
     background-color: #cfccff;
     background-image: url(20px-Golden_Retriever-icon.png)
 }
+.info .player3 {
+    background-image: url(100px-Golden_Retriever-icon.png)
+}
 
 .player4 {
     color: purple;
     background-color: #f6c3f9;
     background-image: url(20px-Welsh_Terrier-icon.png)
+}
+.info .player4 {
+    background-image: url(100px-Welsh_Terrier-icon.png)
 }
 
 .grass {

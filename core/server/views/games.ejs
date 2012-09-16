@@ -8,7 +8,11 @@
 <td><%= games[i].id %></td>
 <td><%= games[i].brief.map %></td>
 <td><%= games[i].brief.turn %></td>
-<td><%= games[i].players.join(",") %></td>
+<td><%- games[i].brief.players.map(function(p) {
+        if (games[i].brief.winner && games[i].brief.winner.id == p.id)
+            return "<b>" + p.name + "</b>";
+        return p.name;
+    }).join(",") %></td>
 <td><a href="/<%= games[i].id %>">See <%= games[i].finished ? 'Replay' : 'Online' %></a></td>
 </tr>
 <% } %>

@@ -22,6 +22,7 @@ Dog.prototype._extend = function(p) {
   p.barking = false;
   p.justBarked = false;
   this.__defineGetter__('isBarking', function() {return p.barking;});
+  this.__defineGetter__('justBarked', function() {return p.justBarked;});
   this.bark = function() {
     p.justBarked = true;
     p.barking = true;

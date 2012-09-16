@@ -1,5 +1,6 @@
 var SocketJson = require('./socket_json.js')
-  , readline = require('readline');
+  , readline = require('readline')
+  , _ = require('cloneextend');
 
 
 /**
@@ -89,13 +90,13 @@ SocketController.prototype = {
   init: function(player) {
     var state = player.toState();
     var landscape = state.landscape;
-    var initState = {
+    var initState = _.extend({
       you: player.getId(),
       rows: landscape.length,
       cols: landscape[0].length,
       players: player.TODO || 0
 
-    };
+    }, player.getGameOptions());
     this.send("start", initState);
     this.send("landscape", landscape);
   },

@@ -2,6 +2,7 @@ package ai;
 
 import client.CommandReactor;
 import client.GameObject;
+import client.GameOptions;
 import client.Landscape;
 
 public class AI implements CommandReactor {
@@ -13,8 +14,8 @@ public class AI implements CommandReactor {
     }
 
     @Override
-    public void onInit(int players, int yourId, int cols, int rows, Landscape[][] map) {
-        this.me = yourId;
+    public void onInit(GameOptions options, Landscape[][] map) {
+        this.me = options.yourId;
     }
     
     private int turn = 0;
@@ -42,11 +43,6 @@ public class AI implements CommandReactor {
             turn.bark(getMyDog(info));
         }
         turn.endTurn();
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
     }
 
     @Override

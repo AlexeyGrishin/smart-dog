@@ -1,10 +1,25 @@
 {
-    "mapsDir": "./maps",
+    "maps": {
+        "dir": "./maps",
+        "maps": []
+    },
     "replaysDir": "./replays",
     "httpResources": "./games/smart-dog/client/public",
     "storage": "MemoryStorage",
     "controllerPort": 3002,
     "viewPort": 3003,
     "httpPort": 3000,
-    "waitForPlayer": 4000
+    "waitForPlayer": 4000,
+    "games": {
+        "default": {
+            "turnsLimit": 100,
+            "waitForTurn": 300000,
+            "dogVisibilityR":"4",
+            "sheepVisibilityR":"2",
+            "sheepScaryDistance":"4",
+            "dogScaryDistance":"4",
+            "sheepStandBy": "4",
+            "sheepScaryTurns":"4"
+        }
+    }
 }
