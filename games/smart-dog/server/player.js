@@ -1,7 +1,8 @@
 var Dog = require('./dog')
   , constants = require('./consts.js')
   , Sheep = require('./sheep.js')
-  , Game = require('../../../core/server/game/game.js');
+  , Game = require('../../../core/server/game/game.js')
+  , _ = require('cloneextend');
 
 var PlayerInterface = function(game, ownerId, info, options) {
   this.game = game;
@@ -41,30 +42,39 @@ PlayerInterface.prototype = {
   },
 
   calculateScore: function() {
-    var score = 0;
-    if (!this.site) return score;
+    var sheepsOnSite = this._calculateSheeps();
+    if (sheepsOnSite <= this.o.ownSheepsCount) {
+      return 5*(sheepsOnSite / this.o.ownSheepsCount);
+    }
+    else {
+      return 5 + 5*((sheepsOnSite - this.o.ownSheepsCount) / (this.o.maxSheepsCount - this.o.ownSheepsCount));
+    }
+  },
+
+  _calculateSheeps: function() {
+    if (!this.site) return 0;
+    var sheepsOnSite = 0;
     this.site.forEach(function(s) {
       var objOnSite = this.map.getObject(s.x, s.y);
       if (objOnSite && objOnSite instanceof Sheep) {
-        score++;
+        sheepsOnSite++;
       }
     }.bind(this));
-    return score;
+    return sheepsOnSite;
   },
 
   _genState: function() {
     var visibleArea = [];
     var see = {};
     function toState(d) {
-      var st = d.toState();
+      var st = _.clone(d.toState());
+      delete st.sheepBarkingArea;
+      delete st.scaredBy;
       //anonimize :)
       if (!see[d.x + '_' + d.y]) {
-        var ost = st;
-        st = {};
-        Object.keys(ost).forEach(function(k) {
-          if (['id', 'type', 'owner'].indexOf(k) > -1) return;
-          st[k] = ost[k];
-        })
+        delete st.id;
+        delete st.type;
+        delete st.owner;
       }
       return st;
     }
@@ -108,14 +118,14 @@ PlayerInterface.prototype = {
 
     var movement = constants.DIRECTIONS[direction];
     if (!movement) {
-      return cb("Unexpected direction '" + direction + "', one of the following expected: " + Object.keys(constants.DIRECTIONS).join(','));
+      return cb(id + " Unexpected direction '" + direction + "', one of the following expected: " + Object.keys(constants.DIRECTIONS).join(','));
     }
     var dog = this.dogById[id];
-    if (!dog) return cb("Unknown id - " + id);
-    if (dog.moved) return cb("Dog with id " + id + " already moved this turn");
+    if (!dog) return cb(id + " Unknown id");
+    if (dog.moved) return cb(id + " Dog already moved this turn");
     dog.move(movement.dx, movement.dy, function(err) {
       if (err) {
-        return cb(err);
+        return cb(id + " " + err);
       }
       dog.moved = true;
       cb();
@@ -124,10 +134,11 @@ PlayerInterface.prototype = {
 
   bark: function(id, cb) {
     var dog = this.dogById[id];
-    if (!dog) return cb("Unknown id - " + id);
-    if (dog.justBarked) return cb("Dog with id " + id + " already barked this turn");
-    dog.bark();
-    cb();
+    if (!dog) return cb(id + " Unknown id");
+    if (dog.justBarked) return cb(id + " Dog with already barked this turn");
+    dog.bark(function(err) {
+      cb(err);
+    });
   },
 
   endTurn: function(error) {

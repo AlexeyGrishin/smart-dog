@@ -1,6 +1,7 @@
 var GameObject = require("./game_object.js")
   , events = require("events")
-  , util = require("util");
+  , util = require("util")
+  , _ = require('cloneextend');
 
 /**
  * Represents single game session. Holds anything related - players, map, etc.
@@ -148,14 +149,6 @@ var GameMethods = {
 
   setPlayers: function(players) {
     this._.players = players.slice();
-    /* TODO: delete
-    var index = 1;
-    players.forEach(function(p) {
-      var pi = this._.playerFactory.createPlayer(this, {name:p.name}, index++);
-      p.pi = pi;
-      p.io.setPlayerInterface(pi);
-      this._.players.push(pi);
-    }.bind(this))*/
 
   },
 
@@ -189,7 +182,7 @@ var GameMethods = {
   },
 
   _genBrief: function() {
-    var brief = {map: this._.mapName, width: this._.map.cols, height: this._.map.rows, turn: this._.turn};
+    var brief = _.extend({map: this._.mapName, width: this._.map.cols, height: this._.map.rows, turn: this._.turn}, this._.o);
     brief.players = this._.players.map(function(p) {return {id:p.getId(), name:p.getName(), score:p.calculateScore()}});
     if (this.isFinished()) {
       brief.finished = true;
@@ -201,7 +194,6 @@ var GameMethods = {
 
   _genState: function() {
     var state = this._genBrief();
-    //TODO: optimize - cache landscape
     state.objects = this._.map.allObjects.map(function(o) {
       return o.toState();
     });

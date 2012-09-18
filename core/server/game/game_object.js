@@ -64,7 +64,9 @@ function GameObject(game, properties) {
     game.emit("gameobject.move", this, oldX, oldY);
     p.oldPosition = {
       x: oldX,
-      y: oldY
+      y: oldY,
+      dx: dx,
+      dy: dy
     };
     cb();
   };
@@ -102,6 +104,8 @@ GameObject.prototype = {
     if (p.oldPosition) {
       state.movedFromX = p.oldPosition.x;
       state.movedFromY = p.oldPosition.y;
+      state.movedDx = p.oldPosition.dx;
+      state.movedDy = p.oldPosition.dy;
     }
     return state;
   },

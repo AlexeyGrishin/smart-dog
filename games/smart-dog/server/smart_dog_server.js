@@ -1,4 +1,5 @@
-require('nodetime').profile();
+//require('nodetime').profile();
+//require('look').start(5959, '127.0.0.1');
 var GameServer = require('../../../core/server/game/game_server.js')
   , config = require('./server_config.json')
   , GameFactory = require('./game_object_factory.js')(config)

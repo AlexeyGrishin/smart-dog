@@ -2,13 +2,16 @@
 <html>
 <head>
     <script src="jquery-1.8.0.min.js"></script>
+    <script src="jquery-ui-1.8.23.custom.min.js"></script>
     <script src="bootstrap.js"></script>
     <script src="socket.io.min.js"></script>
-    <script src="raphael-min.js"></script>
+    <script src="canvas-css.js"></script>
     <script src="renderer.js"></script>
     <script src="webclient.js"></script>
     <link href="bootstrap.css" rel="stylesheet"/>
+    <link href="ui-lightness/jquery-ui-1.8.23.custom.css" rel="stylesheet"/>
     <link href="games.css" rel="stylesheet"/>
+
 </head>
 <body data-id="<%= game.getId() %>">
 <h1>Game <%= game.getId() %></h1>
@@ -16,11 +19,14 @@
 <p class="players info"></p>
 <p class="alert alert-error hidden"></p>
 <br>
-<canvas id="game">
+<div class="controls hidden row">
+    <button class="btn btn-primary replay span1">Replay</button>
+    <div class="turn-slider span3"></div>
+</div>
+<canvas id="game" class="sheep grass dog wall tree player1 player2 player3 player4 scary barking barking-area arrow">
     Loading...
 </canvas>
 <br/>
-<button class="btn btn-primary disabled replay">Replay</button>
 
 </body>
 </html>

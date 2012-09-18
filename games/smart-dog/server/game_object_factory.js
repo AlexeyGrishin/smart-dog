@@ -64,9 +64,12 @@ var Factory = function(options) {
         sheepVisibilityR: 2,
         sheepScaryDistance: 4,
         dogScaryDistance: 4,
+        dogHomeScaryDistance: 4,
         sheepStandBy: 4,
         sheepScaryTurns: 4,
-        turnsLimit: 3
+        turnsLimit: 3,
+        dogScaryTurns: 2,
+        dogSilenceTurns: 2
       }}}, options || {})
 };
 Factory.prototype = {
@@ -232,6 +235,8 @@ Factory.prototype = {
     game.setMap(gameToStart.mapName, gameToStart.map);
     this.fillMap(gameToStart.mapCtor, game.getPlayers(), gameToStart.map, game, options);
     game._.landscape = this.encodeMap(game._.map.cols, game._.map.rows, game._.map.getAll("landscape"));
+    options.ownSheepsCount = game.getMap().getObjectsBy("object", function(o) {return o instanceof Sheep && o.owner.id == 1}).length;
+    options.maxSheepsCount = game.getMap().getObjectsBy("landscape", function(o) {return o instanceof Site && o.owner.id == 1}).length;
     return game;
   }
 };

@@ -40,8 +40,7 @@ Sheep.prototype._extend = function(p) {
   p.standBy = p.sheepStandBy;
   p.sheepScaryDistance2 = p.sheepScaryDistance* p.sheepScaryDistance;
   p.game.on(Dog.Event.Barked, function(dog) {
-    //TODO: also they shall be sent to players
-    if (p.map.distance2(p.x, p.y, dog.x, dog.y) < p.sheepScaryDistance2) {
+    if (p.map.distance2(p.x, p.y, dog.x, dog.y) <= p.sheepScaryDistance2) {
       p.fearSources.push({x: dog.x, y: dog.y, turns:p.sheepScaryTurns});
       p.standBy = 0;
     }

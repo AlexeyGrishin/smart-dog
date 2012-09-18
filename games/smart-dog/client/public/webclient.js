@@ -32,6 +32,14 @@ var GameView = {
     $("#game").on("render", $.proxy(this.postRender, this));
   },
 
+  loadReplay: function(gameId, cb) {
+    $.getJSON('/' + gameId + '/replay', function(data) {
+      GameView._replay = data.replay;
+      GameView.landscape = parseMap(data.replay[0].landscape);
+      cb(GameView._replay);
+    });
+  },
+
   update: function(update) {
     if (update.landscape && update.landscape.length > 0 && !this.landscape) {
       this.landscape = parseMap(update.landscape);
@@ -68,15 +76,19 @@ var GameView = {
     $(".alert").removeClass("alert-error").addClass("alert-success").html(stats.join("<br>")).show().removeClass("hidden");
   },
 
-  replay: function(data, from) {
+  replay: function(from, to) {
     this.renderer.stop();
-    var replay = data.replay;
-    this.landscape = parseMap(replay[0].landscape);
+    var replay = this._replay;
     var from = from || 0;
-    for (var i = from; i < replay.length; i++) {
+    var to = to == undefined ? replay.length : to+1;
+    for (var i = from; i < to; i++) {
       this.assignLandscape(replay[i], this.landscape, i != from);
       this.renderer.update(replay[i]);
     }
+  },
+
+  goToStep: function(step) {
+    this.replay(step-1, step-1);
   },
 
   assignLandscape: function(state, landscape, partial) {
@@ -112,13 +124,29 @@ $(function() {
       else if (data.indexOf(endCmd) == 0) {
         var updatedView = JSON.parse(data.substring((endCmd + " " + gameId).length));
         GameView.update(updatedView);
-        $(".replay").removeClass("disabled");
+        GameView.loadReplay(gameId, function(replay) {
+          $(".turn-slider").slider("option", {
+            min: 1,
+            max: replay.length,
+            value: replay.length
+          });
+          $(".controls").removeClass("hidden");
+        });
       }
     });
     $(".replay").click(function() {
-      $.getJSON('/' + gameId + '/replay', function(data) {
-        GameView.replay(data);
-      });
+      GameView.replay();
+    });
+    $(".turn-slider").slider({
+      min: 0,
+      max: 0,
+      value: 0,
+      slide:$.proxy(function(event, ui) {
+        this.goToStep(ui.value);
+      }, GameView)
+    });
+    $("#game").on("render", function(r, u) {
+      $(".turn-slider").slider("value", u.turn+1);
     });
   });
 

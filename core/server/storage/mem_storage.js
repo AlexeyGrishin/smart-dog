@@ -2,18 +2,22 @@ var fs = require('fs')
   , path = require('path');
 
 function PlayerInfo(name) {
-  this.name = name;
+  this._name = name;
   this._games = [];
   this._gamesCount = 0;
   this._winsCount = 0;
+  this._score = 0;
+  this.__defineGetter__('name', function() {return this._name});
   this.__defineGetter__('gamesCount', function() {return this._gamesCount});
   this.__defineGetter__('winsCount', function() {return this._winsCount});
   this.__defineGetter__('games', function() {return this._games});
+  this.__defineGetter__('averageScore', function() {return this._score});
 }
 
 PlayerInfo.prototype = {
-  registerGame: function(game, isWinner) {
-    this._games.push(game);
+  registerGame: function(gameId, score, isWinner) {
+    this._games.push({id: gameId, score: score});
+    this._score = this._games.map(function(g) {return g.score}).reduce(function(a,b) {return a+b;}, 0) / this._games.length;
     this._gamesCount++;
     if (isWinner) {
       this._winsCount++;
@@ -38,8 +42,16 @@ function MemoryStorage(config) {
 
 MemoryStorage.prototype = {
   saveGame: function(id, game) {
-    this.games.push(game);
-    this.gamesById[id] = game;
+    if (this.gamesById[id] == undefined) {
+      this.games.push(game);
+      this.gamesById[id] = game;
+    }
+    if (game.isFinished()) {
+      var winner = game.getGameResult().winner;
+      game.getPlayers().forEach(function(p) {
+        this.updatePlayer(p.getName(), p.calculateScore(), game.getId(), winner && winner.getId() == p.getId());
+      }.bind(this));
+    }
   },
 
   getGameInfo: function(id, cb) {
@@ -56,6 +68,10 @@ MemoryStorage.prototype = {
     var player = this.playersInfoByName[name];
     if (!player) return cb("Not found");
     cb(null, player);
+  },
+
+  listPlayers: function(cb) {
+    cb(null, this.playersInfo);
   },
 
   listActiveGames: function(cb) {
@@ -98,14 +114,14 @@ MemoryStorage.prototype = {
     return cb(null, game.toState());
   },
 
-  updatePlayer: function(playerName, playedGame, gameResult) {
+  updatePlayer: function(playerName, score, gameId, isWinner) {
     var player = this.playersInfoByName[playerName];
     if (!player) {
       player = new PlayerInfo(playerName);
       this.playersInfo.push(player);
       this.playersInfoByName[playerName] = player;
     }
-    player.registerGame(playedGame, gameResult.winner == playerName);
+    player.registerGame(gameId, score, isWinner);
   },
 
   saveReplay: function(game, replay) {

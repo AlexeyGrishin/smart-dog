@@ -9,10 +9,11 @@
 <td><%= games[i].brief.map %></td>
 <td><%= games[i].brief.turn %></td>
 <td><%- games[i].brief.players.map(function(p) {
+        var name = p.name;
         if (games[i].brief.winner && games[i].brief.winner.id == p.id)
-            return "<b>" + p.name + "</b>";
-        return p.name;
-    }).join(",") %></td>
+            name = "<b>" + p.name + "</b>";
+        return name + " (" + p.score.toFixed(2) + ")";
+    }).join(", ") %></td>
 <td><a href="/<%= games[i].id %>">See <%= games[i].finished ? 'Replay' : 'Online' %></a></td>
 </tr>
 <% } %>

@@ -1,0 +1,10 @@
+<ul>
+    <% for (var i = 0; i < players.length; i++) { var player = players[i];%>
+    <li>
+        <a href="./player/<%= player.name %>">
+            <%= player.name %>
+        </a>
+        - <%= player.averageScore.toFixed(2) %>
+    </li>
+    <% } %>
+</ul>

@@ -112,12 +112,12 @@ SocketController.prototype = {
   },
 
   finished: function(myWin, state) {
+    this.stopped = true;
     this.send("finished", {
       youWin: myWin,
       winner: state.winner ? state.winner.id : undefined,
       stopReason: state.stopReason
     });
-    this.stopped = true;
     this.socket.end();
   },
 

@@ -3,8 +3,7 @@ var fs = require('fs')
 
 /**
  * Maps collection and players balancer (simple right now)
- * TODO: make configurable - players counts, map directory, map files - shall be able to say 'use only map4.txt with 4 players' via config - that would be useful for debug
- * @param mapDir
+ * @param config {dir, maps}
  * @param mapFactory
  * @constructor
  */

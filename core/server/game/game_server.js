@@ -75,6 +75,7 @@ GameServer.prototype = {
     var replay = new ReplayDataStorer(game);
     game.on('game.stop', function(results) {
       this.storage.saveReplay(game, replay.getReplay());
+      this.storage.saveGame(game.getId(), game);
     }.bind(this));
 
   },
@@ -141,6 +142,10 @@ GameServer.prototype = {
         }
       }))
     });
+  },
+
+  listPlayers: function(cb) {
+    this.storage.listPlayers(cb);
   },
 
   getGame: function(id, cb) {

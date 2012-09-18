@@ -159,16 +159,27 @@ Map2D.prototype = {
   getAround: function(layer, x, y, radius) {
     var radius2 = radius*radius;
     var objects = [];
+    this.getArea(x, y, radius).forEach(function(point) {
+      var layers = this._.map[point.y][point.x];
+      if (layers[layer])
+        objects.push(layers[layer]);
+    }.bind(this));
+    return objects;
+  },
+
+  getArea: function(x, y, radius) {
+    var radius2 = radius*radius;
+    var area = [];
     for (var dx = -radius; dx <= radius; dx++) {
       for (var dy = -radius; dy <= radius; dy++) {
-        if (this.distance2(x, y, this.x(x+dx), this.y(y+dy)) <= radius2) {
-          var layers = this._.map[this.y(y+dy)][this.x(x+dx)];
-          if (layers[layer])
-            objects.push(layers[layer]);
+        var newX = this.x(x+dx);
+        var newY = this.y(y+dy);
+        if (this.distance2(x, y, newX, newY) <= radius2) {
+          area.push({x:newX, y:newY});
         }
       }
     }
-    return objects;
+    return area;
   },
 
   getObjectsBy: function(layer, filter) {

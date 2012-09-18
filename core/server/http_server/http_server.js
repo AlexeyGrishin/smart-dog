@@ -30,6 +30,12 @@ HttpServer.prototype.init = function(resources) {
       res.render('games', {games: games});
     });
   });
+  app.get('/players', function(req, res, next) {
+    gameServer.listPlayers(function(err, players) {
+      if (err) return next(err);
+      res.render('players', {players: players.sort(function(p1, p2) {return p1.score - p2.score;})});
+    });
+  });
   app.get('/:id', function(req, res) {
     gameServer.getGame(req.param('id'), function(err, game) {
       if (game)
