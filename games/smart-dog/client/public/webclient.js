@@ -29,6 +29,7 @@ var GameView = {
   init: function() {
     this.renderer = new Renderer($("#game")[0]);
     this.playersShown = false;
+    this.replayLandscapeShown = false;
     $("#game").on("render", $.proxy(this.postRender, this));
   },
 
@@ -82,8 +83,9 @@ var GameView = {
     var from = from || 0;
     var to = to == undefined ? replay.length : to+1;
     for (var i = from; i < to; i++) {
-      this.assignLandscape(replay[i], this.landscape, i != from);
+      this.assignLandscape(replay[i], this.landscape, this.replayLandscapeShown);
       this.renderer.update(replay[i]);
+      this.replayLandscapeShown = true;
     }
   },
 

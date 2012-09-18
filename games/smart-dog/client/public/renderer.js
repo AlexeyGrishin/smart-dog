@@ -90,8 +90,8 @@ Renderer.prototype = {
   BLOCK: 20,
   OBJ_PAD: 0,
   DRAW_EACH: 0.5,
-  FRAMES: 20,
-  WAIT_FRAMES: 20,
+  FRAMES: 8,
+  WAIT_FRAMES: 8,
 
   stop: function() {
     clearInterval(this.updator);

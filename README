@@ -23,12 +23,14 @@ node ./games/smart-dog/server/smart_dog_server.js &
 
 TODO:
 +0. Guidelines
-1. Game logic (see GameFactory, Player, Dog, etc.)
+*1. Game logic (see GameFactory, Player, Dog, etc.)
+    - In progress (Grishin)
 2. Persistence (save to DB, see MemoryStorage class)
 +3. Entry point for bots (command-line client, etc)
 4. Development tools (turns replays, etc)
 5. Offline replay (ReplayDataStorer shall put html page near json)
 *6. Rendering ('barking' and other sounds, animated moval, probably sprites)
+    - In progress (Grishin)
 7. Website
    - player page - list of games, winning count, replay/realtime view of latest/current game
      shall be updated in runtime!
