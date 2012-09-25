@@ -9,9 +9,9 @@ public class GameOptions {
     public final int players;
     
     public final int dogVisibilityRadius;
-    public final int sheepVisibilityRadius;
-    public final int sheepScaryRadius;
+    public final int dogBarkingRadius;
     public final int sheepScaryTurns;
+    public final int dogScaryTurns;
     public final int sheepStandBy;
     public final int turnsLimit;
     
@@ -21,9 +21,9 @@ public class GameOptions {
         yourId = get(map, "you");
         players = get(map, "players");
         dogVisibilityRadius = get(map, "dogVisibilityR");
-        sheepVisibilityRadius = get(map, "sheepVisibilityR");
-        sheepScaryRadius = get(map, "sheepScaryDistance");
+        dogBarkingRadius = get(map, "dogBarkingR");
         sheepScaryTurns = get(map, "sheepScaryTurns");
+        dogScaryTurns = get(map, "dogScaryTurns");
         sheepStandBy = get(map, "sheepStandBy");
         turnsLimit = get(map, "turnsLimit");
         System.out.println(map);

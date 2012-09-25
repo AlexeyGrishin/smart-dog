@@ -15,14 +15,10 @@
             "turnsLimit": 100,
             "waitForTurn": 300000,
             "dogVisibilityR":"4",
-            "sheepVisibilityR":"2",
-            "sheepScaryDistance":"4",
-            "dogScaryDistance":"2",
-            "dogHomeScaryDistance": "4",
+            "dogBarkingR":"4",
             "sheepStandBy": "4",
             "sheepScaryTurns":"4",
-            "dogScaryTurns": "2",
-            "dogSilenceTurns": "6"
+            "dogScaryTurns": "2"
         }
     }
 }

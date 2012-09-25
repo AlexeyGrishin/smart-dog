@@ -75,8 +75,8 @@ SocketController.prototype = {
     var state = this.player.toState();
     state.landscape = undefined;
     this.send("state ", {turn: state.turn});
-    for (var i = 0; i < state.visibleArea.length; i++) {
-      this.send("obj ", state.visibleArea[i]);
+    for (var i = 0; i < state.objects.length; i++) {
+      this.send("obj ", state.objects[i]);
     }
     this.send("turn");
   },

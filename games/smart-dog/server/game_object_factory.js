@@ -61,15 +61,11 @@ var Factory = function(options) {
       "default": {
         waitForTurn: 300000,
         dogVisibilityR: 4,
-        sheepVisibilityR: 2,
-        sheepScaryDistance: 4,
-        dogScaryDistance: 4,
-        dogHomeScaryDistance: 4,
+        dogBarkingR: 4,
         sheepStandBy: 4,
         sheepScaryTurns: 4,
-        turnsLimit: 3,
-        dogScaryTurns: 2,
-        dogSilenceTurns: 2
+        turnsLimit: 10,
+        dogScaryTurns: 2
       }}}, options || {})
 };
 Factory.prototype = {
@@ -216,20 +212,21 @@ Factory.prototype = {
    *    mapCtor: map creator (returned by this factory),
    *    mapName: map name,
    *    players: array[] of {
-   *      name: player name,
-   *      io: controller
+   *      name: player name[,
+   *      io: controller {setPlayerInterface}]
    *    }
    *  }
    * @return {*}
    */
   createGame: function(id, gameToStart) {
-    var options = _.extend(this._getOptions(), _.clone(gameToStart.options));
+    var options = gameToStart ? _.extend(this._getOptions(), _.clone(gameToStart.options)) : this._getOptions();
     var game = new SmartDogGame(options);
     game.setId(id);
     var pid = 1;
+    //TODO: move player/controller connection upper
     game.setPlayers(gameToStart.players.map(function(p) {
       var pi = new PlayerInterface(game, pid++, {name: p.name}, options);
-      p.io.setPlayerInterface(pi);
+      if (p.io) p.io.setPlayerInterface(pi);
       return pi;
     }.bind(this)));
     game.setMap(gameToStart.mapName, gameToStart.map);
@@ -246,22 +243,25 @@ var SmartDogGame = function(options) {
   this.on(Game.Event.Init, this.init.bind(this));
   //this.on(Game.Event.BeforeTurn, this.beforeTurn.bind(this));
   this.on(Game.Event.AfterTurn, this.afterTurn.bind(this));
-};
-
-util.inherits(SmartDogGame, Game);
-
-SmartDogGame.prototype.init = function() {
   var _ = this._;
   this._.result = {
     finished: false
   }
 };
 
+util.inherits(SmartDogGame, Game);
+
+SmartDogGame.prototype.init = function() {
+};
+
 
 SmartDogGame.prototype.afterTurn = function() {
+  this.emit(Sheep.Event.DoMove);
+  this.emit(Sheep.Event.DoFear);
   if (this._.turn >= this._.o.turnsLimit) {
     this._stopGame('turnsLimit');
   }
+
 };
 
 
@@ -293,3 +293,5 @@ SmartDogGame.prototype._stopGame = function(reason, playerCausedStop) {
 module.exports = function(config) {
   return new Factory(config);
 };
+
+module.exports.types = Factory.prototype.types;

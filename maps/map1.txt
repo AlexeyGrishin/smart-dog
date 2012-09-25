@@ -1,4 +1,4 @@
-{"min":2,"max":4,"dogVisibilityR":"4","sheepVisibilityR":2,"sheepScaryDistance":"2", "sheepScaryTurns":"2"}
+{"min":2,"max":4,"dogVisibilityR":"4","dogBarkingR":"2", "sheepScaryTurns":"2"}
 ........
 .#####..
 .#oo-#..

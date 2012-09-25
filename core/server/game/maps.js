@@ -60,16 +60,5 @@ var Maps = function(config, mapFactory) {
   }
 };
 
-//TODO: delete
-Maps.prototype.initGameMap = function(game, players) {
-  if (!this.hasGamesFor(players.length)) throw new Error("There is no maps for " + players.length + " players");
-  //var map = this.maps[Math.floor(Math.random() * this.maps.length)];
-  var map = this.maps[this.nextMap];
-  this.nextMap++;
-  if (this.nextMap == this.maps.length) this.nextMap = 0;
-  var map2d = new Map2D();
-  game.setMap(map.name, map2d);
-  this.mapFactory.fillMap(map.mapCtor, players, map2d, game);
-};
 
 module.exports = Maps;

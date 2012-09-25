@@ -9,7 +9,6 @@ function sign(num) {
  * Represents 2d rectangle map with 1 or several layers where game objects may be contained.
  * Provides helpers for finding objects and calculating reltions between them.
  *
- * TODO: I'd like to introduce jQuery-like api: Map(game).at(4,3).around(4).list("landscape").emit("boo);
  * @param layers
  * @constructor
  */
@@ -51,12 +50,21 @@ Map2D.prototype = {
     this._.height = height;
   },
 
-  add: function(layer, object, x, y) {
+  _putOnMap: function(layer, object, x, y) {
     var _ = this._;
     var obj = _.map[y][x] || {};
-    if (obj[layer] !== undefined) throw new Error('There is already object on layer "' + layer + '" x=' + x + ', y=' + y);
+    if (obj[layer] !== undefined) {
+      console.log(">>>");
+      console.log(obj[layer].type);
+      throw new Error('There is already object on layer "' + layer + '" x=' + x + ', y=' + y);
+    }
     obj[layer] = object;
     _.map[y][x] = obj;
+  },
+
+  add: function(layer, object, x, y) {
+    var _ = this._;
+    this._putOnMap(layer, object, x, y);
     if (!_.objects[layer])
       _.objects[layer] = [];
     if (!_.objects[ALL])
@@ -91,20 +99,20 @@ Map2D.prototype = {
     return this._.map[this.y(y)][this.x(x)][layer];
   },
 
+  getAllAt: function(x, y) {
+    return this._.layers.map(function(l) {
+      return this.get(l, x, y);
+    }.bind(this)).filter(function(o) {return o != undefined});
+  },
+
   getAll: function(layer) {
     if (!layer) layer = ALL;
     return this._.objects[layer];
   },
 
-
-  moveObject: function(object, newX, newY) {
-    this.remove(object.layer, object.x, object.y);
-    this.add(object.layer, this.x(newX), this.y(newY));
-  },
-
   objectMoved: function(object, oldX, oldY) {
-    this.remove(object.layer, oldX, oldY);
-    this.add(object.layer, object, this.x(object.x), this.y(object.y));
+    delete this._.map[oldY][oldX][object.layer];
+    this._putOnMap(object.layer, object, this.x(object.x), this.y(object.y));
 
   },
 
@@ -157,11 +165,15 @@ Map2D.prototype = {
 
 
   getAround: function(layer, x, y, radius) {
-    var radius2 = radius*radius;
     var objects = [];
     this.getArea(x, y, radius).forEach(function(point) {
       var layers = this._.map[point.y][point.x];
-      if (layers[layer])
+      if (layer == ALL) {
+        this._.layers.forEach(function(l) {
+          if (layers[l]) objects.push(layers[l]);
+        });
+      }
+      else if (layers[layer])
         objects.push(layers[layer]);
     }.bind(this));
     return objects;

@@ -4,13 +4,9 @@ var id = 1;
  * Represents game object with base properties/functionality - coordinates, type, etc.
  * Note that it has private object which cannot be accessed outside
  *
- * TODO: in the future it seems to be useful to have modules that may be attached to GameObject, i.e.
- *
- * function Bullet() {
- * }
- * util.extend(Bullet, GameObject);
- * Bullet.make(Moveable); //adds 'move' method
- * Bullet.make(Solid);    //adds size and collisions
+ * See also:
+ *  helper.js - helps traversing map
+ *  moveable.js - example of module
  *
  * @param game
  * @param properties
@@ -49,27 +45,8 @@ function GameObject(game, properties) {
   this.toState = function() {
     return this._genState(p);
   };
-  this.move = function(dx, dy, cb) {
-    dx = parseInt(dx);
-    dy = parseInt(dy);
-    var landscape = p.map.getLandscape(p.x + dx, p.y + dy);
-    if (!landscape.traversable)
-      return cb("Cannot move " + dx + "," + dy + " - landscape is not traversable: " + landscape.type);
-    var object = p.map.getObject(p.x + dx, p.y + dy);
-    if (object != undefined)
-      return cb("Cannot move " + dx + "," + dy + " - there is a object: " + object.type);
-    var oldX = p.x, oldY = p.y;
-    p.x = p.map.x(p.x + dx);
-    p.y = p.map.y(p.y + dy);
-    game.emit("gameobject.move", this, oldX, oldY);
-    p.oldPosition = {
-      x: oldX,
-      y: oldY,
-      dx: dx,
-      dy: dy
-    };
-    cb();
-  };
+  var $ = p.game.$;
+  $.extend(this, $.moveable, p);
   this.__defineGetter__('type', function() { return this.constructor.name});
   this._extend(p);
   this._subscribe(p);

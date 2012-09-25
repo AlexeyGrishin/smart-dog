@@ -1,7 +1,27 @@
 
-.controls .turn-slider {
+.controls .slider {
     margin-top: 8px;
+    left: 90px;
+    right: 100px;
+    position: absolute;
 }
+.controls .play,
+.controls .stop {
+    float: left;
+    margin-left: 5px;
+}
+
+.controls .turn-container {
+    float: right;
+    padding-left: 5px;
+    margin-top: 5px;
+}
+
+.controls {
+    margin-bottom: 5px;
+    position: relative;
+}
+
 
 .info div {
     display: inline-block;
@@ -101,7 +121,7 @@
     background-image: url(./images/20px-Sheep-icon.png);
 }
 
-.scary {
+.scared {
     background-image: url(./images/20px-Brown_Sheep-icon.png);
     color: #ff0000;
     background-color: #ff0000;
@@ -113,7 +133,7 @@
 }
 
 .barking-area {
-    opacity: 0.2;
+    opacity: 0.3;
 }
 
 .arrow {

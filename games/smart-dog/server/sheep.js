@@ -5,6 +5,7 @@ var GameObject = require('../../../core/server/game/game_object.js')
 
 function Sheep(game, properties) {
   GameObject.call(this, game, properties);
+
 }
 
 util.inherits(Sheep, GameObject);
@@ -27,60 +28,78 @@ goDown.next = [goRight, goLeft, goUp];
 goRight.next = [goUp, goDown, goLeft];
 [goDown,goUp,goLeft,goRight].forEach(function(g) {g.dx = constants.DIRECTIONS[g.dir].dx; g.dy = constants.DIRECTIONS[g.dir].dy; });
 
+function getDirection(direction) {
+  return [goDown,goUp,goLeft,goRight].filter(function(go) {
+    return go.dx == direction.dx && go.dy == direction.dy;
+  })[0];
+}
+
+Sheep.Event = {
+  SheepScared: "sheep.scared",
+  DoMove: "sheep.doMove",
+  DoFear: "sheep.doFear"
+};
+
 Sheep.prototype._genState = function(p) {
   var state = GameObject.prototype._genState.call(this, p);
-  state.scary = p.fearSources.length > 0;
+  state.scared = p.scaredBy != null;
+  state.action = p.scared ? "panic" : (this._shallMove(p) ? "move" : "standBy");
   state.direction = p.direction.dir;
+  if (p.scaredBy) {
+    state.willNotFearAt = p.game.getTurn() + p.scared;
+    state.scaredBy = {x: p.scaredBy.x, y:p.scaredBy.y};
+  }
   return state;
 };
 
 Sheep.prototype._extend = function(p) {
-  p.fearSources = [];
+  p.sheepStandBy = parseInt(p.sheepStandBy);
+  p.scaredBy = null;
+  p.scared = 0;
   p.direction = goDown;
-  p.standBy = p.sheepStandBy;
-  p.sheepScaryDistance2 = p.sheepScaryDistance* p.sheepScaryDistance;
+  p.doPanic = function() {};
+  this.__defineGetter__('scared', function() {return p.scaredBy != null;});
+  var $ = p.game.$;
+  p.game.on(Sheep.Event.DoMove, this._doMove.bind(this, p));
+  p.game.on(Sheep.Event.DoFear, this._doFear.bind(this, p));
   p.game.on(Dog.Event.Barked, function(dog) {
-    if (p.map.distance2(p.x, p.y, dog.x, dog.y) <= p.sheepScaryDistance2) {
-      p.fearSources.push({x: dog.x, y: dog.y, turns:p.sheepScaryTurns});
-      p.standBy = 0;
+    if ($(this).inRadius(dog, p.dogBarkingR)) {
+      this._scare(p, dog);
     }
-  })
+  }.bind(this))
 };
 
 Sheep.prototype._beforeTurn = function(p) {
-  p.fearSources = p.fearSources.filter(function(fs) {
-    return --fs.turns>0;
-  });
-  if (p.standBy > 0) p.standBy--;
+  if (p.scared) {
+    p.scared--;
+    if (!p.scared) p.scaredBy = null;
+  }
 };
 
-Sheep.prototype._afterTurn = function(p) {
-  //detect where to go next
-  if (p.standBy > 0) return;  //just stay on the grass
-  if (p.fearSources.length > 0) {
-    //TODO: right now get the latest fear source
-    var s = p.fearSources[p.fearSources.length-1];
-    var direction = p.map.getDirection(s.x, s.y, p.x, p.y);
-    p.direction = [goDown,goUp,goLeft,goRight].filter(function(go) {
-      return go.dx == direction.dx && go.dy == direction.dy;
-    })[0];
-    //TODO: if cannot move this way - shall try another ones, but not forward to fear source
-    console.log("Sheep " + p.id + " fears of dog at " + s.x + "," + s.y + " and going to run into " + direction.dx + "," + direction.dy);
-    this.move(direction.dx, direction.dy, function(err) {
+Sheep.prototype._scare = function(p, scaryObject) {
+  if (!scaryObject || p.scaredBy) return;
+  p.scaredBy = scaryObject;
+  p.scared = p.sheepScaryTurns;
+  p.direction = getDirection(p.game.$(scaryObject).direction(this));
+};
+
+Sheep.prototype._shallMove = function(p) {
+  return p.game.getTurn() % (p.sheepStandBy+1) == p.sheepStandBy;
+};
+
+Sheep.prototype._doMove = function(p) {
+  if (p.scared) {
+    console.log("Sheep " + p.id + " fears " + p.scaredBy.type + " at " + p.scaredBy.x + "," + p.scaredBy.y + " and going to run into " + p.direction.dx + "," + p.direction.dy);
+    this.move(p.direction.dx, p.direction.dy, function(err) {
       if (err) console.log("Sheep stuck - " + err);
     });
   }
   else {
+    console.log("turn#" + p.game.getTurn() + ", s=" + p.game.getTurn() % (1+p.sheepStandBy), " sm = " + this._shallMove(p));
+    if (!this._shallMove(p)) return;
+    var $ = p.game.$;
     function check(dr) {
-      //TODO: it seems to a duplicate of code in GameObject.move. Lets move out
-      var landscape = p.map.getLandscape(p.x+dr.dx, p.y+dr.dy);
-      if (landscape.traversable) {
-        var o = p.map.getObject(p.x+dr.dx, p.y+dr.dy);
-        if (!o) {
-          return true;
-        }
-      }
-      return false;
+      return ($.canMoveTo(p.x+dr.dx, p.y+dr.dy));
     }
     if (!check(p.direction)) {
       var valid = p.direction.next.filter(function(d) {return check(d);});
@@ -89,16 +108,56 @@ Sheep.prototype._afterTurn = function(p) {
       }
     }
     if (check(p.direction)) {
-      //TODO: add more selectors to map
-      //make it look like:
-      //  $ = map;
-      //  $.objects.all
-      //  $.all
-      //  $.object.at(x,y)
-      //  $.at(x,y).object
-      //  $.objects.around(x,y,radius)
-      //  $.landscape.forward(x,y,dx,dy,distance)
-      //  $.objects.around(x,y,radius).find("Dog.isBarking")
+      console.log("Sheep " + p.id + "  decided to go " + p.direction.dir);
+      this.move(p.direction.dx, p.direction.dy, function(err){
+        if (err) console.error("Shall never happen - " + err);
+      });
+    }
+    else {
+      console.log("Sheep " + p.id + "  decided to stay here");
+    }
+  }
+
+};
+
+Sheep.prototype._doFear = function(p) {
+  var $ = p.game.$;
+  var sheep = $(this).around(2).find(".Sheep :scared").not(this).first();
+  this._scare(p, sheep);
+};
+
+/*Sheep.prototype._afterTurn = function(p) {
+  if (p.scared) p.scared--;
+  if (!p.scared) p.scaredBy = null;
+  //detect where to go next
+  if (p.standBy > 0) {
+    p.standBy--;
+    return;
+  }
+  if (p.scaredBy) {
+    var direction = p.map.getDirection(p.scaredBy.x, p.scaredBy.y, p.x, p.y);
+    p.direction = [goDown,goUp,goLeft,goRight].filter(function(go) {
+      return go.dx == direction.dx && go.dy == direction.dy;
+    })[0];
+    //TODO: if cannot move this way - shall try another ones, but not forward to fear source
+    console.log("Sheep " + p.id + " fears " + p.type + " at " + p.scaredBy.x + "," + p.scaredBy.y + " and going to run into " + direction.dx + "," + direction.dy);
+    this.move(direction.dx, direction.dy, function(err) {
+      if (err) console.log("Sheep stuck - " + err);
+    });
+    p.game.emit(Sheep.Event.SheepScared, this);
+  }
+  else {
+    var $ = p.game.$;
+    function check(dr) {
+      return ($.canMoveTo(p.x+dr.dx, p.y+dr.dy));
+    }
+    if (!check(p.direction)) {
+      var valid = p.direction.next.filter(function(d) {return check(d);});
+      if (valid.length > 0) {
+        p.direction = valid[0];
+      }
+    }
+    if (check(p.direction)) {
       console.log("Sheep " + p.id + "  decided to go " + p.direction.dir);
       this.move(p.direction.dx, p.direction.dy, function(err){
         if (err) console.error("Shall never happen - " + err);
@@ -109,7 +168,7 @@ Sheep.prototype._afterTurn = function(p) {
       console.log("Sheep " + p.id + "  decided to stay here");
     }
   }
-};
+};*/
 
 module.exports = Sheep;
 

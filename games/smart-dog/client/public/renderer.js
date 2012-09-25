@@ -1,4 +1,154 @@
-//TODO: introduce style selector on page
+/*
+  Classes in this package:
+
+  Renderer - defines how to render game state on canvas
+  GameViewer - rules playback
+ */
+
+var characters = {
+  '.': function() {return {type: 'Grass'}},
+  '#': function() {return {type: 'Wall'}},
+  '1': function() {return {type: 'Site', owner: 1}},
+  '2': function() {return {type: 'Site', owner: 2}},
+  '3': function() {return {type: 'Site', owner: 3}},
+  '4': function() {return {type: 'Site', owner: 4}}
+};
+
+function parseMap(charMap) {
+  var objects = [];
+  objects.xy = {};
+  for (var y = 0; y < charMap.length; y++) {
+    for (var x = 0; x < charMap[y].length; x++) {
+      var ctor = characters[charMap[y][x]];
+      if (!ctor) throw "Unknown character: " + charMap[y][x];
+      var obj = ctor();
+      obj.x = x;
+      obj.y = y;
+      objects.push(obj);
+      objects.xy[x + '_' + y] = obj;
+    }
+  }
+  return objects;
+}
+
+
+function GameViewer(canvas, controls) {
+  this.canvas = $(canvas);
+  this.renderer = new Renderer(this.canvas[0]);
+  this.controls = controls;
+  if (!controls) {
+    this.controls = this._createControls();
+  }
+  this._initControls();
+  $(canvas).on("render", $.proxy(this._onRender, this));
+  $(canvas).on("stop", $.proxy(this.stop, this));
+  $(canvas).on("resized", $.proxy(this._onResize, this));
+  $(canvas).trigger("viewer.init");
+}
+
+GameViewer.prototype = {
+  _createControls: function() {
+    var $controls = $("<div></div>").addClass("controls row-fluid");
+    $controls.append($("<a href='javascript:void(0)'><i class='icon-play'></i></a>").addClass("btn btn-primary play"));
+    $controls.append($("<a href='javascript:void(0)'><i class='icon-stop'></i></a>").addClass("btn stop"));
+    $controls.append($("<div></div>").addClass("slider"));
+    $controls.append($("<div>Turn # <span class='turn'></span> </div>").addClass("turn-container"));
+    this.canvas.before($controls);
+    return $controls;
+  },
+
+  _initControls: function() {
+    $(".play", this.controls).click($.proxy(function() {
+      if (this.currentFrame == this.maxFrame) {
+        this.play(this.minFrame);
+      }
+      else {
+        this.play(this.currentFrame);
+      }
+    }, this));
+    $(".stop", this.controls).click($.proxy(function() {
+      this.renderer.stop(true);
+    }, this));
+    $(".slider", this.controls).slider({
+      slide: $.proxy(function(e, ui) {
+        this.goToFrame(ui.value+1);
+      }, this)
+    });
+  },
+
+  _onResize: function() {
+    this.controls.width(this.canvas.width());
+  },
+
+  _onRender: function(e, u) {
+    this.currentFrame = u.turn+1;
+    $(".slider", this.controls).slider({
+      value:u.turn+1
+    });
+    $(".turn", this.controls).html(u.turn+1);
+  },
+
+
+  setReplay: function(replay) {
+    this.stop();
+    this.replay = replay;
+    this.landscapeShown = false;
+    this.minFrame = 1;
+    this.currentFrame = this.minFrame;
+    this.maxFrame = replay.length;
+    this.landscape = parseMap(replay[0].landscape);
+    $(".slider", this.controls).slider({
+      min: this.minFrame,
+      max: this.maxFrame,
+      value: this.currentFrame
+    });
+    this.isPlaying = false;
+  },
+
+  play: function(from, to) {
+    if (this.isPlaying) this.stop();
+    from = typeof from == 'number' ? from : this.minFrame;
+    to = typeof to == 'number' ? to : this.getMaxFrame();
+    for (var i = from-1; i < to; i++) {
+      if (!this.landscapeShown) {
+        this.replay[i].landscape = this.landscape;
+      }
+      else {
+        this.replay[i].partial = true;
+      }
+      this.renderer.update(this.replay[i]);
+      this.landscapeShown = true;
+    }
+    this.isPlaying = true;
+    $(this.canvas).trigger("viewer.play");
+  },
+
+  stop: function() {
+    this.isPlaying = false;
+    this.renderer.stop();
+    $(this.canvas).trigger("viewer.stop");
+  },
+
+  goToFrame: function(frame) {
+    if (this.isPlaying) {
+      this.play(frame);
+    }
+    else {
+      this.stop();
+      this.play(frame, frame);
+      this.isPlaying = false;
+    }
+  },
+
+  getMinFrame: function() {
+    return this.minFrame;
+  },
+
+  getMaxFrame: function() {
+    return this.maxFrame;
+  }
+
+};
 
 
 function Canvas(renderer, canvas) {
@@ -93,10 +243,17 @@ Renderer.prototype = {
   FRAMES: 8,
   WAIT_FRAMES: 8,
 
-  stop: function() {
+  stop: function(finishLast) {
+    if (!this.updator) return;
+    if (finishLast) {
+      this.toDraw = this.toDraw.slice(0, 1);
+      return;
+    }
     clearInterval(this.updator);
     this.updator = null;
     this.toDraw = [];
+    //this.doInit = this.init;
+    this.canvas.trigger("stop");
   },
 
   init: function(state) {
@@ -110,6 +267,7 @@ Renderer.prototype = {
     this.landscape.setSize(this.width, this.height);
     this.players = state.players;
     this.doInit = function() {};
+    this.canvas.trigger("resized");
   },
 
   update: function(state) {
@@ -219,7 +377,7 @@ Renderer.prototype = {
 
     switch (el.type) {
       case "Sheep":
-        if (el.scary) cls = 'scary';
+        if (el.scared) cls = 'scared';
         break;
       case "Dog":
         cls = "player" + parseInt(el.owner);
@@ -239,7 +397,7 @@ Renderer.prototype = {
   },
 
   renderEffect: function(el, ctx) {
-    if (el.scary) {
+    if (el.scared) {
       //TODO: styles
       ctx.fillStyle = "red";
       ctx.strokeStyle = "red";
@@ -275,8 +433,8 @@ Renderer.prototype = {
       }
 
       this.styler.applyClass(ctx, "arrow");
-      if (el.scary) {
-        this.styler.applyClass(ctx, "scary");
+      if (el.scared) {
+        this.styler.applyClass(ctx, "scared");
       }
       ctx.beginPath();
       var ARROW = 3;

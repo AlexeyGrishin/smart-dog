@@ -1,4 +1,4 @@
-var Map2D = require('../core/server/game/map2d.js');
+var Map2D = require('../../core/server/game/map2d.js');
 
 var mockObj = function() {
   this.locate = function(x, y) {

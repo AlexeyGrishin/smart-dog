@@ -66,6 +66,7 @@ GameServer.prototype = {
     }.bind(this));
     var id = this.nextGameId++;
     var game = this.gameFactory.createGame(id, gameToStart);
+
     this.maps.gameStarted(gameToStart);
     //game.setId(id);
     //game.setPlayers(players);

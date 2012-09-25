@@ -9,6 +9,8 @@ public class GameObject {
     public enum Voice {
         NONE, BARKING
     }
+
+    //TODO: add 'scared', 'scaredBy', 'silence'
     
     public GameObject(Map<String, String> map) {
         id = toInt(map.get("id"));

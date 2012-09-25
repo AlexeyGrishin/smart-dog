@@ -11,6 +11,7 @@ var PlayerInterface = function(game, ownerId, info, options) {
   this.info = info;
   this.name = info.name;
   this.game.on(Game.Event.AfterTurn, this.generateState.bind(this));
+  this.controller = PlayerController;
 };
 
 var PlayerController = {
@@ -31,6 +32,11 @@ PlayerInterface.prototype = {
     }
     this.savedState = this._genState();
     this.controller.init(this);
+  },
+
+  //for tests
+  getFirstDog: function() {
+    return this.dogs[0];
   },
 
   getName: function() {
@@ -66,6 +72,7 @@ PlayerInterface.prototype = {
   _genState: function() {
     var visibleArea = [];
     var see = {};
+    //TODO: specify exactly fields to be exported
     function toState(d) {
       var st = _.clone(d.toState());
       delete st.sheepBarkingArea;
@@ -94,7 +101,7 @@ PlayerInterface.prototype = {
     return {
       turn: this.game.turn,
       dogs: this.dogs.map(toState),
-      visibleArea: visibleArea.map(toState),
+      objects: visibleArea.map(toState),
       landscape: this.game.toState().landscape
     }
   },
@@ -137,7 +144,7 @@ PlayerInterface.prototype = {
     if (!dog) return cb(id + " Unknown id");
     if (dog.justBarked) return cb(id + " Dog with already barked this turn");
     dog.bark(function(err) {
-      cb(err);
+      cb(err ? id + " " + err : err);
     });
   },
 
