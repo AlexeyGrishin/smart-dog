@@ -25,6 +25,11 @@ TODO:
 +0. Guidelines
 *1. Game logic (see GameFactory, Player, Dog, etc.)
     - In progress (Grishin)
+      * Sheep logic
+      * Dogs fight
+      - Unit tests for it
+      ! split turn in 2 phases: player turn (before,after) - move dogs, npc turn (before, after) - move sheeps
+      ! split visually on replays too
 2. Persistence (save to DB, see MemoryStorage class)
 +3. Entry point for bots (command-line client, etc)
 4. Development tools (turns replays, etc)
@@ -46,7 +51,7 @@ TODO:
 10. Unit tests!
 11. TODOs, comments, make code clean
 12. Memory leaks - currently server allocates a lot of memory. Probably listeners, or non-closed connections
-
+13. Game rules page - with inlined behavior demos (replays)
 ------------------------------------------------
 Code guidelines
 
