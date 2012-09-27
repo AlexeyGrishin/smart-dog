@@ -23,26 +23,26 @@ node ./games/smart-dog/server/smart_dog_server.js &
 
 TODO:
 +0. Guidelines
-*1. Game logic (see GameFactory, Player, Dog, etc.)
-    - In progress (Grishin)
-      * Sheep logic
-      * Dogs fight
-      - Unit tests for it
-      ! split turn in 2 phases: player turn (before,after) - move dogs, npc turn (before, after) - move sheeps
-      ! split visually on replays too
++1. Game logic (see GameFactory, Player, Dog, etc.)
+    + Done (Grishin)
+      + Sheep logic
+      + Dogs fight
+      + Unit tests for it
+      + split turn in 2 phases: player turn (before,after) - move dogs, npc turn (before, after) - move sheeps
 2. Persistence (save to DB, see MemoryStorage class)
 +3. Entry point for bots (command-line client, etc)
 4. Development tools (turns replays, etc)
 5. Offline replay (ReplayDataStorer shall put html page near json)
-*6. Rendering ('barking' and other sounds, animated moval, probably sprites)
-    - In progress (Grishin)
-7. Website
-   - player page - list of games, winning count, replay/realtime view of latest/current game
-     shall be updated in runtime!
-   - game page - improve design
-   - list of players
-   - list of games - active/finished filter, paging, design
-   - tournament creation/results review (see below)
++6. Rendering ('barking' and other sounds, animated moval, probably sprites)
+    + In progress (Grishin)
+*7. Website
+    * In progress (Grishin)
+        - player page - list of games, winning count, replay/realtime view of latest/current game
+            shall be updated in runtime!
+        + game page - improve design
+        - list of players
+        * list of games - active/finished filter, paging, design
+        - tournament creation/results review (see below)
 8. Players balancer
    - now it just waits for players to join and starts a game with first 2-4 of them.
      It shall make sure that all players play same amount of games
@@ -51,7 +51,8 @@ TODO:
 10. Unit tests!
 11. TODOs, comments, make code clean
 12. Memory leaks - currently server allocates a lot of memory. Probably listeners, or non-closed connections
-13. Game rules page - with inlined behavior demos (replays)
+*13. Game rules page - with inlined behavior demos (replays)
+    * In progress (Grishin)
 ------------------------------------------------
 Code guidelines
 
