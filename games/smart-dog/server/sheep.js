@@ -64,7 +64,8 @@ Sheep.prototype._extend = function(p) {
   p.scaredBy = null;
   p.scared = 0;
   p.direction = goDown;
-  p.doPanic = function() {};
+  p.scaredLevel = 0;
+  this.__defineGetter__('scaredLevel', function() {return p.scaredLevel;});
   this.__defineGetter__('scared', function() {return p.scaredBy != null;});
   this.__defineGetter__('direction', function() {return p.direction});
   var $ = p.game.$;
@@ -88,7 +89,8 @@ Sheep.prototype._beforeTurn = function(p) {
 Sheep.prototype._scare = function(p, scaryObject) {
   if (!scaryObject || p.scaredBy) return;
   p.scaredBy = scaryObject;
-  p.scared = p.sheepScaryTurns;
+  p.scaredLevel = scaryObject.scaredLevel != undefined ? scaryObject.scaredLevel + 1 : 0;
+  p.scared = Math.max(p.sheepScaryTurns - p.scaredLevel, 2);
   p.direction = scaryObject.direction ? scaryObject.direction : getDirection(p.game.$(scaryObject).direction(this));
 };
 

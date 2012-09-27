@@ -11,6 +11,10 @@ Helper.prototype = {
     this.game.once(Game.Event.PlayersReady, cb);
   },
 
+  onFinish: function(cb) {
+    this.game.once(Game.Event.Stop, cb);
+  },
+
   skipTurn: function(cb) {
     this.onTurn(function() {
       this.game.getPlayers().forEach(function(p) {p.endTurn()});
@@ -137,6 +141,11 @@ Helper.prototype = {
 
       skip: function(count, cb) {
         helper.skipTurns(count, cb);
+      },
+
+      waitForEnd: function(cb) {
+        helper.onFinish(cb);
+        helper.skipTurns(999, cb);
       }
     }
   }

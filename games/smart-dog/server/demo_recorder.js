@@ -55,7 +55,13 @@ var Demo = {
           c.move("right", function() {
             c.move("up", function() {
               c.bark(function() {
-                c.skip(8, cb);
+                c.skip(22, function() {
+                  c.move("right", function() {
+                    c.bark(function() {
+                      c.waitForEnd(cb);
+                    })
+                  })
+                });
               })
             })
           })
