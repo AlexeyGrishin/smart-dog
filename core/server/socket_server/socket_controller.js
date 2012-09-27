@@ -35,8 +35,8 @@ SocketController.prototype = {
   },
 
   /* protocol commands */
-  "join": function(name) {
-    this.gameServer.connect(name, this);
+  "join": function(name, hub) {
+    this.gameServer.connect(name, this, hub);
   },
 
   unknown: function(cmd, arg) {
@@ -91,10 +91,10 @@ SocketController.prototype = {
     var state = player.toState();
     var landscape = state.landscape;
     var initState = _.extend({
-      you: player.getId(),
+      you: state.playerId,
       rows: landscape.length,
       cols: landscape[0].length,
-      players: player.TODO || 0
+      players: state.playersCount
 
     }, player.getGameOptions());
     this.send("start", initState);

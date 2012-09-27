@@ -1,3 +1,10 @@
+body {
+    padding-top: 40px;
+}
+
+.rules {
+    padding-top: 100px;
+}
 
 .controls .slider {
     margin-top: 8px;
@@ -139,4 +146,9 @@
 .arrow {
     background-color: #00ff00;
     color: #00ff00;
+}
+
+.helped {
+    color: #00f2ff;
+    background-color: #cbd100;
 }

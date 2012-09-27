@@ -36,10 +36,11 @@ GameServer.prototype = {
    * @param playerName
    * @param ioInterface
    */
-  connect: function(playerName, ioInterface) {
+  connect: function(playerName, ioInterface, hub) {
     var playerInfo = {
       name: playerName,
-      io: ioInterface
+      io: ioInterface,
+      hub: hub
     };
     this.waiting.push(playerInfo);
     var gameToStart = this.maps.getGameToStart(this.waiting);
@@ -151,6 +152,10 @@ GameServer.prototype = {
 
   getGame: function(id, cb) {
     this.storage.getGameInfo(id, cb);
+  },
+
+  getPlayerInfo: function(id, cb) {
+    this.storage.getPlayerInfo(id, cb);
   },
 
   getGameReplay: function(id, cb) {

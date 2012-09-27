@@ -117,6 +117,7 @@ Map2D.prototype = {
   },
 
   x: function(x) {
+    x = Math.ceil(x);
     while (x < 0) {
       x += this.cols;
     }
@@ -124,6 +125,7 @@ Map2D.prototype = {
   },
 
   y: function(y) {
+    y = Math.ceil(y);
     while (y < 0) {
       y += this.rows;
     }
@@ -170,6 +172,8 @@ Map2D.prototype = {
       var layers = this._.map[point.y][point.x];
       if (layer == ALL) {
         this._.layers.forEach(function(l) {
+          if (layers == undefined)
+            console.log(1);
           if (layers[l]) objects.push(layers[l]);
         });
       }

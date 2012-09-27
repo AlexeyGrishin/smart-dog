@@ -63,6 +63,9 @@ var MockSocket = function() {
   this.disconnected = false;
   this.disconnect = function() {
     this.disconnected = true;
+  };
+  this.end = function() {
+
   }
 };
 
@@ -73,7 +76,7 @@ module.exports = {
     this.playerSocket1 = new SocketController(this.mockSocket1, this.server);
     cb();
   }
-/*
+
   ,testMainSuccess: function(test) {
     this.playerSocket1.receive('join Alex');
     setTimeout(function() {
@@ -87,25 +90,23 @@ module.exports = {
       console.log(turn);
       test.ok(turn.indexOf('turn') == 0);
       var state = JSON.parse("{" + obj.substring(4) + "}");
-      test.deepEqual(state.dogs, [
+      test.deepEqual(state,
         {
-          id: 1,
+          id: this.playerSocket1.player.dogs[0].id,
           x: 0,
           y: 0,
-          layer: "object",
           owner: 1,
           type: "Dog",
-          action: "move",
-          scared: false,
-          dogBarkingRadius: 4,
-          sheepBarkingRadius: 4
-        }]);
+          action: "move"
+        });
       test.equals(this.mockSocket1.disconnected, false);
       this.playerSocket1.receive('do 1 move up\n');
       this.playerSocket1.receive('end\n');
+      this.playerSocket1.disconnect();
+
       test.done();
     }.bind(this), 1);
-  }*/
+  }
 };
 
 //module.exports.setUp(function() {});

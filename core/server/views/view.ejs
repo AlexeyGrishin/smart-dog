@@ -1,32 +1,18 @@
-<!DOCTYPE HTML>
-<html>
-<head>
-    <script src="jquery-1.8.0.min.js"></script>
-    <script src="jquery-ui-1.8.23.custom.min.js"></script>
-    <script src="bootstrap.js"></script>
-    <script src="socket.io.min.js"></script>
-    <script src="canvas-css.js"></script>
-    <script src="renderer.js"></script>
-    <script src="webclient.js"></script>
-    <link href="bootstrap.css" rel="stylesheet"/>
-    <link href="ui-lightness/jquery-ui-1.8.23.custom.css" rel="stylesheet"/>
-    <link href="games.css" rel="stylesheet"/>
-
-</head>
-<body data-id="<%= game.getId() %>">
-<h1>Game <%= game.getId() %></h1>
-<p>Turn # <span id="turn">0</span> </p>
+<link href="ui-lightness/jquery-ui-1.8.23.custom.css" rel="stylesheet"/>
+<h1 data-id="<%= game.getId() %>">Game <%= game.getId() %>
+<small><%= game.getMapName() %></small>
+</h1>
 <p class="players info"></p>
 <p class="alert alert-error hidden"></p>
 <br>
-<div class="controls hidden row">
-    <button class="btn btn-primary replay span1">Replay</button>
-    <div class="turn-slider span3"></div>
-</div>
-<canvas id="game" class="sheep grass dog wall tree player1 player2 player3 player4 scared barking barking-area arrow">
+
+<canvas id="game">
     Loading...
 </canvas>
 <br/>
 
-</body>
-</html>
+<script src="jquery-ui-1.8.23.custom.min.js"></script>
+<script src="socket.io.min.js"></script>
+<script src="canvas-css.js"></script>
+<script src="renderer.js"></script>
+<script src="webclient.js"></script>

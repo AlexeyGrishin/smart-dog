@@ -45,6 +45,9 @@ function GameObject(game, properties) {
   this.toState = function() {
     return this._genState(p);
   };
+  this.toPlayerState = function() {
+    return this._genPlayerState(p);
+  };
   var $ = p.game.$;
   $.extend(this, $.moveable, p);
   this.__defineGetter__('type', function() { return this.constructor.name});
@@ -85,6 +88,10 @@ GameObject.prototype = {
       state.movedDy = p.oldPosition.dy;
     }
     return state;
+  },
+
+  _genPlayerState: function(p) {
+    return this._genState(p);
   },
 
   _extend: function(p) {

@@ -16,7 +16,7 @@ var GameView = {
 
   onFinished: function(update) {
     $(".players").html(
-      update.players.map(function(p) {return "<div class='player" + p.id + "'><span>" + p.name + "</span><em>" + p.score + "</em></div>"}).join("")
+      update.players.map(function(p) {return "<div class='player" + p.id + "'><span>" + p.name + "</span><em>" + p.score.toFixed(2) + "</em></div>"}).join("")
     );
     var stats = ["Game is over"];
     if (update.winner) {
@@ -34,7 +34,7 @@ var GameView = {
 };
 
 $(function() {
-  var gameId = $("body").attr("data-id");
+  var gameId = $("h1").attr("data-id");
   var socket = io.connect("http://" + window.location.hostname + ':3003');
   var viewCmd = 'view';
   var errorCmd = 'error';

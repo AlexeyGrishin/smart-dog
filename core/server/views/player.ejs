@@ -1,21 +1,19 @@
-<!DOCTYPE HTML>
-<html>
-<head>
-    <script src="jquery-1.8.0.min.js"></script>
-    <script src="bootstrap.js"></script>
-    <script src="socket.io.min.js"></script>
-    <script src="renderer.js"></script>
-    <script src="webclient.js"></script>
-    <link href="bootstrap.css" rel="stylesheet"/>
-    <link href="games.css" rel="stylesheet"/>
-</head>
-<body data-id="<%= player.name %>">
-<h1>Player <%= player.name %></h1>
-<h3></h3>
+<h1 data-id="<%= player.name %>">Player <%= player.name %></h1>
 <table>
 <tr>
-<th>Game</th><th>Score</th>
+<th>Game</th><th>Map</th><th>Players</th><th>Replay</th>
 </tr>
+<% for (var i = 0; i < player.games.length; i++) { var game = player.games[i]; %>
+<tr>
+<td><%= game.id %></td>
+<td><%= game.brief.map %></td>
+<td><%- games[i].brief.players.map(function(p) { /*TODO: copy-paste from 'games.ejs'*/
+        var name = p.name;
+        if (games[i].brief.winner && games[i].brief.winner.id == p.id)
+            name = "<b>" + p.name + "</b>";
+        return name + " (" + p.score.toFixed(2) + ")";
+    }).join(", ") %></td>
+<td><a href="/<%= game.id %>">See Replay</a></td>
+</tr>
+<% } %>
 </table>
-</body>
-</html>

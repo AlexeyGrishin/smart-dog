@@ -258,7 +258,7 @@ SmartDogGame.prototype.init = function() {
 SmartDogGame.prototype.afterTurn = function() {
   this.emit(Sheep.Event.DoMove);
   this.emit(Sheep.Event.DoFear);
-  if (this._.turn >= this._.o.turnsLimit) {
+  if (this._.turn >= this._.o.turnsLimit - 1) {
     this._stopGame('turnsLimit');
   }
 

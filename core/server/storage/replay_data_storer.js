@@ -10,10 +10,14 @@ var Game = require('../game/game.js')
  */
 var ReplayData = function(game) {
   EventEmitter.call(this);
-  this.game = ReplayFormat.getGameInfo(game);
   this.replay = [];
-  this.replay.push(ReplayFormat.getFirstState(game.toState()));
-  this.game.replay = this.replay;
+  //TODO: ugly, need another way to know that game is not started
+  if (game.toState() == undefined) {
+    game.once(Game.Event.Start, this.onInit.bind(this, game));
+  }
+  else {
+    this.onInit(game);
+  }
   game.on(Game.Event.Turn, this.onTurn.bind(this));
   game.on(Game.Event.Stop, this.onStop.bind(this));
 };
@@ -24,6 +28,12 @@ ReplayData.Event = {
 };
 
 util.inherits(ReplayData, EventEmitter);
+
+ReplayData.prototype.onInit = function(game) {
+  this.game = ReplayFormat.getGameInfo(game);
+  this.replay.push(ReplayFormat.getFirstState(game.toState()));
+  this.game.replay = this.replay;
+};
 
 ReplayData.prototype.onTurn = function(state) {
   var turn = ReplayFormat.getNextState(state);

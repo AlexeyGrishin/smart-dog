@@ -166,6 +166,11 @@ var dogTest = {
         ".@.",
         "..."
       ];
+      this.map2dogs = [
+        ".....",
+        ".@.@.",
+        "....."
+      ];
       cb();
     },
     tearDown: function(cb) {
@@ -212,7 +217,7 @@ var dogTest = {
       p.makeTurn(function() {
         p.player1.bark(p.dog1.id, ex(test).noError());
       }).after(function(state) {
-          ex(test).contains(state.objects[1], {type: "Dog", scared: true, action: "panic", x: 4, y: 4});
+          ex(test).contains(state.objects[1], {type: "Dog", action: "panic", x: 4, y: 4});
           test.done();
         });
     },
@@ -236,7 +241,7 @@ var dogTest = {
       p.makeTurn(function() {
         p.player1.bark(p.dog1.id, ex(test).noError());
       }).after(function(state) {
-          ex(test).contains(state.objects[1], {type: "Dog", scared: false, action: "move", x: 4, y: 4});
+          ex(test).contains(state.objects[1], {type: "Dog", action: "move", x: 4, y: 4});
           test.done();
         });
     },
@@ -256,7 +261,7 @@ var dogTest = {
                 //now we are on the enemy area. bark!
                 p.player1.bark(p.dog1.id, ex(test).noError());
               }).after(function(state) {
-                  ex(test).contains(state.objects[1], {type: "Dog", scared: true, action: "indignant", x: 4, y: 4});
+                  ex(test).contains(state.objects[1], {type: "Dog", action: "indignant", x: 4, y: 4});
                   test.done();
                 });
             })
@@ -298,16 +303,55 @@ var dogTest = {
         p.player1.bark(p.dog1.id, ex(test).noError());
         p.player2.bark(p.dog2.id, ex(test).noError());
       }).after(function(state) {
-          ex(test).contains(state.objects[1], {type: "Dog", scared: true, action: "panic", x: 4, y: 4});
-          ex(test).contains(state.objects[0], {type: "Dog", scared: true, action: "panic", x: 1, y: 1});
+          ex(test).contains(state.objects[1], {type: "Dog", action: "panic", x: 4, y: 4});
+          ex(test).contains(state.objects[0], {type: "Dog", action: "panic", x: 1, y: 1});
           test.done();
         });
 
       test.done();
 
+    },
+
+    allyBarkCancelsPanic: function(test) {
+      var state = p.initAndStart(this.map2dogs, {dogBarkingR: 3, dogScaryTurns: 50}, 2);
+      ex(test).contains(state.objects[2], {type: "Dog", action: "move", x: 6, y: 4, owner: 2});
+      var enemyDog = p.controller(p.player1, p.dog1_2);
+      var allyDog = p.controller(p.player2, p.dog2_2);
+      enemyDog.move("down", function() {
+        enemyDog.move("right", function() {
+          enemyDog.bark(function(state) {
+            ex(test).contains(state.objects[2], {type: "Dog", action: "panic", x: 6, y: 4, owner: 2});
+            allyDog.bark(function(state) {
+              ex(test).contains(state.objects[2], {type: "Dog", action: "move", x: 6, y: 4, owner: 2});
+              test.done();
+            });
+          });
+        })
+      });
+
+    },
+
+
+    allyBarkSameTurnDoesNotCancelPanic: function(test) {
+      var state = p.initAndStart(this.map2dogs, {dogBarkingR: 3, dogScaryTurns: 50}, 2);
+      ex(test).contains(state.objects[2], {type: "Dog", action: "move", x: 6, y: 4, owner: 2});
+      var enemyDog = p.controller(p.player1, p.dog1_2);
+      var allyDog = p.controller(p.player2, p.dog2_2);
+      enemyDog.move("down", function() {
+        enemyDog.move("right", function() {
+          p.player1.bark(p.dog1_2.id, ex(test).noError());
+          p.player2.bark(p.dog2_2.id, ex(test).noError());
+          p.skipTurn(function(state) {
+            ex(test).contains(state.objects[2], {type: "Dog", action: "panic", x: 6, y: 4, owner: 2});
+            test.done();
+          });
+        })
+      });
     }
 
   }
+
+
 
 };
 

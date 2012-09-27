@@ -1,7 +1,8 @@
 var GameObject = require('../../../core/server/game/game_object.js')
   , util = require('util')
   , Dog = require('./dog')
-  , constants = require('./consts.js');
+  , constants = require('./consts.js')
+  , _ = require('cloneextend');
 
 function Sheep(game, properties) {
   GameObject.call(this, game, properties);
@@ -41,15 +42,21 @@ Sheep.Event = {
 };
 
 Sheep.prototype._genState = function(p) {
-  var state = GameObject.prototype._genState.call(this, p);
-  state.scared = p.scaredBy != null;
-  state.action = p.scared ? "panic" : (this._shallMove(p) ? "move" : "standBy");
-  state.direction = p.direction.dir;
+  var state = _.extend(GameObject.prototype._genState.call(this, p), this._genPlayerState(p));
   if (p.scaredBy) {
-    state.willNotFearAt = p.game.getTurn() + p.scared;
     state.scaredBy = {x: p.scaredBy.x, y:p.scaredBy.y};
   }
   return state;
+};
+
+Sheep.prototype._genPlayerState = function(p) {
+  return {
+    type: this.type,
+    x:p.x,
+    y:p.y,
+    action: p.scared ? "panic" : (this._shallMove(p) ? "move" : "standBy"),
+    direction:p.direction.dir
+  }
 };
 
 Sheep.prototype._extend = function(p) {
@@ -59,6 +66,7 @@ Sheep.prototype._extend = function(p) {
   p.direction = goDown;
   p.doPanic = function() {};
   this.__defineGetter__('scared', function() {return p.scaredBy != null;});
+  this.__defineGetter__('direction', function() {return p.direction});
   var $ = p.game.$;
   p.game.on(Sheep.Event.DoMove, this._doMove.bind(this, p));
   p.game.on(Sheep.Event.DoFear, this._doFear.bind(this, p));
@@ -66,7 +74,8 @@ Sheep.prototype._extend = function(p) {
     if ($(this).inRadius(dog, p.dogBarkingR)) {
       this._scare(p, dog);
     }
-  }.bind(this))
+  }.bind(this));
+
 };
 
 Sheep.prototype._beforeTurn = function(p) {
@@ -80,7 +89,7 @@ Sheep.prototype._scare = function(p, scaryObject) {
   if (!scaryObject || p.scaredBy) return;
   p.scaredBy = scaryObject;
   p.scared = p.sheepScaryTurns;
-  p.direction = getDirection(p.game.$(scaryObject).direction(this));
+  p.direction = scaryObject.direction ? scaryObject.direction : getDirection(p.game.$(scaryObject).direction(this));
 };
 
 Sheep.prototype._shallMove = function(p) {
@@ -122,53 +131,9 @@ Sheep.prototype._doMove = function(p) {
 
 Sheep.prototype._doFear = function(p) {
   var $ = p.game.$;
-  var sheep = $(this).around(2).find(".Sheep :scared").not(this).first();
+  var sheep = $(this).around(1.5).find(".Sheep :scared").not(this).first();
   this._scare(p, sheep);
 };
-
-/*Sheep.prototype._afterTurn = function(p) {
-  if (p.scared) p.scared--;
-  if (!p.scared) p.scaredBy = null;
-  //detect where to go next
-  if (p.standBy > 0) {
-    p.standBy--;
-    return;
-  }
-  if (p.scaredBy) {
-    var direction = p.map.getDirection(p.scaredBy.x, p.scaredBy.y, p.x, p.y);
-    p.direction = [goDown,goUp,goLeft,goRight].filter(function(go) {
-      return go.dx == direction.dx && go.dy == direction.dy;
-    })[0];
-    //TODO: if cannot move this way - shall try another ones, but not forward to fear source
-    console.log("Sheep " + p.id + " fears " + p.type + " at " + p.scaredBy.x + "," + p.scaredBy.y + " and going to run into " + direction.dx + "," + direction.dy);
-    this.move(direction.dx, direction.dy, function(err) {
-      if (err) console.log("Sheep stuck - " + err);
-    });
-    p.game.emit(Sheep.Event.SheepScared, this);
-  }
-  else {
-    var $ = p.game.$;
-    function check(dr) {
-      return ($.canMoveTo(p.x+dr.dx, p.y+dr.dy));
-    }
-    if (!check(p.direction)) {
-      var valid = p.direction.next.filter(function(d) {return check(d);});
-      if (valid.length > 0) {
-        p.direction = valid[0];
-      }
-    }
-    if (check(p.direction)) {
-      console.log("Sheep " + p.id + "  decided to go " + p.direction.dir);
-      this.move(p.direction.dx, p.direction.dy, function(err){
-        if (err) console.error("Shall never happen - " + err);
-      });
-      p.standBy = p.sheepStandBy;
-    }
-    else {
-      console.log("Sheep " + p.id + "  decided to stay here");
-    }
-  }
-};*/
 
 module.exports = Sheep;
 

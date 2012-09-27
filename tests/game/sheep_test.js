@@ -34,7 +34,7 @@ var sheepTest = {
 
     testInitial: function(test) {
       var state = p.game.toState();
-      test.deepEqual(state.objects, [{action: "standBy", type: "Sheep", x:1, y:1, direction: "down", layer:"object", scared:false, owner:1}]);
+      test.deepEqual(state.objects, [{action: "standBy", type: "Sheep", x:1, y:1, direction: "down", layer:"object", owner:1}]);
       test.done();
     },
 
@@ -54,7 +54,7 @@ var sheepTest = {
       p.skipTurns(3, function() {
         var state = p.game.toState();
         test.equals(state.objects.length, 1);
-        ex(test).contains(state.objects[0], {action: "move", type: "Sheep", x:1, y:2, direction: "down", layer:"object", scared:false, owner:1});
+        ex(test).contains(state.objects[0], {action: "move", type: "Sheep", x:1, y:2, direction: "down", layer:"object", owner:1});
         test.done();
       });
     },
@@ -161,7 +161,7 @@ var sheepTest = {
       p.makeTurn(function() {
         p.player1.bark(p.dog1.id, ex(test).noError());
       }).after(function(state) {
-          ex(test).contains(state.objects[0], {type: "Sheep", action: "panic", x: 4, y: 5, scared: true});
+          ex(test).contains(state.objects[0], {type: "Sheep", action: "panic", x: 4, y: 5});
           test.done();
         });
     },
@@ -171,7 +171,7 @@ var sheepTest = {
       p.makeTurn(function() {
         p.player1.bark(p.dog1.id, ex(test).noError());
       }).after(function(state) {
-          ex(test).contains(state.objects[0], {action: "standBy", x: 5, y: 5, scared: false});
+          ex(test).contains(state.objects[0], {action: "standBy", x: 5, y: 5});
           test.done();
         });
     },
@@ -181,7 +181,7 @@ var sheepTest = {
       p.makeTurn(function() {
         p.player1.bark(p.dog1.id, ex(test).noError());
       }).after(function(state) {
-          ex(test).contains(state.objects[0], {x: 5, y: 4, scared: true});
+          ex(test).contains(state.objects[0], {x: 5, y: 4, action: "panic"});
           test.done();
         });
     },
@@ -192,14 +192,14 @@ var sheepTest = {
         p.player1.bark(p.dog1.id, ex(test).noError());
       }).after(function(state) {
           //turn 1 done - shall be scary
-          ex(test).contains(state.objects[0], {x: 5, y: 4, scared: true, direction: "up"});
+          ex(test).contains(state.objects[0], {x: 5, y: 4, action: "panic", direction: "up"});
           p.skipTurn(function(state) {
             //turn 2 done - shall be scary
             console.log(state.objects[0]);
-            ex(test).contains(state.objects[0], {action: "panic", x: 5, y: 3, scared: true, direction: "up"});
+            ex(test).contains(state.objects[0], {action: "panic", x: 5, y: 3, direction: "up"});
             p.skipTurn(function(state) {
               //turn 3 done - shall be not scary
-              ex(test).contains(state.objects[0], {action: "standBy", x: 5, y: 3, scared: false, direction: "up"});
+              ex(test).contains(state.objects[0], {action: "standBy", x: 5, y: 3, direction: "up"});
               test.done();
             })
           })
@@ -216,7 +216,7 @@ var sheepTest = {
         }).after(function(state) {
             ex(test).contains(state.objects[0], {x: 6, y: 4, type: "Sheep", direction: "up"});
             p.skipTurns(3, function(state) {
-              ex(test).contains(state.objects[0], {type: "Sheep", direction: "up", scared: false});
+              ex(test).contains(state.objects[0], {type: "Sheep", direction: "up", action: "move"});
               test.done();
             })
           });
@@ -250,15 +250,15 @@ var sheepTest = {
           ex(test).contains(state.objects[1], {x: 4, y: 5, type: "Sheep", direction: "left", action: "panic"});
           p.skipTurn(function(state) {
             //shall stand by, but fear. shall move on next turn
-            ex(test).contains(state.objects[0], {x: 2, y: 4, type: "Sheep", direction: "up", action: "panic"});
+            ex(test).contains(state.objects[0], {x: 2, y: 4, type: "Sheep", direction: "left", action: "panic"});
             ex(test).contains(state.objects[1], {x: 3, y: 5, type: "Sheep", direction: "left", action: "panic"});
             p.skipTurn(function(state) {
               //second sheep run, first one shall stand by
-              ex(test).contains(state.objects[0], {x: 2, y: 3, type: "Sheep", direction: "up", action: "panic"});
+              ex(test).contains(state.objects[0], {x: 1, y: 4, type: "Sheep", direction: "left", action: "panic"});
               ex(test).contains(state.objects[1], {x: 3, y: 5, type: "Sheep", direction: "left", action: "standBy"});
               p.skipTurn(function(state) {
                 //second sheep stops
-                ex(test).contains(state.objects[0], {x: 2, y: 3, type: "Sheep", direction: "up", action: "standBy"});
+                ex(test).contains(state.objects[0], {x: 1, y: 4, type: "Sheep", direction: "left", action: "standBy"});
                 test.done();
               });
             });
@@ -275,18 +275,6 @@ var sheepTest = {
 
   }
 
-
-  //TODO: в тестах - хорошо бы проверять со стороны player, собак так уж точно. овец - проверить, что не светится owner и id
-
 };
 
 module.exports = sheepTest;
-if(1) {
-  var F = function() {};
-  //sheepTest.fear.setUp(F);
-  //sheepTest.fear.testScaryDistance({done: F, equals: F, deepEqual: F, ifError: F, fail: F});
-  //sheepTest.fear.tearDown(F);
-  //sheepTest.fear.setUp(F);
-  //sheepTest.fear.testKeepDirectionAfterScared({done: F, equals: F, deepEqual: F, ifError: F, fail: F});
-  //sheepTest.fear.tearDown(F);
-}

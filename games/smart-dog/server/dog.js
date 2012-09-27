@@ -1,6 +1,7 @@
 var GameObject = require('../../../core/server/game/game_object.js')
   , util = require('util')
-  , Game = require('../../../core/server/game/game.js');
+  , Game = require('../../../core/server/game/game.js')
+  , _ = require('cloneextend');
 
 function Dog(game, properties) {
   GameObject.call(this, game, properties);
@@ -12,16 +13,28 @@ Dog.Event = {
 util.inherits(Dog, GameObject);
 
 Dog.prototype._genState = function(p) {
-  var state = GameObject.prototype._genState.call(this, p);
-  state.id = p.id;
+  var state = _.extend(GameObject.prototype._genState.call(this, p), this._genPlayerState(p));
   state.sheepBarkingRadius = p.dogBarkingR;
   state.dogBarkingRadius = p.dogBarkingR;
   state.sheepBarkingArea = p.map.getArea(p.x, p.y, p.dogBarkingR);
-  state.scared = p.scared > 0;
-  state.action = p.scared ? (p.onlySilence ? "indignant" : "panic") : "move";
   if (p.scaredBy) {
     state.scaredBy = p.scaredBy;
   }
+  if (p.helpedBy) {
+    state.helpedBy = p.helpedBy;
+  }
+  return state;
+};
+
+Dog.prototype._genPlayerState = function(p) {
+  var state = {
+    id:p.id,
+    type: this.type,
+    x:p.x,
+    y:p.y,
+    owner:p.owner ? p.owner.getId() : undefined,
+    action: p.scared ? (p.onlySilence ? "indignant" : "panic") : "move"
+  };
   if (p.barking) state.voice = "barking";
   return state;
 };
@@ -45,9 +58,13 @@ Dog.prototype._extend = function(p) {
     cb();
   };
   p.game.on(Dog.Event.Barked, function(barkedDog) {
-    if (barkedDog.owner == p.owner) return; //we do not fear our dogs
-    var enemyOnOurArea = p.map.getLandscape(barkedDog.x, barkedDog.y).owner == p.owner;
-    if (p.game.$(this).inRadius(barkedDog, p.dogBarkingR)) {
+    if (barkedDog == this || !p.game.$(this).inRadius(barkedDog, p.dogBarkingR)) return;
+    if (barkedDog.owner == p.owner) {
+      p.allyBarked = true;
+      p.helpedBy = {x:barkedDog.x, y:barkedDog.y};
+    }
+    else {
+      var enemyOnOurArea = p.map.getLandscape(barkedDog.x, barkedDog.y).owner == p.owner;
       console.log("Scared by dog at " + barkedDog.x + ", " + barkedDog.y + ", it is on our area: " + enemyOnOurArea);
       p.justBecameScared = true;
       p.scaredBy = {x: barkedDog.x, y: barkedDog.y};
@@ -63,13 +80,16 @@ Dog.prototype._extend = function(p) {
 };
 
 Dog.prototype._beforeTurn = function(p) {
+  p.helpedBy = null;
+  p.scaredBy = null;
 };
 
 Dog.prototype._afterTurn = function(p) {
   if (p.scared) p.scared--;
-  if (p.silence) p.silence--;
+  if (p.allyBarked) p.scared = 0;
   p.barking = p.justBarked;
   p.justBarked = false;
+  p.allyBarked = false;
   if (p.justBecameScared) {
     p.scared = p.dogScaryTurns;
     p.justBecameScared = false;

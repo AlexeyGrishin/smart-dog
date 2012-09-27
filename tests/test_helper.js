@@ -23,7 +23,6 @@ Helper.prototype = {
       before: turnCb,
       after: afterCb || function() {}
     };
-    var that = this;
     this.onTurn(function() {
       cbacks.before();
       this.game.getPlayers().forEach(function(p) {p.endTurn()});
@@ -60,14 +59,18 @@ Helper.prototype = {
     for (var i = 0; i < playersCount; i++) {
       this["player" + (i+1)] = this.game.getPlayers()[i];
       (function(i) {
-        this.__defineGetter__("dog" + (i+1), function() {return this.game.getPlayers()[i].getFirstDog()});
+        this.__defineGetter__("dog" + (i+1), function() {return this.game.getPlayers()[i].dogs[0]});
+        this.__defineGetter__("dog" + (i+1) + '_2', function() {return this.game.getPlayers()[i].dogs[1]});
       }.bind(this))(i);
     }
   },
 
   initAndStart: function(map, options, playersCount) {
     this.init(map, options, playersCount);
+    return this.start();
+  },
 
+  start: function() {
     this.game.start();
     return this.game.toState();
   },
@@ -115,6 +118,27 @@ Helper.prototype = {
       map.push(r);
     }
     return map;
+  },
+
+  controller: function(player, dog) {
+    var helper = this;
+    return {
+      move: function(direction, cb) {
+        helper.makeTurn(function() {
+          player.move(dog.id, direction, function(){});
+        }).after(cb);
+      },
+
+      bark: function(cb) {
+        helper.makeTurn(function() {
+          player.bark(dog.id, function(){});
+        }).after(cb);
+      },
+
+      skip: function(count, cb) {
+        helper.skipTurns(count, cb);
+      }
+    }
   }
 
 

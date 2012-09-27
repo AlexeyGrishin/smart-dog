@@ -8,7 +8,7 @@ In pattern: <command> <arg> where <arg> is a json-like string, for example:
         where vals are wrapped with quotes (")
 Out pattern: the same, but <arg> is a string
 
-> ready
+> join <userName> [#<hubName>]
 < wait
 < start "players":"<playersCount>","map":"<mapName>","rows":"<rows>","cols":"<cols>","you":"<yourId>" \
             "dogVisibilityR":"<radius>","dogBarkingR":"<distance>",\
@@ -18,7 +18,7 @@ Out pattern: the same, but <arg> is a string
 #For dog
 < obj id:1,x:2,y:3,owner:1,type:Dog[,voice:barking][,action=move|panic|indignant]
 #For sheep
-< obj x:2,y:4,type:Sheep[,voice:baa][,direction:left|down|right|up][,action=move|standBy|panic]
+< obj x:2,y:4,type:Sheep[,direction:left|down|right|up][,action=move|standBy|panic]
 #For unknown voice
 < obj x:10,y:15,voice:Barking
 < turn

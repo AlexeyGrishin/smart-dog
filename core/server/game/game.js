@@ -32,7 +32,8 @@ var Game = function(options) {
 };
 
 Game.Event = {
-  Init: 'game.init',
+  Init: 'game.init',    //nothing is initialized
+  Start: 'game.start',  //everything is initialized, ready for first
   //Game cycle:
   BeforeTurn: 'game.beforeTurn',
   PlayersReady: 'game.playerReady',  //sent when player may make the turn
@@ -60,13 +61,14 @@ var GameMethods = {
     this._measure();
     this.on(Game.Event.PlayerTurn, this._catchError(this._onPlayerTurn.bind(this)));
     setTimeout(this._catchError(this._doTurn.bind(this)), 0);
+    this.emit(Game.Event.Start);
   },
 
   _measure: function(topic) {
     var now = new Date();
     if (this._.lastDate) {
       var dur = now - this._.lastDate;
-      console.log("         " + topic + " took " + dur + "ms");
+      //console.log("         " + topic + " took " + dur + "ms");
     }
     this._.lastDate = new Date();
   },

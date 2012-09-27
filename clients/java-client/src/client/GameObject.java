@@ -9,18 +9,28 @@ public class GameObject {
     public enum Voice {
         NONE, BARKING
     }
+    public enum Action {
+        UNKNOWN, STANDBY, MOVE, PANIC, INDIGNANT
+    }
+    public enum Direction {
+        UNKNOWN, UP, DOWN, LEFT, RIGHT
+    }
 
-    //TODO: add 'scared', 'scaredBy', 'silence'
-    
     public GameObject(Map<String, String> map) {
         id = toInt(map.get("id"));
         x = toInt(map.get("x"));
         y = toInt(map.get("y"));
-        String t = map.get("type");
-        type = t == null ? Type.UNKNOWN : Type.valueOf(t.toUpperCase());
+        type = extract(map, "type", Type.UNKNOWN);
         owner = toInt(map.get("owner"));
-        String v = map.get("voice");
-        voice = v == null ? null : Voice.valueOf(v.toUpperCase());
+        voice = extract(map, "voice", Voice.NONE);
+        direction = extract(map, "direction", Direction.UNKNOWN);
+        action = extract(map, "action", Action.UNKNOWN);
+    }
+    
+    private <E extends Enum<E>> E extract(Map<String, String> map, String name, E defaultVal) {
+        String value = map.get(name);
+        if (value == null) return defaultVal;
+        return Enum.valueOf(defaultVal.getDeclaringClass(), value.toUpperCase());
     }
 
     private Integer toInt(String integer) {
@@ -33,5 +43,7 @@ public class GameObject {
     public final int y;
     public final Integer owner;
     public final Voice voice;
+    public final Action action;
+    public final Direction direction;
     
 }

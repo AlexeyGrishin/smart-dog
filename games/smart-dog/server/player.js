@@ -10,7 +10,7 @@ var PlayerInterface = function(game, ownerId, info, options) {
   this.id = ownerId;
   this.info = info;
   this.name = info.name;
-  this.game.on(Game.Event.AfterTurn, this.generateState.bind(this));
+  //this.game.on(Game.Event.AfterTurn, this.generateState.bind(this));
   this.controller = PlayerController;
 };
 
@@ -32,11 +32,6 @@ PlayerInterface.prototype = {
     }
     this.savedState = this._genState();
     this.controller.init(this);
-  },
-
-  //for tests
-  getFirstDog: function() {
-    return this.dogs[0];
   },
 
   getName: function() {
@@ -72,16 +67,15 @@ PlayerInterface.prototype = {
   _genState: function() {
     var visibleArea = [];
     var see = {};
-    //TODO: specify exactly fields to be exported
     function toState(d) {
-      var st = _.clone(d.toState());
-      delete st.sheepBarkingArea;
-      delete st.scaredBy;
+      var st = _.clone(d.toPlayerState());
       //anonimize :)
       if (!see[d.x + '_' + d.y]) {
-        delete st.id;
-        delete st.type;
-        delete st.owner;
+        st = {
+          voice: st.voice,
+          x: st.x,
+          y: st.y
+        }
       }
       return st;
     }
@@ -99,10 +93,11 @@ PlayerInterface.prototype = {
       }
     });
     return {
-      turn: this.game.turn,
-      dogs: this.dogs.map(toState),
-      objects: visibleArea.map(toState),
-      landscape: this.game.toState().landscape
+      turn: this.game.getTurn(),
+      playerId: this.getId(),
+      playersCount: this.game.getPlayers().length,
+      landscape: this.game.toState().landscape,
+      objects: visibleArea.map(toState)
     }
   },
 
@@ -162,6 +157,7 @@ PlayerInterface.prototype = {
   },
 
   makeTurn: function() {
+    this.generateState();
     this.turn = this.game.getTurn();
     this.moved = false;
     this.dogs.forEach(function(d) {

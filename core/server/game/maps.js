@@ -9,25 +9,20 @@ var fs = require('fs')
  */
 var Maps = function(config, mapFactory) {
   this.maps = [];
-  this.mapFactory = mapFactory;
   function match(fileName) {
     if (!config.maps || config.maps.length == 0) return true;
     return config.maps.some(function(m) {return m == fileName;});
   }
   fs.readdirSync(config.dir).forEach(function(name) {
-    if (!match(name)) return;
+    var fpath = './' + config.dir + '/' + name;
+    if (!fs.statSync(fpath).isFile() || !match(name)) return;
     console.log("Read map: " + name);
-    var mapFile = fs.readFileSync('./maps/' + name);
-    var lines = mapFile.toString().replace(/\r/g, '').split("\n");
-    var opts = {};
-    if (lines[0].charAt(0) == '{') {
-      opts = JSON.parse(lines.splice(0,1)[0]);
-    }
-    var mapCtor = mapFactory.parseMapPart(lines);
+    var readMap = Maps.readMap(fpath);
+    var mapCtor = mapFactory.parseMapPart(readMap.map);
     this.maps.push({
       name: name,
       mapCtor: mapCtor,
-      opts: opts
+      opts: readMap.opts
     })
   }.bind(this));
   this.nextMap = 0;
@@ -57,6 +52,21 @@ var Maps = function(config, mapFactory) {
   };
   this.gameStarted = function() {
     if (++this.nextMap == this.maps.length) this.nextMap = 0;
+  }
+};
+
+Maps.readMap = function(file) {
+  var mapFile = fs.readFileSync(file);
+  var lines = mapFile.toString().replace(/\r/g, '').split("\n")
+    .map(function(s) {return s.trim();})
+    .filter(function(s) {return s.length > 0});
+  var opts = {};
+  if (lines[0].charAt(0) == '{') {
+    opts = JSON.parse(lines.splice(0,1)[0]);
+  }
+  return {
+    map: lines,
+    opts: opts
   }
 };
 

@@ -7,7 +7,7 @@
 <tr class="<%= games[i].finished ? 'finished' : 'active' %>">
 <td><%= games[i].id %></td>
 <td><%= games[i].brief.map %></td>
-<td><%= games[i].brief.turn %></td>
+<td><%= games[i].brief.turn+1 %></td>
 <td><%- games[i].brief.players.map(function(p) {
         var name = p.name;
         if (games[i].brief.winner && games[i].brief.winner.id == p.id)

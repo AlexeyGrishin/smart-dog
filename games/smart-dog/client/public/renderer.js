@@ -5,6 +5,8 @@
   GameViewer - rules playback
  */
 
+var VIEW_CLASSES = "sheep grass dog wall tree player1 player2 player3 player4 scared barking barking-area arrow helped".split(" ");
+
 var characters = {
   '.': function() {return {type: 'Grass'}},
   '#': function() {return {type: 'Wall'}},
@@ -49,8 +51,8 @@ function GameViewer(canvas, controls) {
 GameViewer.prototype = {
   _createControls: function() {
     var $controls = $("<div></div>").addClass("controls row-fluid");
-    $controls.append($("<a href='javascript:void(0)'><i class='icon-play'></i></a>").addClass("btn btn-primary play"));
-    $controls.append($("<a href='javascript:void(0)'><i class='icon-stop'></i></a>").addClass("btn stop"));
+    $controls.append($("<a href='javascript:void(0)'><i class='icon-play'></i></a>").addClass("btn btn-small btn-primary play"));
+    $controls.append($("<a href='javascript:void(0)'><i class='icon-stop'></i></a>").addClass("btn btn-small stop"));
     $controls.append($("<div></div>").addClass("slider"));
     $controls.append($("<div>Turn # <span class='turn'></span> </div>").addClass("turn-container"));
     this.canvas.before($controls);
@@ -71,7 +73,7 @@ GameViewer.prototype = {
     }, this));
     $(".slider", this.controls).slider({
       slide: $.proxy(function(e, ui) {
-        this.goToFrame(ui.value+1);
+        this.goToFrame(ui.value);
       }, this)
     });
   },
@@ -93,9 +95,9 @@ GameViewer.prototype = {
     this.stop();
     this.replay = replay;
     this.landscapeShown = false;
-    this.minFrame = 1;
+    this.minFrame = 0;
     this.currentFrame = this.minFrame;
-    this.maxFrame = replay.length;
+    this.maxFrame = replay.length - 1;
     this.landscape = parseMap(replay[0].landscape);
     $(".slider", this.controls).slider({
       min: this.minFrame,
@@ -109,7 +111,7 @@ GameViewer.prototype = {
     if (this.isPlaying) this.stop();
     from = typeof from == 'number' ? from : this.minFrame;
     to = typeof to == 'number' ? to : this.getMaxFrame();
-    for (var i = from-1; i < to; i++) {
+    for (var i = from; i <= to; i++) {
       if (!this.landscapeShown) {
         this.replay[i].landscape = this.landscape;
       }
@@ -229,7 +231,7 @@ function Renderer(canvas) {
   this.landscape = new Canvas(this.renderLandscape.bind(this));
   this.ctx = this.c.main.getContext();
   this.canvas = $(canvas);
-  this.styler = new Styler($(canvas).getStyles());
+  this.styler = new Styler($(canvas).getStyles(VIEW_CLASSES));
   $(canvas).removeClass();
   this.doInit = this.init;
   this.toDraw = [];
@@ -377,7 +379,7 @@ Renderer.prototype = {
 
     switch (el.type) {
       case "Sheep":
-        if (el.scared) cls = 'scared';
+        if (el.action == "panic") cls = 'scared';
         break;
       case "Dog":
         cls = "player" + parseInt(el.owner);
@@ -397,21 +399,21 @@ Renderer.prototype = {
   },
 
   renderEffect: function(el, ctx) {
-    if (el.scared) {
-      //TODO: styles
-      ctx.fillStyle = "red";
-      ctx.strokeStyle = "red";
-      var r = this._cirBounds(el);
+    var r = this._cirBounds(el);
+    if (el.action == "panic" || el.action == "indignant") {
+      this.styler.applyClass(ctx, "scared");
       ctx.beginPath();
       ctx.arc(r.cx, r.cy, r.radius, 0, 2*Math.PI);
-      ctx.fill();
-      if (el.scaredBy) {
-        var t = this._cirBounds({x:el.scaredBy.x, y:el.scaredBy.y});
-        ctx.beginPath();
-        ctx.moveTo(r.cx, r.cy);
-        ctx.lineTo(t.cx, t.cy);
-        ctx.stroke();
-      }
+      if (el.action == "panic") ctx.fill(); else ctx.stroke();
+    }
+    if (el.helpedBy || el.scaredBy) {
+      var obj = el.helpedBy || el.scaredBy;
+      var t = this._cirBounds({x:obj.x, y:obj.y});
+      this.styler.applyClass(ctx, el.helpedBy ? "helped" : "scared");
+      ctx.beginPath();
+      ctx.moveTo(r.cx, r.cy);
+      ctx.lineTo(t.cx, t.cy);
+      ctx.stroke();
     }
     if (el.direction) {
       ctx.save();
@@ -433,7 +435,7 @@ Renderer.prototype = {
       }
 
       this.styler.applyClass(ctx, "arrow");
-      if (el.scared) {
+      if (el.action == "panic") {
         this.styler.applyClass(ctx, "scared");
       }
       ctx.beginPath();

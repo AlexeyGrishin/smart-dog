@@ -13,7 +13,7 @@ HttpServer.prototype.init = function(resources) {
   app.configure(function(){
     app.set('views', 'core/server/views');
     app.set('view engine', 'ejs');
-    //app.use(expressLayouts);
+    app.use(expressLayouts);
     app.use(express.static(resources));
     app.use(function(err, req, res, next) {
       console.error(err);
@@ -27,13 +27,21 @@ HttpServer.prototype.init = function(resources) {
   app.get('/games', function(req, res, next) {
     gameServer.listGames(false, function(err, games) {
       if (err) return next(err);
-      res.render('games', {games: games});
+      res.render('games', {games: games, layout: 'partial'});
     });
   });
   app.get('/players', function(req, res, next) {
     gameServer.listPlayers(function(err, players) {
       if (err) return next(err);
-      res.render('players', {players: players.sort(function(p1, p2) {return p1.score - p2.score;})});
+      res.render('players', {players: players.sort(function(p1, p2) {return p1.score - p2.score;}), layout: 'partial'});
+    });
+  });
+  app.get('/player/:id', function(req, res) {
+    gameServer.getPlayerInfo(req.param('id'), function(err, player) {
+      if (player)
+        res.render('player', {player: player});
+      else
+        res.sendfile('core/server/views/error.html');
     });
   });
   app.get('/:id', function(req, res) {
