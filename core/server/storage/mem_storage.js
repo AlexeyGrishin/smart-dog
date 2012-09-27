@@ -29,6 +29,7 @@ PlayerInfo.prototype = {
 function MemoryStorage(config) {
   this.games = [];
   this.gamesById = {};
+  this.hubs = [];
   this.playersInfo = [];
   this.playersInfoByName = {};
   if (config && config.replaysDir) {
@@ -46,6 +47,9 @@ MemoryStorage.prototype = {
       this.games.push(game);
       this.gamesById[id] = game;
     }
+    if (this.hubs.indexOf(game.getHub()) == -1) {
+      this.hubs.push(game.getHub());
+    }
     if (game.isFinished()) {
       var winner = game.getGameResult().winner;
       game.getPlayers().forEach(function(p) {
@@ -60,8 +64,18 @@ MemoryStorage.prototype = {
     return cb(null, game);
   },
 
-  listGames: function(cb) {
-    cb(null, this.games);
+  listGames: function(hub, cb) {
+    cb(null, this.games.filter(function(g) {
+      return !hub || g.getHub() == hub;
+    }));
+  },
+
+  listHubs: function(cb) {
+    cb(null, this.hubs.slice());
+  },
+
+  registerHubs: function(hubs) {
+    this.hubs = this.hubs.concat(hubs.slice());
   },
 
   getPlayerInfo: function(name, cb) {
@@ -74,8 +88,8 @@ MemoryStorage.prototype = {
     cb(null, this.playersInfo);
   },
 
-  listActiveGames: function(cb) {
-    cb(null, this.games.filter(function(g) {return !g.isFinished()}));
+  listActiveGames: function(hub, cb) {
+    cb(null, this.games.filter(function(g) {return (!hub || g.getHub() == hub) && !g.isFinished()}));
   },
 
   listFinishedGames: function(from, count, cb) {

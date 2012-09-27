@@ -22,10 +22,13 @@ HttpServer.prototype.init = function(resources) {
 
   });
   app.get('/', function(req, res){
-    res.render('index');
+    gameServer.listHubs(function(err, hubs) {
+      if (hubs.length == 0) hubs = ["#default"];
+      res.render('index', {hubs: hubs});
+    });
   });
   app.get('/games', function(req, res, next) {
-    gameServer.listGames(false, function(err, games) {
+    gameServer.listGames(false, req.param('hub'), function(err, games) {
       if (err) return next(err);
       res.render('games', {games: games, layout: 'partial'});
     });

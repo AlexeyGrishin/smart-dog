@@ -25,7 +25,8 @@ var MapsMock = {
   },
   gameStarted: function(g) {
 
-  }
+  },
+  getHubs: function() {return []}
 };
 
 var MockIo = function() {

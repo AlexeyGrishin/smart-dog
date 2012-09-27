@@ -16,13 +16,15 @@ class StreamClient implements Runnable {
     private List<GameObject> objects = new ArrayList<GameObject>();
     private CommandReactor.Turn turn;
     private boolean debug = true;
+    private String hub;
 
 
-    public StreamClient(InputStream inputStream, OutputStream outputStream, CommandReactor reactor, String name) {
+    public StreamClient(InputStream inputStream, OutputStream outputStream, CommandReactor reactor, String name, String hub) {
         this.inputStream = inputStream;
         this.outputStream = outputStream;
         this.reactor = reactor;
         this.name = name;
+        this.hub = hub;
     }
 
     @Override
@@ -30,7 +32,7 @@ class StreamClient implements Runnable {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         final PrintWriter writer = new PrintWriter(outputStream);
         //TODO: error from server?
-        sendCommand(writer, "join " + name);
+        sendCommand(writer, "join " + name + (hub != null ? " " + hub : ""));
         turn = new CommandReactor.Turn() {
             @Override
             public void move(int id, CommandReactor.Direction dir) {

@@ -25,7 +25,7 @@ var GameView = {
     if (update.reason && update.reason != "") {
       stats.push("Game was stopped becase of " + update.reason);
     }
-    $(".alert").removeClass().addClass("alert alert-success").html(stats.join("<br>"));
+    $(".alert").removeClass("alert alert-success alert-error hidden").addClass("alert alert-success").html(stats.join("<br>"));
   },
 
   replay: function(from, to) {
@@ -46,7 +46,7 @@ $(function() {
       console.log(">" + data);
       if (data.indexOf(viewCmd) == 0) {
         //ignore right now
-        $(".alert").removeClass().html("Please wait until game is finished...").addClass("alert alert-info");
+        $(".alert").removeClass("alert alert-success alert-error hidden").html("Please wait until game is finished...").addClass("alert alert-info");
       }
       else if (data.indexOf(errorCmd) == 0) {
         var error = data.substring((errorCmd + " " + gameId).length);

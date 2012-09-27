@@ -16,6 +16,8 @@ var GameServer = function(storage, maps, gameFactory, options) {
   this.maps = maps;
   this.options = options;
   this.gameFactory = gameFactory;
+  this.storage.registerHubs(this.maps.getHubs());
+  this.waitForAnotherPlayer = {};
 };
 
 var IoInterface = {
@@ -24,6 +26,7 @@ var IoInterface = {
   //next methods depend on player
   init: function(playerInterface) {},
   sendTurn: function() {},
+  sendError: function(error) {},
   finished: function(winner, result) {}
 };
 
@@ -43,25 +46,30 @@ GameServer.prototype = {
       hub: hub
     };
     this.waiting.push(playerInfo);
-    var gameToStart = this.maps.getGameToStart(this.waiting);
+    var gameToStart = this.maps.getGameToStart(this.waiting, playerInfo);
     if (gameToStart.exists && !gameToStart.waitMore) {
       this._startGame(gameToStart);
     }
     else {
       if (gameToStart.exists) {
-        clearTimeout(this.waitForAnotherPlayer);
-        this.waitForAnotherPlayer = setTimeout(function() {
+        clearTimeout(this.waitForAnotherPlayer[gameToStart.hub]);
+        this.waitForAnotherPlayer[gameToStart.hub] = setTimeout(function() {
           this._startGame(gameToStart);
         }.bind(this), this.options.waitForPlayer);
       }
-      playerInfo.io.sendWait(this.waiting.length);
+      if (!gameToStart.error) {
+        playerInfo.io.sendWait(this.waiting.length);
+      }
+      else {
+        playerInfo.io.sendError(gameToStart.error);
+      }
     }
   },
 
   _startGame: function(gameToStart) {
     //guard
     //if (this.waiting.length < this.maps.minPlayersCount()) return;
-    clearTimeout(this.waitForAnotherPlayer);
+    clearTimeout(this.waitForAnotherPlayer[gameToStart.hub]);
     gameToStart.players.forEach(function(p) {
       this.waiting.splice(this.waiting.indexOf(p), 1);
     }.bind(this));
@@ -133,8 +141,8 @@ GameServer.prototype = {
    * @param onlyActive
    * @param cb will be called with brief info array (id, players[], brief{}, finished}
    */
-  listGames: function(onlyActive, cb) {
-    this.storage[onlyActive ? 'listActiveGames' : 'listGames'](function(error, games) {
+  listGames: function(onlyActive, hub, cb) {
+    this.storage[onlyActive ? 'listActiveGames' : 'listGames'](hub, function(error, games) {
       if (error) return cb(error);
       cb(null, games.map(function(g) {
         return {
@@ -148,6 +156,10 @@ GameServer.prototype = {
 
   listPlayers: function(cb) {
     this.storage.listPlayers(cb);
+  },
+
+  listHubs: function(cb) {
+    this.storage.listHubs(cb);
   },
 
   getGame: function(id, cb) {

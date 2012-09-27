@@ -55,10 +55,8 @@ var Fillers = {
   ]
 };
 
-var Factory = function(options) {
-  this.options = _.extend({
-    "games": {
-      "default": {
+var Factory = function() {
+  this.options = {
         waitForTurn: 300000,
         dogVisibilityR: 4,
         dogBarkingR: 4,
@@ -66,7 +64,7 @@ var Factory = function(options) {
         sheepScaryTurns: 4,
         turnsLimit: 10,
         dogScaryTurns: 2
-      }}}, options || {})
+      }
 };
 Factory.prototype = {
   types: {
@@ -112,9 +110,8 @@ Factory.prototype = {
     }
   },
 
-  _getOptions: function(gameType) {
-    //by default - default
-    return _.clone(this.options.games["default"]);
+  _getOptions: function() {
+    return _.clone(this.options);
   },
 
   empty: function() {
@@ -221,6 +218,7 @@ Factory.prototype = {
   createGame: function(id, gameToStart) {
     var options = gameToStart ? _.extend(this._getOptions(), _.clone(gameToStart.options)) : this._getOptions();
     var game = new SmartDogGame(options);
+    game.setHub(gameToStart.hub);
     game.setId(id);
     var pid = 1;
     //TODO: move player/controller connection upper
@@ -290,8 +288,8 @@ SmartDogGame.prototype._stopGame = function(reason, playerCausedStop) {
   }
 };
 
-module.exports = function(config) {
-  return new Factory(config);
+module.exports = function() {
+  return new Factory();
 };
 
 module.exports.types = Factory.prototype.types;

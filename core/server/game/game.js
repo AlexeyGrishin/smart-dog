@@ -23,6 +23,7 @@ var Game = function(options) {
   events.EventEmitter.call(this);
   this._ = {};
   this._.o = options;
+  this._.hub = null;
   this.on(GameObject.Event.Move, function(object, oldX, oldY) {
     this._.map.objectMoved(object, oldX, oldY);
   }.bind(this));
@@ -207,6 +208,14 @@ var GameMethods = {
     return this._.id
   },
 
+  setHub: function(hub) {
+    this._.hub = hub;
+  },
+
+  getHub: function() {
+    return this._.hub
+  },
+
   getPlayers: function() {
     return this._.players;
   },
@@ -217,11 +226,14 @@ var GameMethods = {
 
   _genBrief: function() {
     var brief = _.extend({map: this._.mapName, width: this._.map.cols, height: this._.map.rows, turn: this._.turn}, this._.o);
-    brief.players = this._.players.map(function(p) {return {id:p.getId(), name:p.getName(), score:p.calculateScore()}});
+    brief.players = this._.players.map(function(p) {return {id:p.getId(), name:p.getName(), score:p.calculateScore(), area:p.getArea()}});
     if (this.isFinished()) {
       brief.finished = true;
       brief.winner = this._.gameResult.winner ? {id: this._.gameResult.winner.id, name: this._.gameResult.winner.name} : undefined;
       brief.reason = this._.gameResult.reason;
+    }
+    if (this._.hub) {
+      brief.hub = this._.hub;
     }
     return brief;
   },

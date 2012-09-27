@@ -1,15 +1,28 @@
 <link href="ui-lightness/jquery-ui-1.8.23.custom.css" rel="stylesheet"/>
-<h1 data-id="<%= game.getId() %>">Game <%= game.getId() %>
-<small><%= game.getMapName() %></small>
-</h1>
-<p class="players info"></p>
-<p class="alert alert-error hidden"></p>
-<br>
+<div class="container well game-result">
+<div class="row">
+    <div class="span3">
+        <h1 data-id="<%= game.getId() %>">Game <%= game.getId() %>
+        </h1>
+        <h5><span class="label"><%= game.getHub() %></span> <%= game.getMapName() %>  </h5>
 
+    </div>
+    <div class="span9">
+        <p class="players info"></p>
+    </div>
+</div>
+<div class="row">
+    <div class="alert alert-error hidden error-info span12"></div>
+</div>
+
+</div>
+<br>
+<div class="game-view">
 <canvas id="game">
     Loading...
 </canvas>
-<br/>
+
+</div>
 
 <script src="jquery-ui-1.8.23.custom.min.js"></script>
 <script src="socket.io.min.js"></script>

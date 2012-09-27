@@ -39,7 +39,7 @@ public class Main {
             else {
                 client = new SocketClient(ai, options.get("host"), Integer.parseInt(options.get("port")));
             }
-            client.start(options.get("name"));
+            client.start(options.get("name"), options.get("hub"));
             System.out.println("Finished!!");
         }
     }

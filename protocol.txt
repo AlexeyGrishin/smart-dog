@@ -10,9 +10,10 @@ Out pattern: the same, but <arg> is a string
 
 > join <userName> [#<hubName>]
 < wait
-< start "players":"<playersCount>","map":"<mapName>","rows":"<rows>","cols":"<cols>","you":"<yourId>" \
+< start "players":"<playersCount>","map":"<mapName>","rows":"<rows>","cols":"<cols>","you":"<yourId>", \
             "dogVisibilityR":"<radius>","dogBarkingR":"<distance>",\
-            "sheepStandBy": "<num-of-turns>", "sheepScaryTurns":"<num-of-turns>", "dogScaryTurns": "<num-of-turns>"
+            "sheepStandBy": "<num-of-turns>", "sheepScaryTurns":"<num-of-turns>", "dogScaryTurns": "<num-of-turns>",\
+            "x1": "<x1>", "y1": "<y1>", "x2": "<x2>", "y2": "<y2>"
 < landscape "#1.2","#12.",...
 < state turn:1
 #For dog

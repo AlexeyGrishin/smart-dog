@@ -35,8 +35,9 @@ SocketController.prototype = {
   },
 
   /* protocol commands */
-  "join": function(name, hub) {
-    this.gameServer.connect(name, this, hub);
+  "join": function(name) {
+    var parts = name.split(" ");
+    this.gameServer.connect(parts[0], this, parts.length > 0 ? parts[1] : null);
   },
 
   unknown: function(cmd, arg) {
@@ -59,6 +60,12 @@ SocketController.prototype = {
   sendWarning: function(warning) {
     if (warning) {
       this.send("warning", warning);
+    }
+  },
+
+  sendError: function(error) {
+    if (error) {
+      this.send("error", error);
     }
   },
 
@@ -94,7 +101,11 @@ SocketController.prototype = {
       you: state.playerId,
       rows: landscape.length,
       cols: landscape[0].length,
-      players: state.playersCount
+      players: state.playersCount,
+      x1: state.area.x1,
+      x2: state.area.x2,
+      y1: state.area.y1,
+      y2: state.area.y2
 
     }, player.getGameOptions());
     this.send("start", initState);

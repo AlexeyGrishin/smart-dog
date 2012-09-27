@@ -5,7 +5,7 @@
   GameViewer - rules playback
  */
 
-var VIEW_CLASSES = "sheep grass dog wall tree player1 player2 player3 player4 scared barking barking-area arrow helped".split(" ");
+var VIEW_CLASSES = "sheep grass dog wall tree player1 player2 player3 player4 scared barking barking-area arrow helped player-area".split(" ");
 
 var characters = {
   '.': function() {return {type: 'Grass'}},
@@ -160,6 +160,7 @@ function Canvas(renderer, canvas) {
   this.canvas = canvas;
   this.ctx = canvas[0].getContext("2d");
   this.renderer = renderer;
+  this.enabled = true;
 }
 
 Canvas.prototype = {
@@ -173,7 +174,12 @@ Canvas.prototype = {
     return this.ctx;
   },
 
+  setEnabled: function(e) {
+    this.enabled = e;
+  },
+
   render: function(el, el_if_first_is_index) {
+    if (!this.enabled) return;
     if (typeof el == 'number') {
       this._renderElement(el_if_first_is_index);
     }
@@ -191,10 +197,12 @@ Canvas.prototype = {
   },
 
   clear: function() {
+    if (!this.enabled) return;
     this.ctx.clearRect(0, 0, this.width, this.height);
   },
 
   flush: function(mainCtx) {
+    if (!this.enabled) return;
     if (mainCtx instanceof Canvas) {
       mainCtx = mainCtx.getContext();
     }
@@ -226,8 +234,11 @@ Object.keys(Canvas.prototype).forEach(function(m) {
 function Renderer(canvas) {
   this.c = new CanvasStack({
     effects: new Canvas(this.renderEffect.bind(this), $(canvas)),
-    main: new Canvas(this.renderObject.bind(this), $(canvas))
+    main: new Canvas(this.renderObject.bind(this), $(canvas)),
+    over: new Canvas(this.renderOver.bind(this), $(canvas))
   });
+  //Enable for debug
+  this.c.over.setEnabled(false);
   this.landscape = new Canvas(this.renderLandscape.bind(this));
   this.ctx = this.c.main.getContext();
   this.canvas = $(canvas);
@@ -302,6 +313,7 @@ Renderer.prototype = {
       if (!state.partial) {
         this.landscape.clear();
         this.landscape.render(state.landscape);
+        this.renderAreas(state, this.landscape.getContext());
       }
       this.frame = frame;
       this.framePercent = Math.min(1, (frame+1) / this.FRAMES);
@@ -345,6 +357,19 @@ Renderer.prototype = {
     b.cy = b.y + b.height/2;
     b.radius = Math.min(b.width, b.height)/2;
     return b;
+  },
+
+  renderAreas: function(state, ctx) {
+    ctx.save();
+    $.each(state.players, $.proxy(function(i, pl) {
+      if (!pl.area) return;
+      var p1 = this._bounds({x: pl.area.x1, y: pl.area.y1});
+      var p2 = this._bounds({x: pl.area.x2, y: pl.area.y2});
+      this.styler.applyClass(ctx, "player-area player" + parseInt(pl.id));
+      ctx.fillRect(p1.x, p1.y, p2.x-p1.x+p2.width, p2.y-p1.y+p2.height);
+    }, this));
+
+    ctx.restore();
   },
 
   renderLandscape: function(el, ctx) {
@@ -398,6 +423,18 @@ Renderer.prototype = {
     }
   },
 
+  renderOver: function(el, ctx) {
+    if (el.scared != undefined) {
+      //debug
+      var t = this._cirBounds(el);
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = "#000000";
+      ctx.font = "9 normal";
+      ctx.fillRect(t.cx, t.y, t.radius, t.radius);
+      ctx.strokeText(el.scared, t.cx+2, t.cy-2);
+    }
+  },
+
   renderEffect: function(el, ctx) {
     var r = this._cirBounds(el);
     if (el.action == "panic" || el.action == "indignant") {
@@ -408,13 +445,14 @@ Renderer.prototype = {
     }
     if (el.helpedBy || el.scaredBy) {
       var obj = el.helpedBy || el.scaredBy;
-      var t = this._cirBounds({x:obj.x, y:obj.y});
+      var t = this._cirBounds(obj);
       this.styler.applyClass(ctx, el.helpedBy ? "helped" : "scared");
       ctx.beginPath();
       ctx.moveTo(r.cx, r.cy);
       ctx.lineTo(t.cx, t.cy);
       ctx.stroke();
     }
+
     if (el.direction) {
       ctx.save();
       var bounds = this._bounds(el);

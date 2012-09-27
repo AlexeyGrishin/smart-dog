@@ -9,7 +9,7 @@ public abstract class AbstractClient implements CommandReactor {
         this.reactor = reactor;
     }
 
-    public abstract void start(String name) throws IOException, InterruptedException;
+    public abstract void start(String name, String hub) throws IOException, InterruptedException;
 
     @Override
     public void onWarning(String warning) {

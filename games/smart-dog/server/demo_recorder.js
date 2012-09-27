@@ -10,7 +10,7 @@ var config = require('./server_config.json')
 var demos = {
   mapDir: './games/smart-dog/demo',
   recDir: './games/smart-dog/client/public/replays',
-  maps: ['sheep', 'dog_barks_sheep', 'dog_barks_sheep_cascade']
+  maps: ['sheep', 'dog_barks_sheep', 'dog_barks_sheep_cascade', 'dog_help']
 };
 
 function recordDemo() {
@@ -20,7 +20,7 @@ function recordDemo() {
     var helper = new Helper(GameFactory);
     var mapInfo = Maps.readMap(path.join(demos.mapDir, map+'.txt'));
 
-    helper.init(mapInfo.map, mapInfo.opts);
+    helper.init(mapInfo.map, mapInfo.opts, mapInfo.opts.players);
     var replay = new ReplayDataStorer(helper.game);
     helper.start();
     Demo[map](helper, function() {
@@ -41,7 +41,7 @@ var Demo = {
     c.move("up", function() {
       c.move("up", function() {
         c.bark(function() {
-          c.skip(8, cb);
+          c.waitForEnd(cb);
         })
       })
     })
@@ -55,11 +55,9 @@ var Demo = {
           c.move("right", function() {
             c.move("up", function() {
               c.bark(function() {
-                c.skip(22, function() {
-                  c.move("right", function() {
-                    c.bark(function() {
-                      c.waitForEnd(cb);
-                    })
+                c.skip(21, function() {
+                  c.bark(function() {
+                    c.waitForEnd(cb);
                   })
                 });
               })
@@ -68,6 +66,37 @@ var Demo = {
         })
       })
     })
+  },
+
+  dog_help: function(helper, cb) {
+    var ally_dog = helper.controller(helper.player1, helper.dog1);
+    var enemy_dog = helper.controller(helper.player2, helper.dog2);
+    var our_dog = helper.controller(helper.player1, helper.dog1_2);
+    enemy_dog.move("up", function() {
+      enemy_dog.move("up", function() {
+        enemy_dog.move("up", function() {
+          enemy_dog.bark(function() {
+            ally_dog.move("right", function() {
+              ally_dog.move("right", function() {
+                ally_dog.bark(function() {
+                  our_dog.move("right", function() {
+                    our_dog.move("down", function() {
+                      our_dog.move("right", function() {
+                        our_dog.move("down", function() {
+                          our_dog.bark(function() {
+                            our_dog.waitForEnd(cb);
+                          })
+                        })
+                      })
+                    });
+                  });
+                });
+              })
+            })
+          })
+        });
+      });
+    });
   }
 };
 

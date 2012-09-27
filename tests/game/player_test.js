@@ -42,7 +42,10 @@ var playerTest = {
         objects: [
           {type: "Dog", x: 13, y:0, action: "move", owner: 1, id:p.dog1.id},
           {type: "Sheep", x: 14, y:0, action: "standBy", direction: "down"}
-        ]
+        ],
+        area: {
+          x1:0, y1:0, x2:15, y2:0
+        }
       });
       test.done();
     });
@@ -66,7 +69,10 @@ var playerTest = {
             objects: [
               {type: "Dog", x: 13, y:0, action: "move", owner: 1, id:p.dog1.id, voice: "barking"},
               {type: "Sheep", x: 14, y:0, action: "panic", direction: "right"}
-            ]
+            ],
+            area: {
+              x1:0, y1:0, x2:15, y2:0
+            }
           });
           test.done();
         })
@@ -89,7 +95,10 @@ var playerTest = {
         objects: [
           {type: "Dog", x: 29, y:1, action: "move", owner: 2, id:p.dog2.id},
           {type: "Sheep", x: 30, y:1, action: "standBy", direction: "down"}
-        ]
+        ],
+        area: {
+          x1:16, y1:1, x2:31, y2:1
+        }
       });
       test.done();
     });
@@ -116,7 +125,10 @@ var playerTest = {
               {type: "Dog", x: 29, y:1, action: "move", owner: 2, id:p.dog2.id},
               {type: "Sheep", x: 30, y:1, action: "standBy", direction: "down"},
               {x: 13, y:0, voice: "barking"}
-            ]
+            ],
+            area: {
+              x1:16, y1:1, x2:31, y2:1
+            }
           });
           test.done();
 

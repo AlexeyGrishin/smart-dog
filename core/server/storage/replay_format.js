@@ -33,6 +33,7 @@ var ReplayFormat = {
   getGameInfo: function(game) {
     return {
       game: game.getId(),
+      hub: game.getHub(),
       map: game.getMapName(),
       rows: game.getMap().rows,
       cols: game.getMap().cols,

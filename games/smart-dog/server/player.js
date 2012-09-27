@@ -26,6 +26,13 @@ PlayerInterface.prototype = {
     //TODO: constants for layers
     this.dogs = this.map.getObjectsBy("object", function(o) {return o instanceof Dog && o.owner.id == this.id}.bind(this));
     this.site = this.map.getObjectsBy("landscape", function(o) {return o.type == "Site" && o.owner.id == this.id}.bind(this));
+    var area = this.map.getObjectsBy("landscape", function(o) {return o.owner && o.owner.id == this.id}.bind(this));
+    var xes = area.map(function(o) {return o.x}), yes = area.map(function(o) {return o.y});
+    this.area = {x1: Math.min.apply(null, xes),
+      x2: Math.max.apply(null, xes),
+      y1: Math.min.apply(null, yes),
+      y2: Math.max.apply(null, yes)
+    };
     this.dogById = {};
     for (var i = 0; i < this.dogs.length; i++) {
       this.dogById[this.dogs[i].id] = this.dogs[i];
@@ -40,6 +47,10 @@ PlayerInterface.prototype = {
 
   getId: function() {
     return this.id;
+  },
+
+  getArea: function() {
+    return this.area;
   },
 
   calculateScore: function() {
@@ -97,6 +108,7 @@ PlayerInterface.prototype = {
       playerId: this.getId(),
       playersCount: this.game.getPlayers().length,
       landscape: this.game.toState().landscape,
+      area: this.area,
       objects: visibleArea.map(toState)
     }
   },

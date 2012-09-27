@@ -50,7 +50,7 @@ Helper.prototype = {
   },
 
   init: function(map, options, playersCount) {
-    this.gameFactory = this.factory({games:{default:options}});
+    this.gameFactory = this.factory();
     //TODO: game creation seems ugly... =(
     var mapCtor = this.gameFactory.parseMapPart(map);
     playersCount = playersCount || 1;
@@ -58,7 +58,7 @@ Helper.prototype = {
     for (var i = 0; i < playersCount; i++) {
       players.push({name: "player" + (i+1), io: this.ioMock});
     }
-    this.game = this.gameFactory.createGame(1, {map: new Map2D(), mapCtor: mapCtor, players: players});
+    this.game = this.gameFactory.createGame(1, {map: new Map2D(), mapCtor: mapCtor, players: players, options: options});
 
     for (var i = 0; i < playersCount; i++) {
       this["player" + (i+1)] = this.game.getPlayers()[i];

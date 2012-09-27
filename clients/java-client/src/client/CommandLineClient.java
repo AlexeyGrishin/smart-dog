@@ -1,7 +1,6 @@
 package client;
 
 import java.io.*;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -23,11 +22,11 @@ public class CommandLineClient extends AbstractClient {
         this.executor = Executors.newSingleThreadExecutor();
     }
 
-    public void start(String name) throws IOException, InterruptedException {
+    public void start(String name, String hub) throws IOException, InterruptedException {
         process = Runtime.getRuntime().exec(executable);
         InputStream inputStream = process.getInputStream();
         OutputStream outputStream = process.getOutputStream();
-        executor.execute(new StreamClient(inputStream, outputStream, this, name));
+        executor.execute(new StreamClient(inputStream, outputStream, this, name, hub));
         process.waitFor();
         BufferedReader br = new BufferedReader(new InputStreamReader(process.getErrorStream()));
         String str;

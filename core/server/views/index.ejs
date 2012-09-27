@@ -1,11 +1,31 @@
-<h1>Games</h1>
 <div class="container">
 <div class="row">
-    <div class="span8" id="games">
+    <div class="span2 sidebar ">
+    <h3>Hubs</h3>
+    <ul class="nav well nav-list span2" data-spy="affix" data-offset-top="20">
+        <% for (var i = 0; i < hubs.length; i++) { %>
+        <li>
+            <a href="<%= hubs[i] %>"><%= hubs[i] %></a>
+        </li>
+        <% } %>
+    </ul>
+    </div>
+    <div class="span7">
+        <% for (var i = 0; i < hubs.length; i++) { %>
+        <section id="<%= hubs[i].substring(1) %>" class="row-fluid">
+            <h3><%= hubs[i] %></h3>
+            <div class="games" data-hub="<%= hubs[i] %>" class="span8">
+                Loading...
+            </div>
+        </section>
+        <% } %>
+    </div>
+    <div class="span2 " >
+    <h3>Players</h3>
+    <div  id="players" class="well">
         Loading...
     </div>
-    <div class="span3 well" id="players">
-        Loading...
+
     </div>
 </div>
 </div>

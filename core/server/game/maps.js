@@ -1,5 +1,75 @@
 var fs = require('fs')
-  , Map2D = require('./map2d.js');
+  , Map2D = require('./map2d.js')
+  , _ = require('cloneextend');
+
+
+var Hub = function(name, hubOptions, allMaps) {
+  this.name = name;
+  this.opts = hubOptions;
+  this.maps = allMaps ? allMaps.slice().filter(this.matchMap.bind(this)) : [];
+  this.nextMap = 0;
+};
+
+Hub.prototype = {
+
+  getGameToStart: function(waitingPlayers) {
+    var players = waitingPlayers.filter(function(w) {return this.matchHub(w.hub)}.bind(this));
+    if (players.length < this.opts.min) return {exists: false};
+    if (players.length > this.opts.max) {
+      players = players.slice(0, this.opts.max);
+    }
+    var map = this.maps[this.nextMap];
+    var map2d = new Map2D();
+    return {
+      exists: true,
+      map: map2d,
+      hub: this.name,
+      mapCtor: map.mapCtor,
+      mapName: map.name,
+      options:_.cloneextend(this.opts.game, map.opts),
+      players: players.slice(),
+      waitMore: players.length < this.opts.max
+    }
+  },
+
+  getName: function() {
+    return this.name;
+  },
+
+  gameStarted: function(game) {
+    if (++this.nextMap == this.maps.length) this.nextMap = 0;
+  },
+
+  maxPlayersCount: function() {
+    return this.opts.max;
+  },
+
+  minPlayersCount: function() {
+    return this.opts.min;
+  },
+
+  matchHub: function(hub) {
+    return hub && this.name.toLowerCase() == hub.toLowerCase();
+  },
+
+  matchMap: function(map) {
+    if (!this.opts.maps || this.opts.maps.length == 0) return true;
+    return this.opts.maps.some(function(m) {
+      return map.name == m || map.name.indexOf(m) == 0;
+    })
+  }
+
+};
+
+var DefaultHub = function(defOptions, allMaps) {
+  Hub.call(this, "#default", defOptions, allMaps);
+};
+
+DefaultHub.prototype = new Hub();
+DefaultHub.prototype.matchHub = function(hub) {
+  return hub == undefined || Hub.prototype.matchHub.call(this, hub);
+};
+
 
 /**
  * Maps collection and players balancer (simple right now)
@@ -7,14 +77,14 @@ var fs = require('fs')
  * @param mapFactory
  * @constructor
  */
-var Maps = function(config, mapFactory) {
+var Maps = function(mapConfig, defaultGameConfig, mapFactory) {
   this.maps = [];
   function match(fileName) {
-    if (!config.maps || config.maps.length == 0) return true;
-    return config.maps.some(function(m) {return m == fileName;});
+    if (!mapConfig.maps || mapConfig.maps.length == 0) return true;
+    return mapConfig.maps.some(function(m) {return m == fileName;});
   }
-  fs.readdirSync(config.dir).forEach(function(name) {
-    var fpath = './' + config.dir + '/' + name;
+  fs.readdirSync(mapConfig.dir).forEach(function(name) {
+    var fpath = './' + mapConfig.dir + '/' + name;
     if (!fs.statSync(fpath).isFile() || !match(name)) return;
     console.log("Read map: " + name);
     var readMap = Maps.readMap(fpath);
@@ -25,33 +95,25 @@ var Maps = function(config, mapFactory) {
       opts: readMap.opts
     })
   }.bind(this));
-  this.nextMap = 0;
-  this.hasGamesFor = function(playerCount) {
-    return playerCount <= this.maxPlayersCount() && playerCount >= this.minPlayersCount();
+  this.hubs = [new DefaultHub(defaultGameConfig, this.maps)];
+  this.findHub = function(name) {
+    var hubs = this.hubs.filter(function(h) {return h.matchHub(name)});
+    return hubs.length > 0 ? hubs[0] : null;
   };
-  this.maxPlayersCount = function() {
-    return 4;
+  this.getGameToStart = function(waitingPlayers, playerOrHub) {
+    var targetHubName = typeof playerOrHub == 'string' ? playerOrHub : playerOrHub.hub;
+    var hub = this.findHub(targetHubName);
+    if (!hub) return {exists: false, error: "No such hub"};
+    return hub.getGameToStart(waitingPlayers);
   };
-  this.minPlayersCount = function() {
-    return 2;
+  this.gameStarted = function(game) {
+    this.findHub(game.hub).gameStarted(game);
   };
-
-  this.getGameToStart = function(waitingPlayers) {
-    if (waitingPlayers.length < this.minPlayersCount()) return {exists: false};
-    var map = this.maps[this.nextMap];
-    var map2d = new Map2D();
-    return {
-      exists: true,
-      map: map2d,
-      mapCtor: map.mapCtor,
-      mapName: map.name,
-      options: map.opts,
-      players: waitingPlayers.slice(),
-      waitMore: waitingPlayers.length < this.maxPlayersCount()
-    }
+  this.addHub = function(name, options) {
+    this.hubs.push(new Hub(name, options, this.maps));
   };
-  this.gameStarted = function() {
-    if (++this.nextMap == this.maps.length) this.nextMap = 0;
+  this.getHubs = function() {
+    return this.hubs.map(function(h) {return h.getName()});
   }
 };
 

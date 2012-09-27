@@ -7,6 +7,7 @@ public class GameOptions {
     public final int cols;
     public final int yourId;
     public final int players;
+    public final int areaX1, areaX2, areaY1, areaY2; 
     
     public final int dogVisibilityRadius;
     public final int dogBarkingRadius;
@@ -26,6 +27,10 @@ public class GameOptions {
         dogScaryTurns = get(map, "dogScaryTurns");
         sheepStandBy = get(map, "sheepStandBy");
         turnsLimit = get(map, "turnsLimit");
+        areaX1 = get(map, "x1");
+        areaX2 = get(map, "x2");
+        areaY1 = get(map, "y1");
+        areaY2 = get(map, "y2");
         System.out.println(map);
     }
 

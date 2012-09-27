@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,7 +30,7 @@ public class SocketClient extends AbstractClient {
     }
 
     @Override
-    public void start(final String name) throws IOException, InterruptedException {
+    public void start(final String name, final String hub) throws IOException, InterruptedException {
         socket = new Socket(this.host, this.port);
 
         final InputStream inputStream = socket.getInputStream();
@@ -40,7 +39,7 @@ public class SocketClient extends AbstractClient {
             @Override
             public void run() {
                 try {
-                    new StreamClient(inputStream, outputStream, SocketClient.this, name).run();
+                    new StreamClient(inputStream, outputStream, SocketClient.this, name, hub).run();
                 }
                 catch (Throwable e) {
                     if (socket.isClosed()) return;

@@ -6,6 +6,43 @@ body {
     padding-top: 100px;
 }
 
+.sidebar ul {
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.sidebar .nav-list > li > a {
+    margin: 0;
+}
+
+.sidebar .nav-list > li.l2 {
+    padding-left: 10px;
+}
+
+.error-info {
+    margin-left: 0;
+    padding-right: 24px;
+    margin-bottom: 0;
+}
+
+.players {
+    float: right;
+}
+
+.game-view {
+    text-align: center;
+}
+
+.game-view .controls {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.game-result {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
 .controls .slider {
     margin-top: 8px;
     left: 90px;
@@ -141,6 +178,10 @@ body {
 
 .barking-area {
     opacity: 0.3;
+}
+
+.player-area {
+    opacity: 0.1;
 }
 
 .arrow {

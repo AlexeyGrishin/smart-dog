@@ -44,7 +44,7 @@ SocketView.prototype = {
   } ,
 
   sendList: function(active) {
-    this.gameServer.listGames(active, function(err, games) {
+    this.gameServer.listGames(active, null, function(err, games) {
       this.send("list", JSON.stringify(games));
     }.bind(this));
   },
