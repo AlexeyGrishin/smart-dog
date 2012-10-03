@@ -17,7 +17,8 @@ var PlayerInterface = function(game, ownerId, info, options) {
 var PlayerController = {
   init: function(playerInterface) {},
   sendTurn: function() {},
-  finished: function(winner, gameResult) {}
+  finished: function(winner, gameResult) {},
+  close: function() {}
 };
 
 PlayerInterface.prototype = {
@@ -26,19 +27,20 @@ PlayerInterface.prototype = {
     //TODO: constants for layers
     this.dogs = this.map.getObjectsBy("object", function(o) {return o instanceof Dog && o.owner.id == this.id}.bind(this));
     this.site = this.map.getObjectsBy("landscape", function(o) {return o.type == "Site" && o.owner.id == this.id}.bind(this));
-    var area = this.map.getObjectsBy("landscape", function(o) {return o.owner && o.owner.id == this.id}.bind(this));
+    /*var area = this.map.getObjectsBy("landscape", function(o) {return o.owner && o.owner.id == this.id}.bind(this));
     var xes = area.map(function(o) {return o.x}), yes = area.map(function(o) {return o.y});
     this.area = {x1: Math.min.apply(null, xes),
       x2: Math.max.apply(null, xes),
       y1: Math.min.apply(null, yes),
       y2: Math.max.apply(null, yes)
-    };
+    };*/
     this.dogById = {};
     for (var i = 0; i < this.dogs.length; i++) {
       this.dogById[this.dogs[i].id] = this.dogs[i];
     }
     this.savedState = this._genState();
     this.controller.init(this);
+    this.game.on(Game.Event.Stop, this._onStop.bind(this));
   },
 
   getName: function() {
@@ -51,6 +53,10 @@ PlayerInterface.prototype = {
 
   getArea: function() {
     return this.area;
+  },
+
+  setArea: function(x1, y1, x2, y2) {
+    this.area = {x1:x1, y1:y1, x2:x2, y2:y2};
   },
 
   calculateScore: function() {
@@ -188,6 +194,15 @@ PlayerInterface.prototype = {
 
   getGameOptions: function() {
     return this.o;
+  },
+
+  _onStop: function() {
+    this.game = null;
+    this.map = null;
+    this.dogs = null;
+    this.site = null;
+    this.controller.close();
+    this.controller = null;
   }
 
 

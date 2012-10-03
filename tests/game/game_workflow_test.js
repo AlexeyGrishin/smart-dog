@@ -68,6 +68,7 @@ var MockSocket = function() {
   this.end = function() {
 
   }
+  this.destroy = function() {}
 };
 
 module.exports = {

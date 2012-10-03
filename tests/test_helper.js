@@ -1,9 +1,14 @@
 var Map2D = require("../core/server/game/map2d.js")
   , Game = require("../core/server/game/game.js");
 
+var IoMock = {
+  setPlayerInterface: function() {},
+  close: function() {}
+};
+
 function Helper(factory, ioMock) {
   this.factory = factory;
-  this.ioMock = ioMock;
+  this.ioMock = ioMock || IoMock;
 }
 
 Helper.prototype = {
@@ -29,8 +34,10 @@ Helper.prototype = {
     };
     this.onTurn(function() {
       cbacks.before();
-      this.game.getPlayers().forEach(function(p) {p.endTurn()});
-      cbacks.after(this.game.toState());
+      if (!this.game.isFinished()) {
+        this.game.getPlayers().forEach(function(p) {p.endTurn()});
+        cbacks.after(this.game.toState());
+      }
     }.bind(this));
     return {
       after: function(cb) {

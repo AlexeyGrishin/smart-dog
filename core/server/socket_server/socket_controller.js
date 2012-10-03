@@ -123,13 +123,18 @@ SocketController.prototype = {
   },
 
   finished: function(myWin, state) {
-    this.stopped = true;
     this.send("finished", {
       youWin: myWin,
       winner: state.winner ? state.winner.id : undefined,
       stopReason: state.stopReason
     });
-    this.socket.end();
+  },
+
+  close: function() {
+    this.socket.destroy();
+    this.socket = null;
+    this.player = null;
+    this.stopped = true;
   },
 
   disconnect: function() {

@@ -15,8 +15,7 @@
       "socket.io-client": "0.9.x",
       "nodeunit": "0.7.x",
       "nodemock": "0.2.x",
-      "cloneextend": "*",
-      "buster": "*"
+      "cloneextend": "*"
 
   },
   "devDependencies": {

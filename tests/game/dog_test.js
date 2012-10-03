@@ -4,14 +4,8 @@ var Sheep = require("../../games/smart-dog/server/sheep.js")
   , Helper = require("./../test_helper.js")
   , ex = Helper.ex;
 
-
-
-
-var IoMock = {
-  setPlayerInterface: function() {}
-};
 function helper() {
-  return new Helper(GameFactoryCtor, IoMock);
+  return new Helper(GameFactoryCtor);
 }
 
 var p;
@@ -312,6 +306,23 @@ var dogTest = {
 
     },
 
+    allyBarkSameTurnDoesNotCancelPanic: function(test) {
+      var state = p.initAndStart(this.map2dogs, {dogBarkingR: 3, dogScaryTurns: 50}, 2);
+      ex(test).contains(state.objects[2], {type: "Dog", action: "move", x: 6, y: 4, owner: 2});
+      var enemyDog = p.controller(p.player1, p.dog1_2);
+      var allyDog = p.controller(p.player2, p.dog2_2);
+      enemyDog.move("down", function() {
+        enemyDog.move("right", function() {
+          p.player1.bark(p.dog1_2.id, ex(test).noError());
+          p.player2.bark(p.dog2_2.id, ex(test).noError());
+          p.skipTurn(function(state) {
+            ex(test).contains(state.objects[2], {type: "Dog", action: "panic", x: 6, y: 4, owner: 2});
+            test.done();
+          });
+        })
+      });
+    },
+
     allyBarkCancelsPanic: function(test) {
       var state = p.initAndStart(this.map2dogs, {dogBarkingR: 3, dogScaryTurns: 50}, 2);
       ex(test).contains(state.objects[2], {type: "Dog", action: "move", x: 6, y: 4, owner: 2});
@@ -328,25 +339,6 @@ var dogTest = {
           });
         })
       });
-
-    },
-
-
-    allyBarkSameTurnDoesNotCancelPanic: function(test) {
-      var state = p.initAndStart(this.map2dogs, {dogBarkingR: 3, dogScaryTurns: 50}, 2);
-      ex(test).contains(state.objects[2], {type: "Dog", action: "move", x: 6, y: 4, owner: 2});
-      var enemyDog = p.controller(p.player1, p.dog1_2);
-      var allyDog = p.controller(p.player2, p.dog2_2);
-      enemyDog.move("down", function() {
-        enemyDog.move("right", function() {
-          p.player1.bark(p.dog1_2.id, ex(test).noError());
-          p.player2.bark(p.dog2_2.id, ex(test).noError());
-          p.skipTurn(function(state) {
-            ex(test).contains(state.objects[2], {type: "Dog", action: "panic", x: 6, y: 4, owner: 2});
-            test.done();
-          });
-        })
-      });
     }
 
   }
@@ -356,3 +348,9 @@ var dogTest = {
 };
 
 module.exports = dogTest;
+/*
+var F = function() {};
+dogTest.movement.setUp(F);
+dogTest.movement.cannotMoveDueToSheep({done: F, ok: function() {
+  dogTest.movement.tearDown(F);
+}, deepEqual: F});*/

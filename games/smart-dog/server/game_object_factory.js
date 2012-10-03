@@ -64,7 +64,7 @@ var Factory = function() {
         sheepScaryTurns: 4,
         turnsLimit: 10,
         dogScaryTurns: 2
-      }
+      };
 };
 Factory.prototype = {
   types: {
@@ -80,34 +80,63 @@ Factory.prototype = {
     var playersCount = players.length;
     var filler = Fillers[playersCount];
     var y = 0, x = 0;
+    this.shared = {
+      grass: new Grass(game, {layer: "landscape", landscape: true}),
+      wall: new Wall(game, {layer: "landscape", landscape: true}),
+      tree: new Tree(game, {layer: "landscape", landscape: true}),
+      sites: []
+    };
+    players.forEach(function(p) {
+      this.shared.sites.push(new Site(game, {layer: "landscape", landscape: true, owner: p}));
+    }.bind(this));
     map2d.setSize(filler.length * mapCtor.length, filler[0].length * mapCtor[0].length);
     for (var fRow = 0; fRow < filler.length; fRow++) {
       y = fRow * mapCtor.length;
       for (var fCol = 0; fCol < filler[0].length; fCol++) {
         x = fCol * mapCtor[0].length;
         var fillerPlayer = filler[fRow][fCol] - 1;
+        var owner = undefined;
+        if (fillerPlayer > -1) {
+          owner = players[fillerPlayer];
+          owner.setArea(x, y, x + mapCtor[0].length - 1, y + mapCtor.length - 1);
+        }
         for (var dy = 0; dy < mapCtor.length; dy++) {
           for (var dx = 0; dx < mapCtor[0].length; dx++) {
-            var mObj, owner;
+            var mObj;
             if (fillerPlayer > -1) {
               mObj = mapCtor[dy][dx];
-              owner = players[fillerPlayer];
             }
             else {
               mObj = this.empty();
-              owner = undefined;
             }
             if (mObj.object) {
               var obj = new mObj.object(game, _.replace({x:x+dx, y:y+dy, owner: owner, layer: "object"}, options));
               map2d.add("object", obj, x+dx, y+dy);
             }
             if (mObj.landscape) {
-              map2d.add("landscape", new mObj.landscape(game, {owner: owner, layer: "landscape"}), x+dx, y+dy);
+              map2d.add("landscape", this._createLandscape(mObj.landscape, game, fillerPlayer, {owner: owner, layer: "landscape", landscape: true}), x+dx, y+dy);
             }
           }
         }
       }
     }
+    this.shared = null;
+  },
+
+  _createLandscape: function(type, game, fillerPlayer, properties) {
+    /*if (type == Grass) {
+      return this.shared.grass;
+    }
+    else if (type == Wall) {
+      return this.shared.wall;
+    }
+    else if (type == Tree) {
+      return this.shared.tree;
+    }
+    else if (type == Site) {
+      return this.shared.sites[fillerPlayer];
+    }*/
+    return new type(game, properties);
   },
 
   _getOptions: function() {

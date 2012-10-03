@@ -205,7 +205,7 @@ Map2D.prototype = {
         layer = ALL;
       }
     }
-    var os = this._.objects[layer];
+    var os = this._.objects[layer] || [];
     if (filter) os = os.filter(filter);
     return os;
   }

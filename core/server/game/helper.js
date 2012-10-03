@@ -75,6 +75,7 @@ function helper(map) {
       }
       return helper;
     }
+    throw new Error("Unknown object - is not a map, not a collection, not a game object, not a selector");
   };
   mainFunc.extend = function(obj, module, p, moduleOptions) {
     if (obj == mainFunc) {
@@ -107,6 +108,11 @@ function helper(map) {
   };
   mainFunc.direction = function(o1, o2) {
     return map.getDirection(o1.x, o1.y, o2.x, o2.y);
+  };
+  mainFunc.free = function() {
+    _cache = null;
+    mainFunc = null;
+    map = null;
   };
 
 

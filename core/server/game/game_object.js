@@ -1,8 +1,10 @@
+var Moveable = require('./moveable.js');
+
 var id = 1;
 
 /**
  * Represents game object with base properties/functionality - coordinates, type, etc.
- * Note that it has private object which cannot be accessed outside
+ * Update[Grishin]: I've removed internal private object and getters because they increases memory usage.
  *
  * See also:
  *  helper.js - helps traversing map
@@ -13,46 +15,21 @@ var id = 1;
  * @constructor
  */
 function GameObject(game, properties) {
-  var p = {
+  this.p = {
     game: game,
     map: game.getMap(),
     id: id++,
-    oldPosition: undefined
+    oldPosition: undefined,
+    GameEvent: game.Event
   };
 
   Object.keys(properties).forEach(function(key) {
-    p[key] = properties[key];
-  });
-  this.__defineGetter__('layer', function() {
-    return p.layer;
-  });
-  this.__defineGetter__('owner', function() {
-    return p.owner;
-  });
-  this.__defineGetter__('x', function() {
-    return p.x;
-  });
-  this.__defineGetter__('y', function() {
-    return p.y;
-  });
-  this.__defineGetter__('id', function() {
-    return p.id;
-  });
-  this.locate = function(x,y) {
-    p.x = x;
-    p.y = y;
-  };
-  this.toState = function() {
-    return this._genState(p);
-  };
-  this.toPlayerState = function() {
-    return this._genPlayerState(p);
-  };
-  var $ = p.game.$;
-  $.extend(this, $.moveable, p);
-  this.__defineGetter__('type', function() { return this.constructor.name});
-  this._extend(p);
-  this._subscribe(p);
+    this.p[key] = properties[key];
+  }.bind(this));
+  if (properties.landscape) return;
+
+  this._extend(this.p);
+  this._subscribe(this.p);
 }
 
 GameObject.Event = {
@@ -60,17 +37,56 @@ GameObject.Event = {
 };
 
 GameObject.prototype = {
-  finalize: function() {
-    //do nothing
+
+  get x() {
+    return this.p.x;
+  },
+
+  get y() {
+    return this.p.y;
+  },
+
+  get layer() {
+    return this.p.layer;
+  },
+
+  get owner() {
+    return this.p.owner;
+  },
+
+  get type() {
+    return this.constructor.name;
+  },
+
+  get id() {
+    return this.p.id;
+  },
+
+  locate: function(x,y) {
+    this.p.x = x;
+    this.p.y = y;
+  },
+
+  toState: function() {
+    return this._genState(this.p);
+  },
+
+  toPlayerState: function() {
+    return this._genPlayerState(this.p);
+  },
+
+  close: function() {
+    this.p.game = null;
+    this.p.map = null;
+    this.p.$ = null;
   },
 
   _subscribe: function(p) {
-    var Game = require('./game.js');
-    p.game.on(Game.Event.BeforeTurn, function() {
+    p.game.on(p.GameEvent.BeforeTurn, function() {
       p.oldPosition = undefined;
       this._beforeTurn(p);
     }.bind(this));
-    p.game.on(Game.Event.AfterTurn, this._afterTurn.bind(this, p));
+    p.game.on(p.GameEvent.AfterTurn, this._afterTurn.bind(this, p));
   },
 
   _genState: function(p) {
@@ -107,4 +123,6 @@ GameObject.prototype = {
   }
 };
 
+Moveable.extendClass(GameObject);
+GameObject.id = function() {return id};
 module.exports = GameObject;

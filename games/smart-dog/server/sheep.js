@@ -61,14 +61,12 @@ Sheep.prototype._genPlayerState = function(p) {
 };
 
 Sheep.prototype._extend = function(p) {
+  GameObject.prototype._extend.call(this, p);
   p.sheepStandBy = parseInt(p.sheepStandBy);
   p.scaredBy = null;
   p.scared = 0;
   p.direction = goDown;
   p.fearChain = [];
-  this.__defineGetter__('scared', function() {return p.scaredBy != null;});
-  this.__defineGetter__('direction', function() {return p.direction});
-  this.__defineGetter__('fearChain', function() {return p.fearChain});
   var $ = p.game.$;
   p.game.on(Sheep.Event.DoMove, this._doMove.bind(this, p));
   p.game.on(Sheep.Event.DoFear, this._doFear.bind(this, p));
@@ -139,9 +137,18 @@ Sheep.prototype._doMove = function(p) {
 
 Sheep.prototype._doFear = function(p) {
   var $ = p.game.$;
+  if (!$) {
+    console.error("$ is undefined");
+    return;
+  }
   var sheep = $(this).around(1.5).find(".Sheep :scared").not(this).first();
   this._scare(p, sheep);
 };
+
+Sheep.prototype.__defineGetter__('scared', function() {return this.p.scaredBy != null;});
+Sheep.prototype.__defineGetter__('direction', function() {return this.p.direction});
+Sheep.prototype.__defineGetter__('fearChain', function() {return this.p.fearChain});
+
 
 module.exports = Sheep;
 

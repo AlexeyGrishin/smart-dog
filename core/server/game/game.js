@@ -19,11 +19,14 @@ var GameObject = require("./game_object.js")
  * @param options
  * @constructor
  */
+
 var Game = function(options) {
   events.EventEmitter.call(this);
   this._ = {};
   this._.o = options;
   this._.hub = null;
+  this._.measure = require('../../common/time.js')();
+
   this.on(GameObject.Event.Move, function(object, oldX, oldY) {
     this._.map.objectMoved(object, oldX, oldY);
   }.bind(this));
@@ -48,7 +51,7 @@ Game.Event = {
 };
 
 util.inherits(Game, events.EventEmitter);
-
+Game.prototype.Event = Game.Event;
 
 var GameMethods = {
   start: function() {
@@ -66,12 +69,7 @@ var GameMethods = {
   },
 
   _measure: function(topic) {
-    var now = new Date();
-    if (this._.lastDate) {
-      var dur = now - this._.lastDate;
-      //console.log("         " + topic + " took " + dur + "ms");
-    }
-    this._.lastDate = new Date();
+    this._.measure(topic);
   },
 
   _catchError: function(f) {
@@ -98,6 +96,10 @@ var GameMethods = {
   },
 
   _onPlayerTurn: function(p, turnMade, error) {
+    if (this.isFinished()) {
+      console.error("Player " + p + " ended turn " + turnMade + "(" + error + "), but game is finished already");
+      return;
+    }
     if (!error && turnMade == this._.turn) {
       this._.turnMade++;
       if (this._.turnMade == this._.players.length) {
@@ -133,6 +135,7 @@ var GameMethods = {
       }.bind(this)
       ), _.o.waitForTurn);
     }
+    console.log("PlayersReady");
     this.emit(Game.Event.PlayersReady);
   },
 
@@ -161,6 +164,7 @@ var GameMethods = {
     var _ = this._;
     var gameResult = this._getGameResult();
     if (gameResult.finished) {
+      console.log("GameFinished");
       _.gameResult = gameResult;
       _.players.forEach(function(p) {
         p.finished(gameResult);
@@ -169,7 +173,22 @@ var GameMethods = {
       _.savedState = this._genState();
       clearTimeout(_.turnTimeout);
       this.emit(Game.Event.Stop, gameResult);
+      this._free();
     }
+  },
+
+
+  _free: function() {
+    console.log("game _free");
+    this.removeAllListeners();
+    this._.map.allObjects.forEach(function(o) {o.close();});
+    this._.map = null;
+    this._.$.free();
+    this._.$ = null;
+    this._.players = null;
+    if (global.gc)
+      global.gc();
+
   },
 
   isFinished: function() {
@@ -229,7 +248,7 @@ var GameMethods = {
     brief.players = this._.players.map(function(p) {return {id:p.getId(), name:p.getName(), score:p.calculateScore(), area:p.getArea()}});
     if (this.isFinished()) {
       brief.finished = true;
-      brief.winner = this._.gameResult.winner ? {id: this._.gameResult.winner.id, name: this._.gameResult.winner.name} : undefined;
+      brief.winner = this._.gameResult.winner ? {id: this._.gameResult.winner.getId(), name: this._.gameResult.winner.getName()} : undefined;
       brief.reason = this._.gameResult.reason;
     }
     if (this._.hub) {

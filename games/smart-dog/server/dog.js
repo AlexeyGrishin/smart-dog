@@ -40,16 +40,14 @@ Dog.prototype._genPlayerState = function(p) {
 };
 
 Dog.prototype._extend = function(p) {
+  GameObject.prototype._extend.call(this, p);
   p.barking = false;
   p.justBarked = false;
   p.scared = 0;
   p.justBecameScared = false;
   p.onlySilence = false;
   p.dogBarkingR2 = p.dogBarkingR* p.dogBarkingR;
-  this.__defineGetter__('isBarking', function() {return p.barking;});
-  this.__defineGetter__('justBarked', function() {return p.justBarked;});
-  this.__defineGetter__('justBecameScared', function() {return p.justBecameScared;});
-  this.__defineGetter__('scared', function() {return p.scared > 0;});
+
   this.bark = function(cb) {
     if (p.scared) return cb("Cannot bark because fighted by another dog");
     p.justBarked = true;
@@ -57,14 +55,15 @@ Dog.prototype._extend = function(p) {
     p.game.emit(Dog.Event.Barked, this);
     cb();
   };
-  p.game.on(Dog.Event.Barked, function(barkedDog) {
+  p.game.on(Dog.Event.Barked, function onBark(barkedDog) {
     if (barkedDog == this || !p.game.$(this).inRadius(barkedDog, p.dogBarkingR)) return;
     if (barkedDog.owner == p.owner) {
       p.allyBarked = true;
       p.helpedBy = {x:barkedDog.x, y:barkedDog.y};
     }
     else {
-      var enemyOnOurArea = p.map.getLandscape(barkedDog.x, barkedDog.y).owner == p.owner;
+      var ourArea = p.owner.getArea();
+      var enemyOnOurArea = ourArea.x1 <= barkedDog.x && ourArea.y1 <= barkedDog.y && ourArea.x2 >= barkedDog.x && ourArea.y2 >= barkedDog.y;
       console.log("Scared by dog at " + barkedDog.x + ", " + barkedDog.y + ", it is on our area: " + enemyOnOurArea);
       p.justBecameScared = true;
       p.scaredBy = {x: barkedDog.x, y: barkedDog.y};
@@ -78,6 +77,7 @@ Dog.prototype._extend = function(p) {
     oldMove.call(this, dx, dy, cb);
   }
 };
+
 
 Dog.prototype._beforeTurn = function(p) {
   p.helpedBy = null;
@@ -95,6 +95,11 @@ Dog.prototype._afterTurn = function(p) {
     p.justBecameScared = false;
   }
 };
+
+Dog.prototype.__defineGetter__('isBarking', function() {return this.p.barking;});
+Dog.prototype.__defineGetter__('justBarked', function() {return this.p.justBarked;});
+Dog.prototype.__defineGetter__('justBecameScared', function() {return this.p.justBecameScared;});
+Dog.prototype.__defineGetter__('scared', function() {return this.p.scared > 0;});
 
 module.exports = Dog;
 

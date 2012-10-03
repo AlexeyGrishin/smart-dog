@@ -1,4 +1,6 @@
-var ReplayDataStorer = require('../storage/replay_data_storer.js');
+var ReplayDataStorer = require('../storage/replay_data_storer.js')
+  //assertvanish may be installed/running under Linux only
+  , assertvanish = function(){};//require('assertvanish');
 
 
 /**
@@ -53,7 +55,7 @@ GameServer.prototype = {
     else {
       if (gameToStart.exists) {
         clearTimeout(this.waitForAnotherPlayer[gameToStart.hub]);
-        this.waitForAnotherPlayer[gameToStart.hub] = setTimeout(function() {
+        this.waitForAnotherPlayer[gameToStart.hub] = setTimeout(function doStart() {
           this._startGame(gameToStart);
         }.bind(this), this.options.waitForPlayer);
       }
@@ -64,6 +66,8 @@ GameServer.prototype = {
         playerInfo.io.sendError(gameToStart.error);
       }
     }
+    assertvanish(ioInterface, 60000);
+    ioInterface = null;
   },
 
   _startGame: function(gameToStart) {
@@ -75,17 +79,18 @@ GameServer.prototype = {
     }.bind(this));
     var id = this.nextGameId++;
     var game = this.gameFactory.createGame(id, gameToStart);
-
     this.maps.gameStarted(gameToStart);
-    //game.setId(id);
-    //game.setPlayers(players);
-    //this.maps.initGameMap(game, game.getPlayers());
     this.storage.saveGame(id, game);
     game.start();
     var replay = new ReplayDataStorer(game);
-    game.on('game.stop', function(results) {
-      this.storage.saveReplay(game, replay.getReplay());
+    game.on('game.stop', function onGameStop(results) {
+      console.log("Objects: " + require('./game_object.js').id())
       this.storage.saveGame(game.getId(), game);
+      this.storage.saveReplay(game, replay.getReplay());
+      replay = null;
+      assertvanish(game._.map, 10000);
+      assertvanish(game._.$, 10000);
+      game = null;
     }.bind(this));
 
   },

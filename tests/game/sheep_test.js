@@ -7,11 +7,9 @@ var Sheep = require("../../games/smart-dog/server/sheep.js")
 
 
 
-var IoMock = {
-  setPlayerInterface: function() {}
-};
+
 function helper() {
-  return new Helper(GameFactoryCtor, IoMock);
+  return new Helper(GameFactoryCtor);
 }
 
 var p;
