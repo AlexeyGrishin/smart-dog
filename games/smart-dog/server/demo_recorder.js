@@ -10,7 +10,7 @@ var config = require('./server_config.json')
 var demos = {
   mapDir: './games/smart-dog/demo',
   recDir: './games/smart-dog/client/public/replays',
-  maps: ['sheep', 'dog_barks_sheep', 'dog_barks_sheep_cascade', 'dog_help']
+  maps: ['sheep', 'dog_barks_sheep', 'dog_barks_sheep_cascade', 'dog_help', 'real']
 };
 
 function recordDemo() {
@@ -97,6 +97,33 @@ var Demo = {
         });
       });
     });
+  },
+
+  real: function(helper, cb) {
+    var sc = helper.scenario({
+      ally: {player: helper.player1, dog: helper.dog1},
+      enemy: {player: helper.player2, dog: helper.dog2}
+    });
+    sc.move("ally", "right").move("enemy", "down").end();
+    sc.move("ally", "right").move("enemy", "left").end();
+    sc.move("ally", "right").move("enemy", "left").end();
+    sc.move("ally", "right").move("enemy", "left").bark("enemy").bark("ally").end();
+    sc.move("ally", "right").move("enemy", "left").end();
+    sc.move("ally", "right").move("enemy", "left").end();
+    sc.move("ally", "right").move("enemy", "up").end();
+    sc.move("ally", "down").bark("ally").move("enemy", "up").end();
+    sc.move("enemy", "up").bark("enemy").move("ally", "left").end();
+    sc.move("enemy", "down").move("ally", "left").end();
+    sc.move("enemy", "right").move("ally", "up").end();
+    sc.move("enemy", "right").move("ally", "left").bark("enemy").end();
+    sc.move("enemy", "left").move("ally", "left").bark("ally").end();
+    sc.move("enemy", "left").move("ally", "left").bark("ally").end();
+    sc.move("enemy", "left").move("ally", "left").bark("ally").end();
+    sc.move("enemy", "left").move("ally", "left").bark("ally").end();
+    sc.move("enemy", "up").move("ally", "left").bark("ally").end();
+    sc.move("enemy", "up").move("ally", "left").bark("ally").end();
+    sc.move("ally", "up").bark("ally").end();
+    sc.execute(cb);
   }
 };
 

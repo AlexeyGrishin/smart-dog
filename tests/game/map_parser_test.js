@@ -62,28 +62,26 @@ module.exports = {
     for2players: function(test) {
       this.createGame([this.p1, this.p2]);
       test.equals(this.map.getObject(0, 0).type, "Dog");
-      test.equals(this.map.getObject(1, 1).type, "Dog");
-      test.equals(this.map.getObject(0, 1), undefined);
-      test.equals(this.map.getObject(1, 0), undefined);
+      test.equals(this.map.getObject(1, 0).type, "Dog");
 
       test.equals(this.map.getObject(0, 0).owner.name, this.p1.name);
-      test.equals(this.map.getObject(1, 1).owner.name, this.p2.name);
+      test.equals(this.map.getObject(1, 0).owner.name, this.p2.name);
       test.done();
     },
     for3players: function(test) {
       this.createGame([this.p1, this.p2, this.p3]);
       test.equals(this.map.getObject(0, 0).type, "Dog");
       test.equals(this.map.getObject(0, 0).owner.name, this.p1.name);
-      test.equals(this.map.getObject(1, 2).type, "Dog");
-      test.equals(this.map.getObject(1, 2).owner.name, this.p2.name);
-      test.equals(this.map.getObject(3, 1).type, "Dog");
-      test.equals(this.map.getObject(3, 1).owner.name, this.p3.name);
+      test.equals(this.map.getObject(1, 1).type, "Dog");
+      test.equals(this.map.getObject(1, 1).owner.name, this.p2.name);
+      test.equals(this.map.getObject(2, 2).type, "Dog");
+      test.equals(this.map.getObject(2, 2).owner.name, this.p3.name);
       test.done();
     },
     for4players: function(test) {
       this.createGame([this.p1, this.p2, this.p3, this.p4]);
-      test.equals(this.map.getObject(1, 1).type, "Dog");
-      test.equals(this.map.getObject(1, 1).owner.name, this.p1.name);
+      test.equals(this.map.getObject(0, 0).type, "Dog");
+      test.equals(this.map.getObject(0, 0).owner.name, this.p1.name);
       test.done();
     }
   }

@@ -18,14 +18,12 @@ var GameView = {
     $(".players").html(
       update.players.map(function(p) {return "<div class='player" + p.id + "'><span>" + p.name + "</span><em>" + p.score.toFixed(2) + "</em></div>"}).join("")
     );
-    var stats = ["Game is over"];
     if (update.winner) {
-      stats.push("Winner is " + update.winner.name);
+      $(".player"+update.winner.id).addClass("winner");
     }
     if (update.reason && update.reason != "") {
-      stats.push("Game was stopped becase of " + update.reason);
+      $(".alert").removeClass("alert alert-success hidden").addClass("alert alert-error").html("Game was stopped becase of " + update.reason);
     }
-    $(".alert").removeClass("alert alert-success alert-error hidden").addClass("alert alert-success").html(stats.join("<br>"));
   },
 
   replay: function(from, to) {

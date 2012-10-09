@@ -28,12 +28,11 @@ var dogTest = {
 
     moveLeft: function(test) {
       p.initAndStart(this.simpleMap, {});
-      p.makeTurn(function() {
-        p.player1.move(p.dog1.id, "left", ex(test).noError());
-      }).after(function(state) {
-          ex(test).contains(state.objects[0], {x: 4, y: 5, type: "Dog"});
-          test.done();
-        });
+      var dog1 = p.controller(p.player1, p.dog1);
+      dog1.move("left", function(state) {
+        ex(test).contains(state.objects[0], {x: 4, y: 5, type: "Dog"});
+        test.done();
+      });
     },
 
     moveTwice: function(test) {
@@ -48,43 +47,38 @@ var dogTest = {
 
     moveRight: function(test) {
       p.initAndStart(this.simpleMap, {});
-      p.makeTurn(function() {
-        p.player1.move(p.dog1.id, "right", ex(test).noError());
-      }).after(function(state) {
-          ex(test).contains(state.objects[0], {x: 6, y: 5, type: "Dog"});
-          test.done();
-        });
+      var dog1 = p.controller(p.player1, p.dog1);
+      dog1.move("right", function(state) {
+        ex(test).contains(state.objects[0], {x: 6, y: 5, type: "Dog"});
+        test.done();
+      });
     },
 
     moveUp: function(test) {
       p.initAndStart(this.simpleMap, {});
-      p.makeTurn(function() {
-        p.player1.move(p.dog1.id, "up", ex(test).noError());
-      }).after(function(state) {
-          ex(test).contains(state.objects[0], {x: 5, y: 4, type: "Dog"});
-          test.done();
-        });
-
+      var dog1 = p.controller(p.player1, p.dog1);
+      dog1.move("up", function(state) {
+        ex(test).contains(state.objects[0], {x: 5, y: 4, type: "Dog"});
+        test.done();
+      });
     },
 
     moveDown: function(test) {
       p.initAndStart(this.simpleMap, {});
-      p.makeTurn(function() {
-        p.player1.move(p.dog1.id, "down", ex(test).noError());
-      }).after(function(state) {
-          ex(test).contains(state.objects[0], {x: 5, y: 6, type: "Dog"});
-          test.done();
-        });
+      var dog1 = p.controller(p.player1, p.dog1);
+      dog1.move("down", function(state) {
+        ex(test).contains(state.objects[0], {x: 5, y: 6, type: "Dog"});
+        test.done();
+      });
     },
 
     moveSite: function(test) {
       p.initAndStart(this.dogNearSite, {});
-      p.makeTurn(function() {
-        p.player1.move(p.dog1.id, "down", ex(test).noError());
-      }).after(function(state) {
-          ex(test).contains(state.objects[0], {x: 5, y: 6, type: "Dog"});
-          test.done();
-        });
+      var dog1 = p.controller(p.player1, p.dog1);
+      dog1.move("down", function(state) {
+        ex(test).contains(state.objects[0], {x: 5, y: 6, type: "Dog"});
+        test.done();
+      });
 
     },
 
@@ -211,7 +205,7 @@ var dogTest = {
       p.makeTurn(function() {
         p.player1.bark(p.dog1.id, ex(test).noError());
       }).after(function(state) {
-          ex(test).contains(state.objects[1], {type: "Dog", action: "panic", x: 4, y: 4});
+          ex(test).contains(state.objects[1], {type: "Dog", action: "panic", x: 4, y: 1});
           test.done();
         });
     },
@@ -231,11 +225,11 @@ var dogTest = {
     },
 
     enemyDogDoNotFearIfFar: function(test) {
-      p.initAndStart(this.map, {dogBarkingR: 3, dogScaryTurns: 2}, 2);
+      p.initAndStart(this.map, {dogBarkingR: 2, dogScaryTurns: 2}, 2);
       p.makeTurn(function() {
         p.player1.bark(p.dog1.id, ex(test).noError());
       }).after(function(state) {
-          ex(test).contains(state.objects[1], {type: "Dog", action: "move", x: 4, y: 4});
+          ex(test).contains(state.objects[1], {type: "Dog", action: "move", x: 4, y: 1});
           test.done();
         });
     },
@@ -249,17 +243,13 @@ var dogTest = {
       };
       move("right", function() {
         move("right", function() {
-          move("down", function() {
-            move("down", function() {
-              p.makeTurn(function() {
-                //now we are on the enemy area. bark!
-                p.player1.bark(p.dog1.id, ex(test).noError());
-              }).after(function(state) {
-                  ex(test).contains(state.objects[1], {type: "Dog", action: "indignant", x: 4, y: 4});
-                  test.done();
-                });
-            })
-          })
+          p.makeTurn(function() {
+            //now we are on the enemy area. bark!
+            p.player1.bark(p.dog1.id, ex(test).noError());
+          }).after(function(state) {
+              ex(test).contains(state.objects[1], {type: "Dog", action: "indignant", x: 4, y: 1});
+              test.done();
+            });
         })
       });
     },
@@ -308,15 +298,14 @@ var dogTest = {
 
     allyBarkSameTurnDoesNotCancelPanic: function(test) {
       var state = p.initAndStart(this.map2dogs, {dogBarkingR: 3, dogScaryTurns: 50}, 2);
-      ex(test).contains(state.objects[2], {type: "Dog", action: "move", x: 6, y: 4, owner: 2});
+      ex(test).contains(state.objects[2], {type: "Dog", action: "move", x: 6, y: 1, owner: 2});
       var enemyDog = p.controller(p.player1, p.dog1_2);
-      var allyDog = p.controller(p.player2, p.dog2_2);
       enemyDog.move("down", function() {
         enemyDog.move("right", function() {
           p.player1.bark(p.dog1_2.id, ex(test).noError());
           p.player2.bark(p.dog2_2.id, ex(test).noError());
           p.skipTurn(function(state) {
-            ex(test).contains(state.objects[2], {type: "Dog", action: "panic", x: 6, y: 4, owner: 2});
+            ex(test).contains(state.objects[2], {type: "Dog", action: "panic", x: 6, y: 1, owner: 2});
             test.done();
           });
         })
@@ -325,15 +314,15 @@ var dogTest = {
 
     allyBarkCancelsPanic: function(test) {
       var state = p.initAndStart(this.map2dogs, {dogBarkingR: 3, dogScaryTurns: 50}, 2);
-      ex(test).contains(state.objects[2], {type: "Dog", action: "move", x: 6, y: 4, owner: 2});
+      ex(test).contains(state.objects[2], {type: "Dog", action: "move", x: 6, y: 1, owner: 2});
       var enemyDog = p.controller(p.player1, p.dog1_2);
       var allyDog = p.controller(p.player2, p.dog2_2);
       enemyDog.move("down", function() {
         enemyDog.move("right", function() {
           enemyDog.bark(function(state) {
-            ex(test).contains(state.objects[2], {type: "Dog", action: "panic", x: 6, y: 4, owner: 2});
+            ex(test).contains(state.objects[2], {type: "Dog", action: "panic", x: 6, y: 1, owner: 2});
             allyDog.bark(function(state) {
-              ex(test).contains(state.objects[2], {type: "Dog", action: "move", x: 6, y: 4, owner: 2});
+              ex(test).contains(state.objects[2], {type: "Dog", action: "move", x: 6, y: 1, owner: 2});
               test.done();
             });
           });
@@ -349,8 +338,8 @@ var dogTest = {
 
 module.exports = dogTest;
 /*
-var F = function() {};
-dogTest.movement.setUp(F);
-dogTest.movement.cannotMoveDueToSheep({done: F, ok: function() {
-  dogTest.movement.tearDown(F);
-}, deepEqual: F});*/
+ var F = function() {};
+ dogTest.movement.setUp(F);
+ dogTest.movement.cannotMoveDueToSheep({done: F, ok: function() {
+ dogTest.movement.tearDown(F);
+ }, deepEqual: F});*/

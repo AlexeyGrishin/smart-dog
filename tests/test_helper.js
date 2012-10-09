@@ -155,6 +155,50 @@ Helper.prototype = {
         helper.skipTurns(999, cb);
       }
     }
+  },
+
+  scenario: function(playersDogs) {
+    var commands = [];
+    var helper = this;
+    return {
+      move: function(id, direction) {
+        commands.push(function() {playersDogs[id].player.move(playersDogs[id].dog.id, direction, function(){})});
+        return this;
+      },
+
+      bark: function(id) {
+        commands.push(function() {playersDogs[id].player.bark(playersDogs[id].dog.id, function(){})});
+        return this;
+      },
+
+      end: function() {
+        commands.push("end");
+        return this;
+      },
+
+      execute: function(cb) {
+        this._do(cb);
+      },
+
+      _do: function(cb) {
+        helper.makeTurn(function() {
+          var cmd = commands.shift();
+          while (cmd != "end") {
+            cmd();
+            cmd = commands.shift();
+          }
+        }).after(this._post.bind(this, cb));
+      },
+      _post: function(cb) {
+        if (commands.length > 0) {
+          this._do(cb);
+        }
+        else {
+          helper.onFinish(cb);
+          helper.skipTurns(999, cb);
+        }
+      }
+    }
   }
 
 

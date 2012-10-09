@@ -136,6 +136,7 @@ class StreamClient implements Runnable {
         Map<Character, Landscape> parsingMap = new HashMap<Character, Landscape>();
         parsingMap.put('.', Landscape.GRASS);
         parsingMap.put('#', Landscape.WALL);
+        parsingMap.put('^', Landscape.TREE);
         for (char i = 1; i <= 4; i++) {
             parsingMap.put((char)('0' + i), i == ourId ? Landscape.YOUR_SITE : Landscape.ENEMY_SITE);
         }

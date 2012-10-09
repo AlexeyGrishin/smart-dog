@@ -9,6 +9,7 @@ var VIEW_CLASSES = "sheep grass dog wall tree player1 player2 player3 player4 sc
 
 var characters = {
   '.': function() {return {type: 'Grass'}},
+  '^': function() {return {type: 'Tree'}},
   '#': function() {return {type: 'Wall'}},
   '1': function() {return {type: 'Site', owner: 1}},
   '2': function() {return {type: 'Site', owner: 2}},
@@ -54,7 +55,7 @@ GameViewer.prototype = {
     $controls.append($("<a href='javascript:void(0)'><i class='icon-play'></i></a>").addClass("btn btn-small btn-primary play"));
     $controls.append($("<a href='javascript:void(0)'><i class='icon-stop'></i></a>").addClass("btn btn-small stop"));
     $controls.append($("<div></div>").addClass("slider"));
-    $controls.append($("<div>Turn # <span class='turn'></span> </div>").addClass("turn-container"));
+    $controls.append($("<div><span class='turn-label'>Turn # </span> <span class='turn'></span> </div>").addClass("turn-container"));
     this.canvas.before($controls);
     return $controls;
   },
@@ -375,19 +376,23 @@ Renderer.prototype = {
   renderLandscape: function(el, ctx) {
     var bounds = this._bounds(el);
     var cls = el.type.toLowerCase();
+    var drawOverGrass = false;
     switch (el.type) {
       case "Site":
         cls = "player" + parseInt(el.owner);
         this.styler.applyClass(ctx, cls);
         ctx.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
         return;
+      case "Tree":
+        drawOverGrass = true;
+        break;
       case "Grass":
       case "Wall":
-      case "Tree":
         break;
       default:
         throw "Unknown landscape - " + el.type;
     }
+    if (drawOverGrass) this._render(ctx, 'grass', bounds);
     this._render(ctx, cls, bounds);
   },
 

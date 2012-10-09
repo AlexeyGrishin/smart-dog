@@ -274,6 +274,7 @@ var GameMethods = {
   },
 
   stop: function(reason) {
+    if (this.isFinished()) return;
     this._stopGame(reason);
     this._checkGameFinished();
   },

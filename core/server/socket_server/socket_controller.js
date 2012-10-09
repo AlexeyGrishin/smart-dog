@@ -41,6 +41,7 @@ SocketController.prototype = {
   },
 
   unknown: function(cmd, arg) {
+    this.sendError("Unknown command: " + cmd + "(" + arg + ")");
     console.error("Unknown command: " + cmd + "(" + arg + ")");
   },
 
@@ -81,7 +82,7 @@ SocketController.prototype = {
   sendTurn: function(turn) {
     var state = this.player.toState();
     state.landscape = undefined;
-    this.send("state ", {turn: state.turn});
+    this.send("state ", {turn: state.turn + 1});
     for (var i = 0; i < state.objects.length; i++) {
       this.send("obj ", state.objects[i]);
     }

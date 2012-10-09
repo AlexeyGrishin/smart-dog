@@ -185,7 +185,7 @@ PlayerInterface.prototype = {
   },
 
   finished: function(gameResult) {
-    this.controller.finished(gameResult.winner == this, gameResult);
+    if (this.controller) this.controller.finished(gameResult.winner == this, gameResult);
   },
 
   isMoved: function() {

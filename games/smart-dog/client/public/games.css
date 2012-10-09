@@ -2,6 +2,8 @@ body {
     padding-top: 40px;
 }
 
+/* Rules page */
+
 .rules {
     padding-top: 100px;
 }
@@ -19,54 +21,30 @@ body {
     padding-left: 10px;
 }
 
+#api .label i {
+    margin-top: 0;
+}
+
+/* View page */
+.hidden {
+    display: none;
+}
+
 .error-info {
     margin-left: 0;
     padding-right: 24px;
     margin-bottom: 0;
+    width: 100%;
 }
 
 .players {
     float: right;
 }
 
-.game-view {
-    text-align: center;
-}
-
-.game-view .controls {
-    margin-left: auto;
-    margin-right: auto;
-}
-
 .game-result {
     margin-bottom: 0;
     padding-bottom: 0;
 }
-
-.controls .slider {
-    margin-top: 8px;
-    left: 90px;
-    right: 100px;
-    position: absolute;
-}
-.controls .play,
-.controls .stop {
-    float: left;
-    margin-left: 5px;
-}
-
-.controls .turn-container {
-    float: right;
-    padding-left: 5px;
-    margin-top: 5px;
-}
-
-.controls {
-    margin-bottom: 5px;
-    position: relative;
-}
-
-
 .info div {
     display: inline-block;
     height: 100px;
@@ -101,10 +79,52 @@ body {
     padding-bottom: 0;
 }
 
-
-.alert {
-    display: inline-block;
+.info div.winner {
+    -webkit-box-shadow: 0px 0px 4px 2px #ffd700; /* Safari 3-4, iOS 4.0.2 - 4.2, Android 2.3+ */
+    box-shadow: 0px 0px 4px 2px #ffd700; /* Opera 10.5, IE9+, Firefox 4+, Chrome 6+, iOS 5 */
 }
+
+.info div.winner em {
+    font-size: 150%;
+}
+
+/* Game viewer */
+
+.game-view {
+    text-align: center;
+}
+
+.game-view .controls {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.controls .slider {
+    margin-top: 8px;
+    left: 90px;
+    right: 70px;
+    position: absolute;
+}
+.controls .play,
+.controls .stop {
+    float: left;
+    margin-left: 5px;
+}
+
+.controls .turn-container {
+    float: right;
+    padding-left: 5px;
+    margin-top: 5px;
+    font-size: 9pt;
+}
+
+.controls {
+    margin-bottom: 5px;
+    position: relative;
+}
+
+
+/* Rendering */
 
 .player1 {
     color: red;
@@ -154,10 +174,12 @@ body {
 
 .wall {
     background-color: #915d12;
+    background-image: url(./images/wall.png);
 }
 
 .tree {
-
+    background-image: url(./images/tree.png);
+    background-color: #00ff00;
 }
 
 .sheep {

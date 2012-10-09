@@ -38,20 +38,16 @@ var Fillers = {
     [1]
   ],
   2: [
-    [1,0],
-    [0,2]
+    [1,2]
   ],
   3: [
-    [1,0,0,0,0],
-    [0,0,0,3,0],
-    [0,2,0,0,0]
+    [1,0,0],
+    [0,2,0],
+    [0,0,3]
   ],
   4: [
-    [0,0,0,4,0,0],
-    [0,1,0,0,0,0],
-    [0,0,0,0,3,0],
-    [0,0,2,0,0,0],
-    [0,0,0,0,0,0]
+    [1,0,3,0],
+    [0,2,0,4]
   ]
 };
 
@@ -166,43 +162,17 @@ Factory.prototype = {
   },
 
   createFromCharMap: function(mapChar) {
-    switch (mapChar) {
-      case '#':
-        return {
-          landscape: Wall
-        };
-        break;
-      case '@':
-        return {
-          landscape: Grass,
-          object: Dog
-        };
-        break;
-      case 'o':
-        return {
-          landscape: Site,
-          object: Sheep
-        };
-        break;
-      case '*':
-        return {
-          landscape: Grass,
-          object: Sheep
-        };
-        break;
-      case '.':
-        return {
-          landscape: Grass
-        };
-        break;
-      case '-':
-        return {
-          landscape: Site
-        };
-        break;
-      default:
-        throw new Error("UnknownCharacter - " + mapChar);
-    }
+    var res = {
+      '#': {landscape: Wall},
+      '^': {landscape: Tree},
+      '@': {landscape: Grass, object: Dog},
+      '*': {landscape: Grass, object: Sheep},
+      'o': {landscape: Site, object: Sheep},
+      '-': {landscape: Site},
+      '.': {landscape: Grass}
+    }[mapChar];
+    if (!res) throw new Error("UnknownCharacter - " + mapChar);
+    return res;
   },
 
   encodeMap: function(width, height, gameObjects) {
@@ -218,6 +188,7 @@ Factory.prototype = {
       var chr;
       switch (g.type) {
         case 'Wall': chr = '#'; break;
+        case 'Tree': chr = '^'; break;
         case 'Site': chr = "" + g.owner.id; break;
         default: chr = '.';
       }

@@ -20,7 +20,7 @@ var Moveable = {
         var newX = p.map.x(p.x+dx);
         var newY = p.map.y(p.y+dy);
         if (!p.$.canMoveTo(newX, newY)) {
-          return cb("Cannot move at " + dx + ", " + dy);
+          return cb("Cannot move to " + newX + ", " + newY + " - there is a non traversable landscape or another object");
         }
         var oldX = p.x, oldY = p.y;
         p.x = newX;
@@ -38,33 +38,6 @@ var Moveable = {
     classCtor.prototype._extend = function(p) {
       if (!p.$) p.$ = p.game.$;
       oldExtend.call(this, p);
-    }
-  },
-
-  extendObject: function(mapHelper, object, p, extendOptions) {
-    if (extendOptions && extendOptions.traversable) {
-      object.__defineGetter__('traversable', function(){return true;})
-    }
-    else {
-      object.__defineGetter__('moveable', function(){return true;})
-      object.move = function(dx, dy, cb) {
-        var newX = p.map.x(p.x+dx);
-        var newY = p.map.y(p.y+dy);
-        if (!mapHelper.canMoveTo(newX, newY)) {
-          return cb("Cannot move at " + dx + ", " + dy);
-        }
-        var oldX = p.x, oldY = p.y;
-        p.x = newX;
-        p.y = newY;
-        p.game.emit("gameobject.move", this, oldX, oldY);
-        p.oldPosition = {
-          x: oldX,
-          y: oldY,
-          dx: dx,
-          dy: dy
-        };
-        cb();
-      }
     }
   },
 

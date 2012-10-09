@@ -18,7 +18,7 @@
                 "dogVisibilityR":"4",
                 "dogBarkingR":"4",
                 "sheepStandBy": "4",
-                "sheepScaryTurns":"4",
+                "sheepScaryTurns":"1",
                 "dogScaryTurns": "4"
             },
             "min": "2",
