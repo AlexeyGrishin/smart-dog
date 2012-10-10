@@ -245,8 +245,9 @@ var GameMethods = {
 
   _genBrief: function() {
     var brief = _.extend({map: this._.mapName, width: this._.map.cols, height: this._.map.rows, turn: this._.turn}, this._.o);
-    brief.players = this._.players.map(function(p) {return {id:p.getId(), name:p.getName(), score:p.calculateScore(), area:p.getArea()}});
-    if (this.isFinished()) {
+    var finished = this.isFinished();
+    brief.players = this._.players.map(function(p) {return {id:p.getId(), name:p.getName(), score:finished ? p.getResultScore() : p.getScore(), area:p.getArea()}});
+    if (finished) {
       brief.finished = true;
       brief.winner = this._.gameResult.winner ? {id: this._.gameResult.winner.getId(), name: this._.gameResult.winner.getName()} : undefined;
       brief.reason = this._.gameResult.reason;

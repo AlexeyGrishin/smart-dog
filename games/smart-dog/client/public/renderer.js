@@ -491,19 +491,19 @@ Renderer.prototype = {
       ctx.stroke();
       ctx.restore();
     }
-    if (el.sheepBarkingArea) {
+    if (el.dogVisibilityArea) {
       ctx.save();
       var cls = "player" + parseInt(el.owner);
       this.styler.applyClass(ctx, cls);
       this.styler.applyClass(ctx, "barking-area");
-      $.each(el.sheepBarkingArea, function(i, area) {
+      $.each(el.dogVisibilityArea, function(i, area) {
         var bounds = this._bounds({x:area.x, y:area.y, movedDx: el.movedDx, movedDy: el.movedDy});
         ctx.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
       }.bind(this));
       var r = this._cirBounds(el);
       var circleAt = function (r) {
         ctx.beginPath();
-        ctx.arc(r.cx, r.cy, el.sheepBarkingRadius * this.BLOCK, 0, 2*Math.PI);
+        ctx.arc(r.cx, r.cy, el.dogBarkingRadius * this.BLOCK, 0, 2*Math.PI);
         ctx.stroke();
       }.bind(this);
       this.styler.applyClass(ctx, cls);

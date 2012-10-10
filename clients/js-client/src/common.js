@@ -14,7 +14,34 @@ module.exports = {
     Site2: "2",
     Site3: "3",
     Site4: "4",
-    isTraversable: function(landscape) { return landscape != SocketClient.Landscape.Wall},
+    isTraversable: function(landscape) { return landscape != this.Wall},
     isSite: function(landscape) {return [this.Site1, this.Site2, this.Site3, this.Site4].indexOf(landscape) > -1}
+  },
+
+  Directions: {
+    left: {
+      dx: -1,
+      dy: 0,
+      opposite: "right",
+      alternatives: ["up", "down"]
+    },
+    right: {
+      dx: 1,
+      dy: 0,
+      opposite: "left",
+      alternatives: ["down", "up"]
+    },
+    up: {
+      dx: 0,
+      dy: -1,
+      opposite: "down",
+      alternatives: ["right", "left"]
+    },
+    down: {
+      dx: 0,
+      dy: 1,
+      opposite: "up",
+      alternatives: ["left", "right"]
+    }
   }
 };

@@ -53,7 +53,7 @@ MemoryStorage.prototype = {
     if (game.isFinished()) {
       var winner = game.getGameResult().winner;
       game.getPlayers().forEach(function(p) {
-        this.updatePlayer(p.getName(), p.calculateScore(), game.getId(), winner && winner.getId() == p.getId());
+        this.updatePlayer(p.getName(), p.getResultScore(), game.getId(), winner && winner.getId() == p.getId());
       }.bind(this));
     }
   },

@@ -99,6 +99,8 @@ Sheep.prototype._scare = function(p, scaryObject) {
 };
 
 Sheep.prototype._shallMove = function(p) {
+  var sheepStandsOn = p.map.getLandscape(p.x, p.y);
+  if (sheepStandsOn.type == 'Site') return false;
   return p.game.getTurn() % (p.sheepStandBy+1) == p.sheepStandBy;
 };
 

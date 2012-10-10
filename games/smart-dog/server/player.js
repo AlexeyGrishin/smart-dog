@@ -10,7 +10,7 @@ var PlayerInterface = function(game, ownerId, info, options) {
   this.id = ownerId;
   this.info = info;
   this.name = info.name;
-  //this.game.on(Game.Event.AfterTurn, this.generateState.bind(this));
+  this.game.on(Game.Event.Turn, this._storeScore.bind(this));
   this.controller = PlayerController;
 };
 
@@ -41,6 +41,7 @@ PlayerInterface.prototype = {
     this.savedState = this._genState();
     this.controller.init(this);
     this.game.on(Game.Event.Stop, this._onStop.bind(this));
+    this.scores = [];
   },
 
   getName: function() {
@@ -59,7 +60,19 @@ PlayerInterface.prototype = {
     this.area = {x1:x1, y1:y1, x2:x2, y2:y2};
   },
 
-  calculateScore: function() {
+  _storeScore: function() {
+    this.scores.push(this._calculateScore());
+  },
+
+  getResultScore: function() {
+    return Math.max.apply(null, this.scores.slice(this.scores.length - this.o.sheepStandBy*2));
+  },
+
+  getScore: function() {
+    return this._calculateScore();
+  },
+
+  _calculateScore: function() {
     var sheepsOnSite = this._calculateSheeps();
     if (sheepsOnSite <= this.o.ownSheepsCount) {
       return 5*(sheepsOnSite / this.o.ownSheepsCount);
@@ -67,6 +80,9 @@ PlayerInterface.prototype = {
     else {
       return 5 + 5*((sheepsOnSite - this.o.ownSheepsCount) / (this.o.maxSheepsCount - this.o.ownSheepsCount));
     }
+  },
+
+  calculateScore: function() {
   },
 
   _calculateSheeps: function() {

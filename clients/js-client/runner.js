@@ -1,4 +1,5 @@
 var AI = require('./src/ai')
+  , bot = require('./src/bot')
   , common = require('./src/common')
   , SocketClient = require('./src/socket_client');
 
@@ -11,7 +12,7 @@ for (var i = 0; i < args.length; i+=2) {
 function doRun(countLeft) {
   if (countLeft == 0) return;
   var socketClient = new SocketClient(argMap.host, argMap.port);
-  var ai = new AI.Bot(socketClient);
+  var ai = new bot.Bot(socketClient);
   socketClient.on(common.Event.Finish, doRun.bind(null, countLeft-1));
   socketClient.start(argMap.name, argMap.hub);
 }

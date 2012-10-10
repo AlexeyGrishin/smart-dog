@@ -14,9 +14,9 @@ util.inherits(Dog, GameObject);
 
 Dog.prototype._genState = function(p) {
   var state = _.extend(GameObject.prototype._genState.call(this, p), this._genPlayerState(p));
-  state.sheepBarkingRadius = p.dogBarkingR;
   state.dogBarkingRadius = p.dogBarkingR;
-  state.sheepBarkingArea = p.map.getArea(p.x, p.y, p.dogBarkingR);
+  state.dogBarkingArea = p.map.getArea(p.x, p.y, p.dogBarkingR);
+  state.dogVisibilityArea = p.map.getArea(p.x, p.y, p.dogVisibilityR);
   if (p.scaredBy) {
     state.scaredBy = p.scaredBy;
   }
