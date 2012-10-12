@@ -15,11 +15,13 @@ function PlayerInfo(name) {
 }
 
 PlayerInfo.prototype = {
-  registerGame: function(gameId, score, isWinner) {
-    this._games.push({id: gameId, score: score});
+  registerGame: function(game, score, winnerId, playerId) {
+    this._games.push({id: game.getId(), mapName: game.getMapName(), players: game.getPlayers().map(function(p) {
+      return {name:p.getName(), score:p.getResultScore(), isWinner:p.getId() == winnerId, isMe:p.getId() == playerId }
+    }), score: score, isWinner: winnerId == playerId});
     this._score = this._games.map(function(g) {return g.score}).reduce(function(a,b) {return a+b;}, 0) / this._games.length;
     this._gamesCount++;
-    if (isWinner) {
+    if (winnerId == playerId) {
       this._winsCount++;
     }
   }
@@ -51,9 +53,8 @@ MemoryStorage.prototype = {
       this.hubs.push(game.getHub());
     }
     if (game.isFinished()) {
-      var winner = game.getGameResult().winner;
       game.getPlayers().forEach(function(p) {
-        this.updatePlayer(p.getName(), p.getResultScore(), game.getId(), winner && winner.getId() == p.getId());
+        this.updatePlayer(p.getName(), p.getResultScore(), game, p.getId());
       }.bind(this));
     }
   },
@@ -128,14 +129,15 @@ MemoryStorage.prototype = {
     return cb(null, game.toState());
   },
 
-  updatePlayer: function(playerName, score, gameId, isWinner) {
+  updatePlayer: function(playerName, score, game, playerId) {
     var player = this.playersInfoByName[playerName];
     if (!player) {
       player = new PlayerInfo(playerName);
       this.playersInfo.push(player);
       this.playersInfoByName[playerName] = player;
     }
-    player.registerGame(gameId, score, isWinner);
+    var winner = game.getGameResult().winner;
+    player.registerGame(game, score, winner ? winner.id : null, playerId);
   },
 
   saveReplay: function(game, replay) {
