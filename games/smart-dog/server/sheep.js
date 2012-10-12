@@ -4,6 +4,10 @@ var GameObject = require('../../../core/server/game/game_object.js')
   , constants = require('./consts.js')
   , _ = require('cloneextend');
 
+/**
+ * Represents sheep with its behavior
+ * @constructor
+ */
 function Sheep(game, properties) {
   GameObject.call(this, game, properties);
 
@@ -38,6 +42,7 @@ function getDirection(direction) {
 Sheep.Event = {
   SheepScared: "sheep.scared",
   DoMove: "sheep.doMove",
+  DoMoveScaredSheeps: "sheep.doMoveScaredSheeps",
   DoFear: "sheep.doFear"
 };
 
@@ -67,12 +72,14 @@ Sheep.prototype._extend = function(p) {
   p.scared = 0;
   p.direction = goDown;
   p.fearChain = [];
+  p.moved = false;
   var $ = p.game.$;
   p.game.on(Sheep.Event.DoMove, this._doMove.bind(this, p));
+  p.game.on(Sheep.Event.DoMoveScaredSheeps, this._doMoveScaredSheeps.bind(this, p));
   p.game.on(Sheep.Event.DoFear, this._doFear.bind(this, p));
   p.game.on(Dog.Event.Barked, function(dog) {
     if ($(this).inRadius(dog, p.dogBarkingR)) {
-      this._scare(p, dog);
+      this._scare(p, dog, p.sheepScaryTurns);
     }
   }.bind(this));
 
@@ -86,15 +93,16 @@ Sheep.prototype._beforeTurn = function(p) {
       p.fearChain = [];
     }
   }
+  p.moved = false;
 };
 
-Sheep.prototype._scare = function(p, scaryObject) {
+Sheep.prototype._scare = function(p, scaryObject, scaryTurns) {
   if (!scaryObject || (p.scaredBy && scaryObject instanceof Sheep)) return;
   var fearChain = (scaryObject.fearChain || []).slice().concat([scaryObject]);
   if (fearChain.indexOf(this) > -1) return;  //we do not fears which were scared by us :)
   p.scaredBy = scaryObject;
   p.fearChain = fearChain;
-  p.scared = p.sheepScaryTurns;
+  p.scared = scaryTurns;
   p.direction = scaryObject.direction ? scaryObject.direction : getDirection(p.game.$(scaryObject).direction(this));
 };
 
@@ -104,35 +112,74 @@ Sheep.prototype._shallMove = function(p) {
   return p.game.getTurn() % (p.sheepStandBy+1) == p.sheepStandBy;
 };
 
-Sheep.prototype._doMove = function(p) {
+Sheep.prototype._step = function(p, dr, firstAttempt, cb) {
+  if (cb == undefined) {
+    cb = firstAttempt;
+    firstAttempt = true;
+  }
+  var barrier = p.game.$.getBarrier(p.x+dr.dx, p.y+dr.dy);
+  if (barrier) {
+    if (barrier instanceof Sheep && firstAttempt) {
+      console.log(" [ Let's sheep at " + barrier.x + "," + barrier.y + " moves first");
+      barrier.doPreliminaryMove();
+      console.log(" ]");
+      //let it move first - if not moved
+      this._step(p, dr, false, cb);
+    }
+    return cb("Cannot move sheep at " + p.x + "," + p.y + " to " + (p.x+dr.dx) + "," + (p.y+dr.dy) + ": there is " + barrier.type);
+  }
+  this.move(dr.dx, dr.dy, function(err) {
+    if (err) return cb(err);
+  });
+  return cb();
+};
+
+Sheep.prototype.doPreliminaryMove = function() {
+  if (this.p.inPreliminaryMove) return; //to prevent cycles
+  this.p.inPreliminaryMove = true;
+  this._doFear(this.p);
+  this._doMove(this.p, true);
+  this.p.inPreliminaryMove = false;
+};
+
+Sheep.prototype._doMoveScaredSheeps = function(p) {
+  if (!p.scaredBy) return;
+  this._doMove(p);
+};
+Sheep.prototype._doMove = function(p, preliminary) {
+  if (p.moved) {
+    //already moved
+    return;
+  }
+  p.moved = !preliminary;
   if (p.scaredBy) {
-    //console.log("Sheep " + p.id + " fears " + p.scaredBy.type + " at " + p.scaredBy.x + "," + p.scaredBy.y + " and going to run into " + p.direction.dx + "," + p.direction.dy);
-    this.move(p.direction.dx, p.direction.dy, function(err) {
-      //if (err) console.log("Sheep stuck - " + err);
+    this._step(p, p.direction, function(err) {
+      if (err) {
+        console.log("Sheep stuck - " + err);
+      }
+      else {
+        p.moved = true;
+      }
     });
   }
   else {
-    //console.log("turn#" + p.game.getTurn() + ", s=" + p.game.getTurn() % (1+p.sheepStandBy), " sm = " + this._shallMove(p));
+    console.log("turn#" + p.game.getTurn() + ", sheep at " + p.x + "," + p.y + " s=" + p.game.getTurn() % (1+p.sheepStandBy), " sm = " + this._shallMove(p));
     if (!this._shallMove(p)) return;
-    var $ = p.game.$;
-    function check(dr) {
-      return ($.canMoveTo(p.x+dr.dx, p.y+dr.dy));
-    }
-    if (!check(p.direction)) {
-      var valid = p.direction.next.filter(function(d) {return check(d);});
-      if (valid.length > 0) {
-        p.direction = valid[0];
-      }
-    }
-    if (check(p.direction)) {
-      //console.log("Sheep " + p.id + "  decided to go " + p.direction.dir);
-      this.move(p.direction.dx, p.direction.dy, function(err){
-        if (err) console.error("Shall never happen - " + err);
+    var found = false;
+    [p.direction].concat(p.direction.next).forEach(function(dr) {
+      if (found) return;
+      this._step(p, dr, function(err) {
+        if (!err) {
+          found = true;
+          p.direction = dr;
+          p.moved = true;
+          console.log("Sheep moved to " + p.x + "," + p.y )
+        }
+        else {
+          console.log(err);
+        }
       });
-    }
-    else {
-      console.log("Sheep " + p.id + "  decided to stay here");
-    }
+    }.bind(this));
   }
 
 };
@@ -144,7 +191,7 @@ Sheep.prototype._doFear = function(p) {
     return;
   }
   var sheep = $(this).around(1.5).find(".Sheep :scared").not(this).first();
-  this._scare(p, sheep);
+  this._scare(p, sheep, p.sheepScaryTurns);
 };
 
 Sheep.prototype.__defineGetter__('scared', function() {return this.p.scaredBy != null;});

@@ -28,8 +28,12 @@ Hub.prototype = {
       mapName: map.name,
       options:_.cloneextend(this.opts.game, map.opts),
       players: players.slice(),
-      waitMore: players.length < this.opts.max
+      waitMore: this._waitMore(players)
     }
+  },
+
+  _waitMore: function(players) {
+    return players.length < this.opts.max;
   },
 
   getName: function() {
@@ -68,6 +72,11 @@ var DefaultHub = function(defOptions, allMaps) {
 DefaultHub.prototype = new Hub();
 DefaultHub.prototype.matchHub = function(hub) {
   return hub == undefined || Hub.prototype.matchHub.call(this, hub);
+};
+DefaultHub.prototype._waitMore = function(players) {
+  if (players.length == this.opts.max) return false;
+  if (players.length < this.opts.min) return true;
+  return Math.random() > 0.5;
 };
 
 

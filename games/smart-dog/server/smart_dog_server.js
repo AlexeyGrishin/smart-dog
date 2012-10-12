@@ -1,9 +1,10 @@
+//Following lines commented because they are related to performance testing
+//Both modules (nodetime and look) works under *nix only.
 //require('nodetime').profile();
 //require('look').start(5959, '127.0.0.1');
 var GameServer = require('../../../core/server/game/game_server.js')
   , config = require('./server_config.json')
   , GameFactory = require('./game_object_factory.js')()
-  //, GameFactory = require('./stub/stub_factory.js')
   , Maps = require('../../../core/server/game/maps.js')
   , SocketController = require('../../../core/server/socket_server/socket_controller.js')
   , SocketView = require('../../../core/server/socket_server/socket_view.js')
@@ -28,13 +29,11 @@ var socketServer = new SocketServer(function(socket) {
 }, config.viewPort);
 
 var httpServer = new HttpServer(gameServer, config.httpPort, config.httpResources);
-//var profiler = require('v8-profiler');
 function showMemory() {
   console.log("-------------------------");
   var mem = process.memoryUsage();
   console.log(util.format("RSS: %d MB Heap: %d MB / %d MB", mb(mem.rss), mb(mem.heapUsed), mb(mem.heapTotal)));
   console.log();
-  //profiler.takeSnapshot('time-to-time');
 }
 
 function mb(bytes) {

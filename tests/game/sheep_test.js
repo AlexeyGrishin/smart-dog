@@ -123,7 +123,27 @@ var sheepTest = {
       });
     },
 
-    //TODO: add additional tests for movement
+    testTwoNeighborSheepsShallMoveRightTogether: function(test) {
+      p.init(["...","**.","##."], {sheepStandBy:0});
+      p.game.start();
+      p.skipTurn(function() {
+        var state = p.game.toState();
+        ex(test).contains(state.objects[0], {x:1, y:1, type: "Sheep"});
+        ex(test).contains(state.objects[1], {x:2, y:1, type: "Sheep"});
+        test.done();
+      })
+    },
+
+    testTwoNeighborSheepsShallMoveLeftTogether: function(test) {
+      p.init(["..##",".**#","####"], {sheepStandBy:0});
+      p.game.start();
+      p.skipTurn(function() {
+        var state = p.game.toState();
+        ex(test).contains(state.objects[0], {x:0, y:1, type: "Sheep"});
+        ex(test).contains(state.objects[1], {x:1, y:1, type: "Sheep"});
+        test.done();
+      })
+    },
 
     tearDown: function(cb) {
       p.stop();
@@ -234,6 +254,20 @@ var sheepTest = {
       });
     },
 
+    testTwoSheepsInLine: function(test) {
+      p.initAndStart(p.map({
+        sheep: {x:5, y:5},
+        sheep2: {x:5, y:4},
+        dog: {x:5, y:6}
+      }), {dogBarkingR: 1, sheepScaryTurns: 1});
+      var player = p.controller(p.player1, p.dog1);
+      player.bark(function(state) {
+        ex(test).contains(state.objects[0], {x: 5, y: 3, type: "Sheep", direction: "up", action: "panic"});
+        ex(test).contains(state.objects[1], {x: 5, y: 4, type: "Sheep", direction: "up", action: "panic"});
+        test.done();
+      });
+    },
+
     testPanic: function(test) {
       p.initAndStart(p.map({
         sheep: {x:5, y:5},
@@ -276,3 +310,9 @@ var sheepTest = {
 };
 
 module.exports = sheepTest;
+return;
+ var F = function() {};
+ sheepTest.fear.setUp(F);
+ sheepTest.fear.testPanic({done: F, ok: function() {
+
+ }, deepEqual: F});

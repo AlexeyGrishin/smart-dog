@@ -127,6 +127,14 @@ function Landscape(landscape, options) {
       [0].o;
   };
 
+  this.sortByDistance = function(o, objects) {
+    if (objects.length == 0) return [];
+    return objects
+      .map(function(ob) {return {o: ob, distance: this.distance(o, ob)}}.bind(this))
+      .sort(function(p1, p2) {return p1.distance - p2.distance})
+      .map(function(p) {return p.o});
+  };
+
   this.canBarkOn = function(dog, o) {
     return this.distance(dog, o) <= this.opt("dogBarkingR");
   };

@@ -69,34 +69,20 @@ var Demo = {
   },
 
   dog_help: function(helper, cb) {
-    var ally_dog = helper.controller(helper.player1, helper.dog1);
-    var enemy_dog = helper.controller(helper.player2, helper.dog2);
-    var our_dog = helper.controller(helper.player1, helper.dog1_2);
-    enemy_dog.move("up", function() {
-      enemy_dog.move("up", function() {
-        enemy_dog.move("up", function() {
-          enemy_dog.bark(function() {
-            ally_dog.move("right", function() {
-              ally_dog.move("right", function() {
-                ally_dog.bark(function() {
-                  our_dog.move("right", function() {
-                    our_dog.move("down", function() {
-                      our_dog.move("right", function() {
-                        our_dog.move("down", function() {
-                          our_dog.bark(function() {
-                            our_dog.waitForEnd(cb);
-                          })
-                        })
-                      })
-                    });
-                  });
-                });
-              })
-            })
-          })
-        });
-      });
+    var sc = helper.scenario({
+      ally: {player: helper.player1, dog: helper.dog1},
+      enemy: {player: helper.player2, dog: helper.dog2},
+      hero: {player: helper.player1, dog: helper.dog1_2}
     });
+    sc.move("enemy", "left").end();
+    sc.move("enemy", "left").bark("enemy").end();
+    sc.move("ally", "right").end();
+    sc.move("ally", "right").bark("ally").end();
+    sc.move("hero", "right").end();
+    sc.move("hero", "down").end();
+    sc.move("hero", "right").end();
+    sc.move("hero", "right").bark("hero").end();
+    sc.execute(cb);
   },
 
   real: function(helper, cb) {
@@ -104,25 +90,30 @@ var Demo = {
       ally: {player: helper.player1, dog: helper.dog1},
       enemy: {player: helper.player2, dog: helper.dog2}
     });
+    sc.move("ally", "left").move("enemy", "up").end();
+    sc.move("ally", "left").move("enemy", "left").end();
+    sc.move("ally", "left").move("enemy", "left").end();
+    sc.move("ally", "down").move("enemy", "left").bark("enemy").end();
+    sc.move("ally", "left").bark("ally").move("enemy", "left").end();
+    sc.move("ally", "left").move("enemy", "down").end();
+    sc.move("ally", "up").move("enemy", "down").bark("enemy").end();
+    sc.move("ally", "up").move("enemy", "down").end();
+    sc.move("ally", "up").bark("ally").move("enemy", "left").end();
     sc.move("ally", "right").move("enemy", "down").end();
-    sc.move("ally", "right").move("enemy", "left").end();
-    sc.move("ally", "right").move("enemy", "left").end();
-    sc.move("ally", "right").move("enemy", "left").bark("enemy").bark("ally").end();
-    sc.move("ally", "right").move("enemy", "left").end();
-    sc.move("ally", "right").move("enemy", "left").end();
-    sc.move("ally", "right").move("enemy", "up").end();
-    sc.move("ally", "down").bark("ally").move("enemy", "up").end();
-    sc.move("enemy", "up").bark("enemy").move("ally", "left").end();
-    sc.move("enemy", "down").move("ally", "left").end();
-    sc.move("enemy", "right").move("ally", "up").end();
-    sc.move("enemy", "right").move("ally", "left").bark("enemy").end();
-    sc.move("enemy", "left").move("ally", "left").bark("ally").end();
-    sc.move("enemy", "left").move("ally", "left").bark("ally").end();
-    sc.move("enemy", "left").move("ally", "left").bark("ally").end();
-    sc.move("enemy", "left").move("ally", "left").bark("ally").end();
-    sc.move("enemy", "up").move("ally", "left").bark("ally").end();
-    sc.move("enemy", "up").move("ally", "left").bark("ally").end();
-    sc.move("ally", "up").bark("ally").end();
+    sc.move("ally", "right").move("enemy", "down").end();
+    sc.move("ally", "down").bark("ally").move("enemy", "down").bark("enemy").end();
+    sc.move("ally", "left").move("enemy", "right").end();
+    sc.move("ally", "left").move("enemy", "right").end();
+    sc.move("ally", "left").move("enemy", "down").bark("enemy").end();
+    sc.move("ally", "left").move("enemy", "right").end();
+    sc.move("ally", "down").move("enemy", "right").end();
+    sc.move("ally", "down").move("enemy", "right").bark("enemy").end();
+    sc.move("ally", "left").move("enemy", "up").end();
+    sc.move("ally", "left").move("enemy", "up").end();
+    sc.move("ally", "left").move("enemy", "up").end();
+    sc.move("ally", "left").move("enemy", "up").bark("ally").end();
+    sc.move("ally", "up").end();
+    sc.move("ally", "up").move("enemy", "down").bark("ally").end();
     sc.execute(cb);
   }
 };

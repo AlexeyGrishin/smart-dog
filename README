@@ -4,9 +4,7 @@ Currently it is under construction, there is only some prototype that shall be i
 How to see it at work:
 
 1. Clone it
-
 2. Install nodejs >= 0.8.9
-
 3. In the local repository run
      npm install
 
@@ -15,9 +13,14 @@ node ./games/smart-dog/server/smart_dog_server.js &
 
 5. Open site http://localhost:3000
 
-6. Run 2 or more clients (require JRE7):
-./clients/java-client/player1.bat &
-./clients/java-client/player2.bat &
+6. Run 2 or more sample bots:
+./clients/js-client/player1.bat &
+./clients/js-client/player2.bat &
+
+or
+
+./clients/js-client/player1.sh &
+./clients/js-client/player2.sh &
 
 7. Observe game on site
 
@@ -34,9 +37,8 @@ TODO:
 4. Development tools (turns replays, etc)
 5. Offline replay (ReplayDataStorer shall put html page near json)
 +6. Rendering ('barking' and other sounds, animated moval, probably sprites)
-    + In progress (Grishin)
 *7. Website
-    * In progress (Grishin)
+    * In progress
         - player page - list of games, winning count, replay/realtime view of latest/current game
             shall be updated in runtime!
         + game page - improve design
@@ -49,10 +51,11 @@ TODO:
    - tournament: user specifies players, maps, and then server schedules games to be played and awaits required players 
 9. Improve data format to minimize size of turns/replays/data transferred (base64 or something other binary)?
 10. Unit tests!
-11. TODOs, comments, make code clean
-12. Memory leaks - currently server allocates a lot of memory. Probably listeners, or non-closed connections
-*13. Game rules page - with inlined behavior demos (replays)
-    * In progress (Grishin)
+11. Error processing
+   - when player fails - it shall have -10 score, game shall be marked
++12. Memory leaks - currently server allocates a lot of memory. Probably listeners, or non-closed connections
++13. Game rules page - with inlined behavior demos (replays)
+    + In progress (Grishin)
 ------------------------------------------------
 Code guidelines
 

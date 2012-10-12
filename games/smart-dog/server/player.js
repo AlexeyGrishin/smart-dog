@@ -27,13 +27,6 @@ PlayerInterface.prototype = {
     //TODO: constants for layers
     this.dogs = this.map.getObjectsBy("object", function(o) {return o instanceof Dog && o.owner.id == this.id}.bind(this));
     this.site = this.map.getObjectsBy("landscape", function(o) {return o.type == "Site" && o.owner.id == this.id}.bind(this));
-    /*var area = this.map.getObjectsBy("landscape", function(o) {return o.owner && o.owner.id == this.id}.bind(this));
-    var xes = area.map(function(o) {return o.x}), yes = area.map(function(o) {return o.y});
-    this.area = {x1: Math.min.apply(null, xes),
-      x2: Math.max.apply(null, xes),
-      y1: Math.min.apply(null, yes),
-      y2: Math.max.apply(null, yes)
-    };*/
     this.dogById = {};
     for (var i = 0; i < this.dogs.length; i++) {
       this.dogById[this.dogs[i].id] = this.dogs[i];
@@ -65,7 +58,7 @@ PlayerInterface.prototype = {
   },
 
   getResultScore: function() {
-    return Math.max.apply(null, this.scores.slice(this.scores.length - this.o.sheepStandBy*2));
+    return this.scores.length > 0 ? this.scores[this.scores.length-1] : 0;
   },
 
   getScore: function() {
@@ -74,15 +67,15 @@ PlayerInterface.prototype = {
 
   _calculateScore: function() {
     var sheepsOnSite = this._calculateSheeps();
-    if (sheepsOnSite <= this.o.ownSheepsCount) {
-      return 5*(sheepsOnSite / this.o.ownSheepsCount);
+    if (sheepsOnSite == this.o.iniSheepsCount) {
+      return 0;
+    }
+    else if (sheepsOnSite < this.o.iniSheepsCount) {
+      return -10*((this.o.iniSheepsCount - sheepsOnSite) / this.o.iniSheepsCount)
     }
     else {
-      return 5 + 5*((sheepsOnSite - this.o.ownSheepsCount) / (this.o.maxSheepsCount - this.o.ownSheepsCount));
+      return 10 * sheepsOnSite / this.o.maxSheepsCount;
     }
-  },
-
-  calculateScore: function() {
   },
 
   _calculateSheeps: function() {

@@ -7,9 +7,8 @@ var AI = {
   },
 
   sheepDog: function (dog, sheeps, landscape) {
-    var sheepsNonOnPlace = sheeps.filter(function(s) { return !landscape.isMySite(s.x, s.y) });
-    if (sheepsNonOnPlace.length > 0) {
-      var nearestSheep = landscape.findNearestObject(dog, sheepsNonOnPlace);
+    var sheepsNonOnPlace = landscape.sortByDistance(dog, sheeps.filter(function(s) { return !landscape.isMySite(s.x, s.y) }));
+    sheepsNonOnPlace.some(function(nearestSheep) {
       var nearestSite = landscape.findNearest(nearestSheep, function(l){
         return landscape.isMySite(l.x, l.y)
       });
@@ -20,9 +19,16 @@ var AI = {
       }
       else {
         var requiredLocationToBark = landscape.at(nearestSheep, landscape.oppositeDirection(requiredDirection));
-        this.moveTo(landscape, dog, requiredLocationToBark);
+        if (landscape.isTraversable(requiredLocationToBark.x, requiredLocationToBark.y)) {
+          this.moveTo(landscape, dog, requiredLocationToBark);
+        }
+        else {
+          //skip this sheep
+          return false;
+        }
       }
-    }
+      return true;
+    }.bind(this));
   },
 
   moveTo: function(landscape, dog, target) {

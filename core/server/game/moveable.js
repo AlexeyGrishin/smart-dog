@@ -2,12 +2,20 @@
 var Moveable = {
   extendMap: function(mapHelper, map) {
     mapHelper.canMoveTo = this._canMoveTo.bind(mapHelper);
+    mapHelper.getBarrier = this._getBarrier.bind(mapHelper);
   },
 
   _canMoveTo: function(x, y) {
     return this.at(x, y).every(function(o) {
       return (o.layer == 'landscape' && o.traversable);
     })
+  },
+
+  _getBarrier: function(x, y) {
+    var barriers = this.at(x, y).filter(function(o) {
+      return (o.layer != 'landscape' || !o.traversable);
+    });
+    return barriers.length > 0 ? barriers[0] : null;
   },
 
   extendClass: function(classCtor) {

@@ -9,7 +9,7 @@
     <link href="games.css" rel="stylesheet"/>
 </head>
 <body data-spy="scroll" data-target=".sidebar" >
-<div class="navbar navbar-fixed-top">
+<div class="navbar">
     <div class="navbar-inner">
         <a class="brand" href="#">SmartDog</a>
         <ul class="nav">
@@ -19,7 +19,85 @@
         </ul>
     </div>
 </div>
-<div class="alert alert-error">
-    Еще не готово
+<div class="container">
+    <section id="server">
+        <h1>Установка Сервера</h1>
+        <p>Сервер выложен на github: <a href="https://github.com/AlexeyGrishin/smart-dog">https://github.com/AlexeyGrishin/smart-dog</a></p>
+        <p>Инструкция по установке:</p>
+        <ol>
+            <li>Установите последний <a href="http://nodejs.org/">Node.js</a></li>
+            <li>Убедитесь, что путь к бинарникам прописался в PATH - команды 'node' и 'npm' должны выполняться в консоли без проблем</li>
+            <li>Скачайте сервер одним из следующих способов:
+            <ul>
+                <li>Установите <a href="http://git-scm.com/">git</a> и выполните <code>git clone git://github.com/AlexeyGrishin/smart-dog.git</code> в нужной вам директории</li>
+                <li>Скачайте его себе в виде <a href="https://github.com/AlexeyGrishin/smart-dog/zipball/master">ZIP архива</a></li>
+            </ul>
+            </li>
+            <li>Перейдите в папку с сервером</li>
+            <li><code>npm install</code></li>
+            <li><code>./server.bat</code> или <code>./server.sh</code></li>
+            <li>Откройте в браузере <a href="http://localhost:3000">http://localhost:3000</a></li>
+            <li>Все готово! Можете запустить тестовых ботов и начать писать своего:
+<pre>cd clients\js-client
+start player1.bat
+start player2.bat</pre>
+                или
+<pre>./clients/js-client/player1.sh &
+./clients/js-client/player2.sh &</pre>
+            </li>
+        </ol>
+        <p>Полезная информация</p>
+        <ul>
+            <li>Конфигурация сервера лежит в ./games/smart-dog/server_config.json</li>
+            <li>Карты лежат в ./maps</li>
+        </ul>
+    </section>
+    <section id="client">
+        <h1>Установка Клиента</h1>
+
+        <p>Для начала скачайте сервер как это указано <a href="#server">выше</a></p>
+        <p>В папке clients содержатся примеры клиентов для следующих языков</p>
+        <table class="table table-bordered">
+            <tr><th>Язык</th><th>Где лежит</th><th>Билд</th><th>Запуск</th><th>Примечания</th></tr>
+            <tr>
+                <th>Java</th>
+                <td>./clients/java-client</td>
+                <td>
+<pre>cd clients/java-client
+ant</pre>
+                </td>
+                <td>
+<pre>cd clients\java-client
+start player1.bat
+start player2.bat</pre>
+                    или
+<pre>cd clients/java-client
+player1.sh&
+player2.sh&</pre>
+                </td>
+                <td>Requires JDK7 and Ant</td>
+            </tr>
+            <tr>
+                <th>Javascript (NodeJS)</th>
+                <td>./clients/js-client</td>
+                <td>Не требуется</td>
+                <td>
+<pre>cd clients\js-client
+start player1.bat
+start player2.bat</pre>
+                    или
+<pre>cd clients/js-client
+player1.sh&
+player2.sh&</pre>
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <th>C#</th>
+                <td colspan="5" class="text-info">Coming soon...</td>
+            </tr>
+        </table>
+
+    </section>
 </div>
 </body>

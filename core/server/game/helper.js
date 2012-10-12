@@ -36,13 +36,11 @@ var Map2D = require('./map2d.js');
   inRadius(o1, o2, radius) -> true/false
   at(x, y)        -> HelperObjectCollection
 
- TODO: modules
-
-  $.moduleName = $.extend($, {extendMap: function(map), extendObject: function(obj, p), selector: function(selector), extendCollection});
+  $.moduleName = $.extend($, {extendMap: function(map), extendClass: function(classCtor, p), selector: function(selector), extendCollection});
   $.extend(GameObjectClass, $.moduleName, $.moduleName2);
 
-  $.moduleName.customMethod   -> called for map
-  $(object).customMethod      -> called for object
+  $.customMethod()   -> called for map
+  $(object).customMethod()      -> called for object
 
  */
 function helper(map) {

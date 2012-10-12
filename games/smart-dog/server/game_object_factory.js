@@ -120,18 +120,6 @@ Factory.prototype = {
   },
 
   _createLandscape: function(type, game, fillerPlayer, properties) {
-    /*if (type == Grass) {
-      return this.shared.grass;
-    }
-    else if (type == Wall) {
-      return this.shared.wall;
-    }
-    else if (type == Tree) {
-      return this.shared.tree;
-    }
-    else if (type == Site) {
-      return this.shared.sites[fillerPlayer];
-    }*/
     return new type(game, properties);
   },
 
@@ -208,6 +196,7 @@ Factory.prototype = {
    *    map: map object instance,
    *    mapCtor: map creator (returned by this factory),
    *    mapName: map name,
+   *    options: map options,
    *    players: array[] of {
    *      name: player name[,
    *      io: controller {setPlayerInterface}]
@@ -230,8 +219,9 @@ Factory.prototype = {
     game.setMap(gameToStart.mapName, gameToStart.map);
     this.fillMap(gameToStart.mapCtor, game.getPlayers(), gameToStart.map, game, options);
     game._.landscape = this.encodeMap(game._.map.cols, game._.map.rows, game._.map.getAll("landscape"));
-    options.ownSheepsCount = game.getMap().getObjectsBy("object", function(o) {return o instanceof Sheep && o.owner.id == 1}).length;
-    options.maxSheepsCount = game.getMap().getObjectsBy("landscape", function(o) {return o instanceof Site && o.owner.id == 1}).length;
+    var allSheeps = game.getMap().getObjectsBy("object", function(o) {return o instanceof Sheep && o.owner.id == 1});
+    options.maxSheepsCount = allSheeps.length;
+    options.iniSheepsCount = allSheeps.filter(function(o) {return game.getMap().getLandscape(o.x, o.y) instanceof Site}).length;
     return game;
   }
 };
@@ -254,6 +244,7 @@ SmartDogGame.prototype.init = function() {
 
 
 SmartDogGame.prototype.afterTurn = function() {
+  this.emit(Sheep.Event.DoMoveScaredSheeps);
   this.emit(Sheep.Event.DoMove);
   this.emit(Sheep.Event.DoFear);
   if (this._.turn >= this._.o.turnsLimit - 1) {
