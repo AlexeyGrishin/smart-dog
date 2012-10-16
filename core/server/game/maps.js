@@ -66,7 +66,7 @@ Hub.prototype = {
 };
 
 var DefaultHub = function(defOptions, allMaps) {
-  Hub.call(this, "#default", defOptions, allMaps);
+  Hub.call(this, "default", defOptions, allMaps);
 };
 
 DefaultHub.prototype = new Hub();
@@ -105,22 +105,27 @@ var Maps = function(mapConfig, defaultGameConfig, mapFactory) {
     })
   }.bind(this));
   this.hubs = [new DefaultHub(defaultGameConfig, this.maps)];
+
   this.findHub = function(name) {
     var hubs = this.hubs.filter(function(h) {return h.matchHub(name)});
     return hubs.length > 0 ? hubs[0] : null;
   };
+
   this.getGameToStart = function(waitingPlayers, playerOrHub) {
     var targetHubName = typeof playerOrHub == 'string' ? playerOrHub : playerOrHub.hub;
     var hub = this.findHub(targetHubName);
     if (!hub) return {exists: false, error: "No such hub"};
     return hub.getGameToStart(waitingPlayers);
   };
+
   this.gameStarted = function(game) {
     this.findHub(game.hub).gameStarted(game);
   };
+
   this.addHub = function(name, options) {
     this.hubs.push(new Hub(name, options, this.maps));
   };
+
   this.getHubs = function() {
     return this.hubs.map(function(h) {return h.getName()});
   }

@@ -42,13 +42,13 @@ ReplayData.prototype.onTurn = function(state) {
 };
 
 ReplayData.prototype.onStop = function(result) {
-  this.game.stopReason = result.reason;
+  this.game.error = result.error;
   if (result.winner) {
     this.game.winner = {id: result.winner.getId(), name: result.winner.getName()}
   }
   var turn = {
     winner: this.game.winner,
-    stopReason: this.game.stopReason
+    error: this.game.error
   };
   this.emit(ReplayData.Event.Stop, turn);
 };

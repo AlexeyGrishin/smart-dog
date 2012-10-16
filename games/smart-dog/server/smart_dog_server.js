@@ -18,7 +18,7 @@ var storage = new MemoryStorage(config);
 var maps = new Maps(config.maps, config.games.default, GameFactory);
 
 ["solo", "duet", "trio", "quartet"].forEach(function(hub) {
-  maps.addHub("#" + hub, _.cloneextend(config.games.default, config.games[hub]));
+  maps.addHub(hub, _.cloneextend(config.games.default, config.games[hub]));
 });
 
 var gameServer = new GameServer(storage, maps, GameFactory, config);

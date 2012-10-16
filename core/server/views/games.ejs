@@ -1,29 +1,40 @@
 <% if (games.length > 0) { %>
-<table class="table table-striped table-bordered">
+<table class="table table-stripped table-bordered">
 <tr>
-<th>ID</th><th>Map</th><th>Turn</th><th>Players</th><th>Link</th>
+<th>ID</th><th>Карта</th><th>Игроки</th><th>Ссылка</th>
 </tr>
 <% for (var i = 0; i < games.length; i++) { %>
-<tr class="<%= games[i].finished ? 'finished' : 'active' %>">
+<tr class="<%= games[i].finished ? 'finished' : 'active' %> <%= games[i].error ? 'error' : '' %>">
 <td><%= games[i].id %></td>
 <td>
-<%= games[i].brief.map %>
+<%= games[i].map %>
 </td>
-<td><%= games[i].brief.turn+1 %></td>
-<td><%- games[i].brief.players.map(function(p) {
-        var name = p.name;
-        if (games[i].brief.winner && games[i].brief.winner.id == p.id)
-            name = "<b>" + p.name + "</b>";
-        return name + " (" + p.score.toFixed(2) + ")";
+<td><%- games[i].players.map(function(p) {
+        var pl = p.name;
+        if (p.isWinner) pl = "<b>" + p.name + "</b>";
+        if (p.score != undefined) pl += " (" + p.score.toFixed(2) + ")";
+        return pl;
     }).join(", ") %></td>
 <td>
     <% if (games[i].finished) { %>
-    <a href="/<%= games[i].id %>">See Replay</a>
+    <a href="/<%= games[i].id %>">Посмотреть</a>
+    <% } else { %>
+    <span class="label">Игра идет</span>
     <% } %>
 </td>
 </tr>
 <% } %>
 </table>
-<% } else {%>
-<p class="alert alert-warning">There is no active game</p>
+
+<div class="pagination pagination-centered">
+    <ul>
+        <% for (var i = 0; i < pages.length; i++) { %>
+        <li class="<%= pages[i].kls %>">
+            <a href="<%= pages[i].url || 'javascript:void(0)' %>"><%= pages[i].val %></a>
+        </li>
+        <% }%>
+    </ul>
+</div>
+<% } else { %>
+<p class="alert alert-warning">Не было ни одной игры :(</p>
 <% } %>

@@ -2,15 +2,23 @@
 <div class="container well game-result">
 <div class="row">
     <div class="span3">
-        <h1 data-id="<%= game.getId() %>">Game <%= game.getId() %>
-        </h1>
-        <h5><span class="label"><%= game.getHub() %></span> <%= game.getMapName() %>  </h5>
-    <div class="alert alert-error hidden error-info"></div>
+            <h1 data-id="<%= game.id %>">Game <%= game.id %></h1>
+            <h5><span class="label"><%= game.hub %></span> <%= game.map %>  </h5>
 
-    </div>
-    <div class="span9">
-        <p class="players players-info"></p>
-    </div>
+            <% if (game.error) { %>
+        <div class="alert alert-error error-info">
+            <%= game.error %>
+        </div>
+            <% } %>
+
+        </div>
+        <div class="span9">
+            <div class="players players-info">
+        <% for (var i = 0; i < game.players.length; i++) { var p = game.players[i];%>
+            <div class='player<%= (i+1) %> <%= p.isWinner ? 'winner' : '' %>'><span><%= p.name %></span><em><%= p.score.toFixed(2) %></em></div>
+        <% } %>
+            </div>
+        </div>
 </div>
 
 </div>
@@ -23,7 +31,6 @@
 </div>
 
 <script src="jquery-ui-1.8.23.custom.min.js"></script>
-<script src="socket.io.min.js"></script>
 <script src="canvas-css.js"></script>
 <script src="renderer.js"></script>
 <script src="webclient.js"></script>

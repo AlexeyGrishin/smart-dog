@@ -145,6 +145,7 @@ GameServer.prototype = {
    * Gets the list of the games asynchronously
    * @param onlyActive
    * @param cb will be called with brief info array (id, players[], brief{}, finished}
+   * @deprecated use listGames2 instead. Remove this method after refactoring socket_view
    */
   listGames: function(onlyActive, hub, cb) {
     this.storage[onlyActive ? 'listActiveGames' : 'listGames'](hub, function(error, games) {
@@ -159,8 +160,31 @@ GameServer.prototype = {
     });
   },
 
-  listPlayers: function(cb) {
-    this.storage.listPlayers(cb);
+  /**
+   * Gets all games for specified hub. One page is returned assuming that there is <c>perPage</c> games on single page
+   * @param hub
+   * @param page
+   * @param perPage
+   * @param cb
+   */
+  listGames2: function(hub, page, perPage, cb) {
+    this.storage.listGames(hub, {page:page, perPage:perPage, originalSort: function(game1, game2) {
+      if (!game1.finished && game2.finished) return -1;
+      if (game1.finished && !game2.finished) return 1;
+      return game2.id - game1.id;
+    }}, cb);
+  },
+
+  /**
+   * Calls cb with array of players info {
+   *  name: <name>,
+   *  score: <score for specified hub>
+   * }
+   * @param hub
+   * @param cb
+   */
+  listPlayers: function(hub, cb) {
+    this.storage.listPlayers(hub, cb);
   },
 
   listHubs: function(cb) {

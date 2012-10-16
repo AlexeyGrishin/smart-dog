@@ -127,7 +127,7 @@ SocketController.prototype = {
     this.send("finished", {
       youWin: myWin,
       winner: state.winner ? state.winner.id : undefined,
-      stopReason: state.stopReason
+      error: state.error
     });
   },
 

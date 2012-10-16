@@ -248,7 +248,7 @@ SmartDogGame.prototype.afterTurn = function() {
   this.emit(Sheep.Event.DoMove);
   this.emit(Sheep.Event.DoFear);
   if (this._.turn >= this._.o.turnsLimit - 1) {
-    this._stopGame('turnsLimit');
+    this._stopGame();
   }
 
 };
@@ -264,19 +264,20 @@ SmartDogGame.prototype._getGameResult = function() {
   return this._.result;
 };
 
-SmartDogGame.prototype._stopGame = function(reason, playerCausedStop) {
+
+SmartDogGame.prototype._getWinner = function() {
   var _ = this._;
-  _.result.reason = reason;
-  _.result.finished = true;
-  _.result.playerCausedStop = playerCausedStop;
-  var maxScore = -1;
+  if (_.result.playerCausedStop) return null;
+  var maxScore = -10; //minimum for score
+  var winner = null;
   for (var i = 0; i < _.players.length; i++) {
     var score = _.players[i].getResultScore(); //TODO: cache score inside player
-    if (_.players[i] != playerCausedStop && score > maxScore) {
-      _.result.winner = _.players[i];
+    if (_.players[i] != _.result.playerCausedStop && score > maxScore) {
+      winner = _.players[i];
       maxScore = score;
     }
   }
+  return winner;
 };
 
 module.exports = function() {

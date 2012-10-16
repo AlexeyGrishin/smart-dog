@@ -2,12 +2,13 @@ $(function() {
   function doLoad() {
     $(".games").each(function() {
       var hub = $(this).attr('data-hub');
-      $(this).load('/games?hub=' + encodeURIComponent(hub));
+      var page = $(this).attr('data-page');
+      $(this).load('/gamesAjax?hub=' + encodeURIComponent(hub) + '&page=' + encodeURIComponent(page));
+      $("#players").load('/players?hub=' + encodeURIComponent(hub));
     });
-    $("#players").load("/players");
   }
   if ($(".games").length > 0) {
-    setInterval(doLoad, 1000);
+    setInterval(doLoad, 10000);
     doLoad();
   }
   $(".games").ajaxError(function() {

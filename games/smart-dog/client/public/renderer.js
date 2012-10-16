@@ -51,7 +51,7 @@ function GameViewer(canvas, controls) {
 
 GameViewer.prototype = {
   _createControls: function() {
-    var $controls = $("<div></div>").addClass("controls row-fluid");
+    var $controls = $("<div></div>").addClass("controls row-fluid").hide();
     $controls.append($("<a href='javascript:void(0)'><i class='icon-play'></i></a>").addClass("btn btn-small btn-primary play"));
     $controls.append($("<a href='javascript:void(0)'><i class='icon-stop'></i></a>").addClass("btn btn-small stop"));
     $controls.append($("<div></div>").addClass("slider"));
@@ -106,6 +106,7 @@ GameViewer.prototype = {
       value: this.currentFrame
     });
     this.isPlaying = false;
+    this.controls.show();
   },
 
   play: function(from, to) {
@@ -516,3 +517,15 @@ Renderer.prototype = {
     }
   }
 };
+
+//Auto-render demos
+$(function() {
+  $(".demo").each(function() {
+    $(this).addClass("sheep grass dog wall tree player1 player2 player3 player4 scared barking barking-area arrow");
+    var gameViewer = new GameViewer($(this));
+    $.getJSON('./replays/' + $(this).attr("data-name") + '.json', function(data) {
+      gameViewer.setReplay(data.replay);
+      gameViewer.goToFrame(gameViewer.getMinFrame());
+    })
+  });
+});

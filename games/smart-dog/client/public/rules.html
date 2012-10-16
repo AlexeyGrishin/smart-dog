@@ -9,25 +9,15 @@
     <link href="bootstrap.css" rel="stylesheet"/>
     <link href="ui-lightness/jquery-ui-1.8.23.custom.css" rel="stylesheet"/>
     <link href="games.css" rel="stylesheet"/>
-    <script>
-        $(function() {
-            $(".demo").each(function() {
-                $(this).addClass("sheep grass dog wall tree player1 player2 player3 player4 scared barking barking-area arrow");
-                var gameViewer = new GameViewer($(this));
-                $.getJSON('./replays/' + $(this).attr("data-name") + '.json', function(data) {
-                    gameViewer.setReplay(data.replay);
-                    gameViewer.goToFrame(gameViewer.getMinFrame());
-                })
-            });
-        });
-    </script>
+    <title>SmartDog :: Правила</title>
+
 </head>
 <body data-spy="scroll" data-target=".sidebar" >
 <div class="navbar">
     <div class="navbar-inner">
-        <a class="brand" href="#">SmartDog</a>
+        <a class="brand" href="/">SmartDog</a>
         <ul class="nav">
-            <li><a href="/">Игры</a></li>
+            <li><a href="/games">Игры</a></li>
             <li class="active"><a href="/rules.html">Правила</a></li>
             <li><a href="/download.html">Скачать</a></li>
         </ul>
@@ -37,7 +27,6 @@
     <div class="row">
         <div class="span3 sidebar ">
             <ul class="nav nav-list well" data-spy="affix" data-offset-top="0">
-                <li class="active"><a href="#intro">Вступление</a></li>
                 <li><a href="#howtostart">С чего начать</a></li>
                 <li><a href="#rules">Правила</a></li>
                 <li class="l2"><a href="#map">Карта</a></li>
@@ -52,19 +41,6 @@
             </ul>
         </div>
         <div class="span9">
-
-            <section id="intro">
-                <h1>Вступление</h1>
-                <p>smart dog создавался по образу и подобию google ai challenge, поэтому суть такая же: есть игра с несложными правилами, для которой нужно написать бота. Боты "сражаются" между собой, и по итогам сражений определяется победитель.
-                </p>
-                <p>Вкратце правила таковы: есть поле, на котором присутствуют собаки игроков и овцы. Каждый игрок должен загнать как можно большее количество овец в свой загон, управляя собаками.</p>
-                <p>Вот как примерно это может выглядеть:</p>
-                <div class="well">
-                    <canvas class="demo" data-name="real"></canvas>
-                </div>
-
-
-            </section>
 
             <section id="howtostart">
                 <h1>С чего начать</h1>
@@ -407,15 +383,15 @@ do &lt;dogId&gt; bark</pre>
                 <p>Доступен по адресу <a href="/">http://smartdog.actimind.com/</a>. Для игроков используется порт 3002</p>
                 <p>Хабы, работающие на официальном сервере:</p>
                 <dl class="dl-horizontal">
-                    <dt>#default</dt>
+                    <dt>default</dt>
                     <dd>Хаб по-умолчанию. Используются все виды карт, минимальное количество игроков для игры 2, максимальное - 4. </dd>
-                    <dt>#solo</dt>
+                    <dt>solo</dt>
                     <dd>Используются все виды карт. Каждый подключившийся играет в одиночку, без соперников</dd>
-                    <dt>#duet</dt>
+                    <dt>duet</dt>
                     <dd>Используются все виды карт. Во всех играх участвуют 2 игрока</dd>
-                    <dt>#trio</dt>
+                    <dt>trio</dt>
                     <dd>Используются все виды карт. Во всех играх участвуют 3 игрока</dd>
-                    <dt>#quartet</dt>
+                    <dt>quartet</dt>
                     <dd>Используются все виды карт. Во всех играх участвуют 4 игрока</dd>
                 </dl>
             </section>

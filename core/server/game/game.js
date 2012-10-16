@@ -280,9 +280,17 @@ var GameMethods = {
     this._checkGameFinished();
   },
 
-  //protected
-  _stopGame: function(stopReason, playerCausedStop) {
+  _stopGame: function(error, playerCausedStop) {
+    var _ = this._;
+    _.result.error = error;
+    _.result.finished = true;
+    _.result.playerCausedStop = playerCausedStop;
+    _.result.winner = this._getWinner();
+  },
 
+  //protected
+  _getWinner: function() {
+    return this._.players[0];
   },
 
   //protected

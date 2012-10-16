@@ -1,0 +1,24 @@
+<div class="container">
+    <ul class="nav nav-pills">
+    <% for (var i = 0; i < hubs.length; i++) { %>
+        <li class="<%= hubs[i] == currentHub ? 'active' : '' %>">
+            <a href="/games?hub=<%= hubs[i] %>"><%= hubs[i] %></a>
+        </li>
+    <% } %>
+    </ul>
+    <div class="row">
+        <section class="span8">
+            <h1>Игры</h1>
+            <div class="games" data-hub="<%= currentHub %>" data-page="<%= currentPage %>">
+                Loading...
+            </div>
+        </section>
+        <section class="span3">
+            <h1>Игроки</h1>
+            <div id="players" class="well">
+                Loading...
+            </div>
+        </section>
+    </div>
+
+</div>
