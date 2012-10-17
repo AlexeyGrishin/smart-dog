@@ -1,8 +1,12 @@
+<% //layout options;
+subtitle = ' :: Игра ' + game.id;
+active_page = 'games' %>
+
 <link href="ui-lightness/jquery-ui-1.8.23.custom.css" rel="stylesheet"/>
 <div class="container well game-result">
 <div class="row">
     <div class="span3">
-            <h1 data-id="<%= game.id %>">Game <%= game.id %></h1>
+            <h1 data-id="<%= game.id %>">Игра <%= game.id %></h1>
             <h5><span class="label"><%= game.hub %></span> <%= game.map %>  </h5>
 
             <% if (game.error) { %>

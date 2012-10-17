@@ -1,7 +1,8 @@
+
 <% if (games.length > 0) { %>
 <table class="table table-stripped table-bordered">
 <tr>
-<th>ID</th><th>Карта</th><th>Игроки</th><th>Ссылка</th>
+<th>ID</th><th>Карта</th><th>Участники</th><th>Ссылка</th>
 </tr>
 <% for (var i = 0; i < games.length; i++) { %>
 <tr class="<%= games[i].finished ? 'finished' : 'active' %> <%= games[i].error ? 'error' : '' %>">

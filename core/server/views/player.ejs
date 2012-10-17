@@ -1,21 +1,25 @@
+<% //layout options;
+subtitle = ' :: Участник ' + player.name;
+active_page = 'games' %>
+
 <div class="container">
-<h1 data-id="<%= player.name %>">Player <%= player.name %></h1>
+<h1 data-id="<%= player.name %>">Участник <%= player.name %></h1>
 <table class="table table-striped table-bordered">
 <tr>
-<th>Game</th><th>Map</th><th>Players</th><th>Result</th><th>Replay</th>
+<th>Игра</th><th>Карта</th><th>Участики</th><th>Результат</th><th>Ссылка</th>
 </tr>
 <% for (var i = 0; i < player.games.length; i++) { var game = player.games[i]; %>
 <tr class="<%= game.isWinner ? 'success' : ''%> <%= game.error ? 'error' : '' %>">
-<td><%= game.id %></td>
-<td><%= game.map %></td>
+<td><%= game.id %>  </td>
+<td><span class="label"><%= game.hub %></span> <%= game.map %></td>
 <td><%- game.players.map(function(p) {
         var name = p.name;
         if (p.isWinner)
             name = "<b>" + p.name + "</b>";
         return name + " (" + p.score.toFixed(2) + ")";
     }).join(", ") %></td>
-<td><%= game.isWinner ? "Winner" : "" %></td>
-<td><a href="/<%= game.id %>">See Replay</a></td>
+<td><%= game.isWinner ? "Победитель" : "" %></td>
+<td><a href="/<%= game.id %>">Посмотреть</a></td>
 </tr>
 <% } %>
 </table>
