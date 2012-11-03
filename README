@@ -32,7 +32,7 @@ TODO:
       + Dogs fight
       + Unit tests for it
       + split turn in 2 phases: player turn (before,after) - move dogs, npc turn (before, after) - move sheeps
-2. Persistence (save to DB, see MemoryStorage class)
++2. Persistence (save to DB, see MemoryStorage class)
 +3. Entry point for bots (command-line client, etc)
 4. Development tools (turns replays, etc)
 5. Offline replay (ReplayDataStorer shall put html page near json)
