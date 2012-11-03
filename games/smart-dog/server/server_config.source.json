@@ -15,7 +15,7 @@
             "db": "smart-dog"
         }
     },
-    "storage": "couch",
+    "storage": "mem",
     "developer": "true",
     "controllerPort": 3002,
     "viewPort": 3003,

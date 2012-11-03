@@ -25,5 +25,10 @@ active_page = 'games' %>
             </div>
         </section>
     </div>
-
+<% if (reset) { %>
+<div class="alert-danger alert">
+<h4>Утилиты разработчика</h4>
+    <a href="/reset" class="btn btn-danger">Очистить базу (не работает для MemoryStorage)</a>
+</div>
+<% } %>
 </div>

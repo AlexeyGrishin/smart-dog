@@ -2,7 +2,7 @@ var GameServer = require('../../core/server/game/game_server.js')
   , Factory = require('../../games/smart-dog/server/game_object_factory.js')()
   , Map2D = require('../../core/server/game/map2d.js')
   , SocketController = require('../../core/server/socket_server/socket_controller.js')
-  , MemoryStorage = require('../../core/server/storage/mem_storage.js');
+  , MemoryStorage = require('../../core/server/storage/games_storage.js');
 
 var MapsMock = {
   minPlayersCount: function() { return 1},

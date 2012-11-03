@@ -70,9 +70,13 @@ HttpServer.prototype.init = function(resources) {
     var hub = req.param('hub');
     var page = getPage(req);
     gameServer.listHubs(function(err, hubs) {
+      if (err) {
+        console.error(err);
+        return next(new Error(err));
+      }
       if (hubs.length == 0) hubs = ["default"];
       if (hubs.indexOf(hub) == -1) hub = "default";
-      res.render('hub', {hubs: hubs, currentHub: hub, currentPage: page+1});
+      res.render('hub', {hubs: hubs, currentHub: hub, currentPage: page+1, reset: gameServer.supports('reset')});
     });
   });
 
@@ -83,6 +87,13 @@ HttpServer.prototype.init = function(resources) {
       if (err) return next(err);
       res.render('games', {games: games.content, layout: 'partial', pages: paginate(games, '/games?hub=' + encodeURIComponent(hub) + '&')});
     });
+  });
+
+  app.get('/reset', function(req, res, next) {
+    gameServer.doIfSupports('reset', function(err) {
+      if (err) return next(err);
+      res.redirect('/games');
+    })
   });
 
   app.get('/players', function(req, res, next) {

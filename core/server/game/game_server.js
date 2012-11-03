@@ -14,11 +14,9 @@ var ReplayDataStorer = require('../storage/replay_data_storer.js')
 var GameServer = function(storage, maps, gameFactory, options) {
   this.storage = storage;
   this.waiting = [];
-  this.nextGameId = 1;
   this.maps = maps;
   this.options = options;
   this.gameFactory = gameFactory;
-  this.storage.registerHubs(this.maps.getHubs());
   this.waitForAnotherPlayer = {};
 };
 
@@ -34,6 +32,21 @@ var IoInterface = {
 
 
 GameServer.prototype = {
+
+  /**
+   * Initializes game server and storage. Shall be called first, and other methods shall be called only after initialization is done
+   * @param cb
+   */
+  init: function(cb) {
+    this.storage.initAndGetNextId(function(err, id) {
+      if (err) return cb(err);
+      console.log("Start numerating games from " + id);
+      this.nextGameId = id;
+      this.storage.registerHubs(this.maps.getHubs());
+      cb(null)
+    }.bind(this));
+
+  },
 
   /**
    * Adds player to the waiting list. The game will be started as soon as possible - usually waits for other players.
@@ -173,6 +186,39 @@ GameServer.prototype = {
       if (game1.finished && !game2.finished) return 1;
       return game2.id - game1.id;
     }}, cb);
+  },
+
+  /**
+   *
+   * Additional functionaity for development/testing purposes only!
+   * @param cb
+   */
+  doIfSupports: function(functionality, cb) {
+    if (!this.supports(functionality)) {
+      return cb("Not supported")
+    }
+    switch (functionality) {
+      case 'reset': {
+        if (this.storage.reset)
+          this.storage.reset(function(err) {
+            if (err) return cb(err);
+            this.init(cb);
+          }.bind(this));
+        else cb(null);
+      }
+    }
+  },
+
+  /**
+   * Checks that functionaity with specified name is supported or not
+   * @param functionality
+   * @return {*}
+   */
+  supports: function(functionality) {
+    switch (functionality) {
+      case 'reset': return !!this.options.developer;
+      default: return false;
+    }
   },
 
   /**

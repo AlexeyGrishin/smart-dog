@@ -56,6 +56,7 @@ Game.prototype.Event = Game.Event;
 var GameMethods = {
   start: function() {
     var _ = this._;
+    _.startTime = new Date().getTime();
     _.turn = -1;//before game start
     //TODO: order is important. logic.init initializes cached landscape, getState puts it into savedState, and player.init uses it
     this.emit(Game.Event.Init);
@@ -249,6 +250,7 @@ var GameMethods = {
     brief.players = this._.players.map(function(p) {return {id:p.getId(), name:p.getName(), score:finished ? p.getResultScore() : p.getScore(), area:p.getArea()}});
     if (finished) {
       brief.finished = true;
+      brief.duration = this._.duration;
       brief.winner = this._.gameResult.winner ? {id: this._.gameResult.winner.getId(), name: this._.gameResult.winner.getName()} : undefined;
       brief.reason = this._.gameResult.reason;
     }
@@ -274,6 +276,10 @@ var GameMethods = {
     return this._.turn;
   },
 
+  getDuration: function() {
+    return this._.duration || 0;
+  },
+
   stop: function(reason) {
     if (this.isFinished()) return;
     this._stopGame(reason);
@@ -286,6 +292,7 @@ var GameMethods = {
     _.result.finished = true;
     _.result.playerCausedStop = playerCausedStop;
     _.result.winner = this._getWinner();
+    _.duration = new Date().getTime() - _.startTime;
   },
 
   //protected

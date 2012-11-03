@@ -49,8 +49,23 @@ start player2.bat</pre>
         </ol>
         <p>Полезная информация</p>
         <ul>
-            <li>Конфигурация сервера лежит в ./games/smart-dog/server_config.json</li>
+            <li>Сервер читает конфигурацию из <code>./games/smart-dog/server_config.json</code> . Этот файл не хранится в репозитории и создается при первом запуске сервера из шаблона
+                <code>./games/smart-dog/server_config.source.json</code>.
+            </li>
             <li>Карты лежат в ./maps</li>
+            <li>По-умолчанию сервер хранит все данные в памяти, которые теряются при остановке сервера.
+                Чтобы хранить данные в базе CouchDB:
+                <ol>
+                    <li>Установите <a href="http://couchdb.apache.org/">CouchDB</a></li>
+                    <li>
+                        в <code>server_config.json</code> поменяйте строчку
+                        <pre>   "storage": <s>"mem"</s><b>"couch"</b></pre>
+                    </li>
+                    <li>Перезапустите сервер. Теперь все игры хранятся в базе между перезапусками сервера</li>
+                </ol>
+                <br/>
+                При желании вы можете реализовать поддержку своей базы. Для этого нужно создать класс, который реализует те же методы, что и у классов MemoryStorage и CouchDBStorage, и инициализировать его в smart_dog_server.js из настроек.
+            </li>
         </ul>
     </section>
     <section id="client">
