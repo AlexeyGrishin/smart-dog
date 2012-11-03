@@ -142,6 +142,9 @@ CouchDBStorage.prototype = {
     this._db.view('games', 'games_by_hub', {keys: [hub]}, function(err, body) {
       if (err) return cb(err);
       var games = body.rows.map(function(row) {return fromJson(row.value)});
+      games = games.concat(Object.keys(this._runningGames).map(function(k) {
+        return this._runningGames[k];
+      }.bind(this)));
       if (paging.originalSort) games = games.sort(paging.originalSort);
       var pagingInfo = {
         pagesCount: Math.ceil(games.length / paging.perPage)
@@ -149,7 +152,7 @@ CouchDBStorage.prototype = {
       pagingInfo.page = Math.min(paging.page, pagingInfo.pagesCount);
       pagingInfo.content = games.slice(pagingInfo.page * paging.perPage, Math.min((pagingInfo.page + 1) * paging.perPage, games.length));
       cb(null, pagingInfo);
-    })
+    }.bind(this))
   },
 
   reset: function(cb) {
